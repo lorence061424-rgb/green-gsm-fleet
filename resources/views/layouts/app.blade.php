@@ -18,15 +18,15 @@
     <!-- Custom Responsive Style System -->
     <style>
         :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --secondary: #0F172A;
-            --accent: #0284C7;
-            --background: #F8FAFC;
+            --primary: #10B981;
+            --primary-hover: #059669;
+            --secondary: #064E3B;
+            --accent: #06B6D4;
+            --background: #F0FDF4;
             --card-bg: #FFFFFF;
-            --border-color: #E2E8F0;
-            --text-dark: #0F172A;
-            --text-light: #64748B;
+            --border-color: #D1FAE5;
+            --text-dark: #064E3B;
+            --text-light: #047857;
             --sidebar-width: 260px;
         }
 
@@ -38,24 +38,24 @@
             letter-spacing: -0.01em;
         }
 
-        /* Desktop Sidebar */
+        /* Desktop Sidebar - Deep Mint Green */
         .sidebar {
             width: var(--sidebar-width);
             height: 100vh;
-            background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+            background: linear-gradient(180deg, #064E3B 0%, #022C22 100%);
             position: fixed;
             top: 0;
             left: 0;
             z-index: 100;
             padding-top: 1.25rem;
             color: white;
-            box-shadow: 4px 0 24px rgba(15, 23, 42, 0.08);
+            box-shadow: 4px 0 24px rgba(6, 78, 59, 0.15);
             transition: all 0.3s ease;
         }
 
         .sidebar .brand {
             padding: 0 1.5rem 1.25rem 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             margin-bottom: 1rem;
         }
 
@@ -64,7 +64,7 @@
             align-items: center;
             padding: 0.75rem 1.25rem;
             margin: 0.15rem 0.85rem;
-            color: #94A3B8;
+            color: #A7F3D0;
             text-decoration: none;
             font-weight: 500;
             font-size: 0.925rem;
@@ -73,15 +73,15 @@
         }
 
         .sidebar-nav-link:hover {
-            color: #F8FAFC;
-            background-color: rgba(255, 255, 255, 0.06);
+            color: #FFFFFF;
+            background-color: rgba(255, 255, 255, 0.1);
             transform: translateX(2px);
         }
 
         .sidebar-nav-link.active {
             color: #FFFFFF;
             background: var(--primary);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
         }
 
         .sidebar-nav-link i {
@@ -236,12 +236,12 @@
                 align-items: center;
                 justify-content: space-between;
                 width: 100%;
-                background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+                background: linear-gradient(180deg, #064E3B 0%, #022C22 100%);
                 padding: 0.85rem 1.25rem;
                 border-radius: 12px;
                 margin-bottom: 1.25rem;
                 color: white;
-                box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+                box-shadow: 0 4px 12px rgba(6, 78, 59, 0.2);
             }
 
             .page-header-title {

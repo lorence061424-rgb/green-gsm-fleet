@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>TNVS Fleet & AI Fuel Management System</title>
+    <title>Green GSM - Fleet & Transportation Management System</title>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     
-    <!-- Custom Style System -->
+    <!-- Custom Responsive Style System -->
     <style>
         :root {
             --primary: #4F46E5;
@@ -38,7 +38,7 @@
             letter-spacing: -0.01em;
         }
 
-        /* Sidebar Styling */
+        /* Desktop Sidebar */
         .sidebar {
             width: var(--sidebar-width);
             height: 100vh;
@@ -50,6 +50,7 @@
             padding-top: 1.25rem;
             color: white;
             box-shadow: 4px 0 24px rgba(15, 23, 42, 0.08);
+            transition: all 0.3s ease;
         }
 
         .sidebar .brand {
@@ -88,7 +89,7 @@
             margin-right: 0.75rem;
         }
 
-        /* Top Header Bar inside Main Content */
+        /* Top Navigation Header */
         .top-navbar {
             display: flex;
             align-items: center;
@@ -96,16 +97,19 @@
             padding: 1rem 0;
             margin-bottom: 1.75rem;
             border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 0.75rem;
         }
 
-        /* Main Content Panel */
+        /* Main Content Container */
         .main-content {
             margin-left: var(--sidebar-width);
             padding: 2rem 2.5rem;
             min-height: 100vh;
+            transition: margin 0.3s ease, padding 0.3s ease;
         }
 
-        /* Premium Cards */
+        /* Card Styling */
         .premium-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color) !important;
@@ -114,23 +118,19 @@
             overflow: hidden;
         }
 
-        .main-content > .row .premium-card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
         .main-content > .row .premium-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 12px 24px -6px rgba(15, 23, 42, 0.08);
         }
 
-        /* Prevent all transforms inside modals to stop flickering */
+        /* Prevent transform flickering inside modals */
         .modal .premium-card,
         .modal .card {
             transform: none !important;
             transition: none !important;
         }
 
-        /* Table Styling */
+        /* Tables & Responsive Wrappers */
         .table {
             --bs-table-bg: transparent;
             font-size: 0.9rem;
@@ -145,15 +145,22 @@
             border-bottom: 1px solid var(--border-color);
             padding-top: 0.85rem;
             padding-bottom: 0.85rem;
+            white-space: nowrap;
         }
 
         .table tbody td {
             padding: 1rem 0.75rem;
             vertical-align: middle;
             border-bottom: 1px solid #F1F5F9;
+            white-space: nowrap;
         }
 
-        /* Header design */
+        .table-responsive {
+            -webkit-overflow-scrolling: touch;
+            border-radius: 10px;
+        }
+
+        /* Typography */
         .page-header-title {
             font-weight: 700;
             color: var(--text-dark);
@@ -168,7 +175,7 @@
             margin-bottom: 0;
         }
 
-        /* Micro-interactions */
+        /* Buttons & Badges */
         .btn-premium {
             background-color: var(--primary);
             color: white;
@@ -187,7 +194,7 @@
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
         }
 
-        /* Pulse indicator */
+        /* Pulse Indicator */
         .loader-pulse {
             display: inline-block;
             width: 8px;
@@ -203,12 +210,56 @@
             70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
+
+        /* ========================================================
+           RESPONSIVE MEDIA QUERIES FOR MOBILE & TABLET DEVICES
+           ======================================================== */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                display: none; /* Hide fixed sidebar on mobile */
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                padding: 1.25rem 1rem !important;
+            }
+
+            .top-navbar {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 0.75rem;
+                padding-bottom: 0.75rem;
+            }
+
+            .mobile-header-bar {
+                display: flex !important;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+                padding: 0.85rem 1.25rem;
+                border-radius: 12px;
+                margin-bottom: 1.25rem;
+                color: white;
+                box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+            }
+
+            .page-header-title {
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .mobile-header-bar {
+                display: none !important;
+            }
+        }
     </style>
     @yield('styles')
 </head>
 <body>
 
-    <!-- Sidebar Navigation -->
+    <!-- Desktop Sidebar Navigation -->
     <div class="sidebar">
         <div class="brand d-flex align-items-center">
             <i class="bi bi-shield-shaded text-success me-2 fs-3"></i>
@@ -243,15 +294,71 @@
         </nav>
     </div>
 
+    <!-- Mobile Offcanvas Sidebar Drawer (For Mobile & Tablet screens) -->
+    <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel" style="max-width: 280px; background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%) !important;">
+        <div class="offcanvas-header border-bottom border-secondary">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-shield-shaded text-success me-2 fs-3"></i>
+                <div>
+                    <span class="fs-6 fw-bold d-block text-white" style="letter-spacing: 0.5px;">GREEN GSM</span>
+                    <small class="text-success-subtle fw-bold" style="font-size: 10px; letter-spacing: 1px;">FLEET & TRANSPORTATION</small>
+                </div>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-0 pt-3">
+            <nav>
+                <a href="{{ route('dashboard') }}" class="sidebar-nav-link {{ Route::is('dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                </a>
+                <a href="{{ route('vehicles.index') }}" class="sidebar-nav-link {{ Route::is('vehicles.*') ? 'active' : '' }}">
+                    <i class="bi bi-truck"></i> Fleet & Vehicles (FVM)
+                </a>
+                <a href="{{ route('reservations.index') }}" class="sidebar-nav-link {{ Route::is('reservations.*') ? 'active' : '' }}">
+                    <i class="bi bi-calendar-event"></i> Reservations (VRDS)
+                </a>
+                <a href="{{ route('trips.index') }}" class="sidebar-nav-link {{ Route::is('trips.*') ? 'active' : '' }}">
+                    <i class="bi bi-geo-alt"></i> Dispatch & Tracking
+                </a>
+                <a href="{{ route('fuel.index') }}" class="sidebar-nav-link {{ Route::is('fuel.*') ? 'active' : '' }}">
+                    <i class="bi bi-fuel-pump"></i> Fuel & AI Prediction
+                </a>
+                <a href="{{ route('cost-analysis.index') }}" class="sidebar-nav-link {{ Route::is('cost-analysis.*') ? 'active' : '' }}">
+                    <i class="bi bi-graph-up-arrow"></i> Cost Analysis (TCAO)
+                </a>
+                <a href="{{ route('maintenance.index') }}" class="sidebar-nav-link {{ Route::is('maintenance.*') ? 'active' : '' }}">
+                    <i class="bi bi-wrench-adjustable"></i> Maintenance Records
+                </a>
+            </nav>
+        </div>
+    </div>
+
     <!-- Main Content Area -->
     <div class="main-content">
+
+        <!-- Mobile Top Header Bar (Shown only on mobile/tablets) -->
+        <div class="mobile-header-bar">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-sm btn-outline-light me-3 border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
+                    <i class="bi bi-list fs-3"></i>
+                </button>
+                <div>
+                    <span class="fw-bold d-block text-white" style="font-size: 14px;">GREEN GSM FLEET</span>
+                    <span class="badge bg-success" style="font-size: 9px;">100% Electric EV</span>
+                </div>
+            </div>
+            <a href="tel:0277778080" class="btn btn-sm btn-success rounded-pill px-3 fw-medium text-decoration-none">
+                <i class="bi bi-telephone-fill me-1"></i> (02) 7777-8080
+            </a>
+        </div>
+
         <!-- Enterprise Top Navigation Bar -->
         <div class="top-navbar">
             <div class="d-flex align-items-center">
                 <span class="loader-pulse me-2"></span>
                 <span class="small fw-semibold text-muted">Green GSM 100% Electric Fleet (VinFast EVs) &bull; Hotline: (02) 7777-8080</span>
             </div>
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3 ms-auto">
                 @php
                     $currentRole = session('user_role', 'admin');
                     $currentName = session('user_name', 'Green GSM Admin');

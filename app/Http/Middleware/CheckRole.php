@@ -13,10 +13,15 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
+        // Require active login session. If unauthenticated, redirect to login screen
+        if (!session()->has('user_id')) {
+            return redirect()->route('login');
+        }
+
         $userRole = session('user_role', 'admin');
 
-        // Admin has full access to everything
-        if ($userRole === 'admin') {
+        // Admin has full access to everything or when no specific roles are required
+        if ($userRole === 'admin' || empty($roles)) {
             return $next($request);
         }
 

@@ -272,21 +272,21 @@
                 <div class="mb-4">
                     <div class="d-flex align-items-center mb-2">
                         <i class="bi bi-shield-shaded text-success fs-2 me-2"></i>
-                        <span class="fs-4 fw-bold text-white">Sign In to Portal</span>
+                        <span class="fs-3 fw-bold text-white">Sign In to Portal</span>
                     </div>
-                    <p class="text-muted small">Access your Team 7 role-restricted Green GSM portal.</p>
+                    <p class="text-slate-300 small fw-medium" style="color: #CBD5E1;">Access your Team 7 role-restricted Green GSM portal.</p>
                 </div>
 
                 <!-- Flash Messages -->
                 @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show border-0 rounded-3 small mb-3 bg-success bg-opacity-20 text-success" role="alert">
-                        <i class="bi bi-check-circle-fill me-1"></i> {{ session('success') }}
+                    <div class="alert alert-success alert-dismissible fade show border-0 rounded-3 small mb-3 bg-success bg-opacity-25 text-white fw-medium shadow-sm" role="alert">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i> {{ session('success') }}
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
                     </div>
                 @endif
                 @if(session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3 small mb-3 bg-danger bg-opacity-20 text-danger" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ session('error') }}
+                    <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3 small mb-3 bg-danger bg-opacity-25 text-white fw-medium shadow-sm" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i> {{ session('error') }}
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
                     </div>
                 @endif
@@ -295,35 +295,35 @@
                     @csrf
                     
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-slate-300">Email Address</label>
+                        <label class="form-label small fw-bold text-white">Email Address</label>
                         <div class="input-group">
-                            <span class="input-group-text border-end-0"><i class="bi bi-envelope"></i></span>
-                            <input type="email" id="emailInput" name="email" class="form-control border-start-0" value="admin@greengsm.com" required placeholder="name@greengsm.com">
+                            <span class="input-group-text border-end-0 text-white"><i class="bi bi-envelope text-success"></i></span>
+                            <input type="email" id="emailInput" name="email" class="form-control border-start-0 text-white fw-medium" value="admin@greengsm.com" required placeholder="name@greengsm.com">
                         </div>
                     </div>
 
                     <div class="mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label class="form-label small fw-semibold text-slate-300 mb-0">Password</label>
-                            <span class="text-muted" style="font-size: 11px;">Default: <code>password</code></span>
+                            <label class="form-label small fw-bold text-white mb-0">Password</label>
+                            <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-30" style="font-size: 11px;">Default: password</span>
                         </div>
                         <div class="input-group">
-                            <span class="input-group-text border-end-0"><i class="bi bi-lock"></i></span>
-                            <input type="password" id="passwordInput" name="password" class="form-control border-start-0 border-end-0" value="password" required>
-                            <button class="btn btn-outline-secondary border border-start-0 text-muted" type="button" id="togglePassword">
-                                <i class="bi bi-eye" id="eyeIcon"></i>
+                            <span class="input-group-text border-end-0 text-white"><i class="bi bi-lock text-success"></i></span>
+                            <input type="password" id="passwordInput" name="password" class="form-control border-start-0 border-end-0 text-white fw-medium" value="password" required>
+                            <button class="btn btn-outline-secondary border border-start-0 text-white" type="button" id="togglePassword">
+                                <i class="bi bi-eye text-white" id="eyeIcon"></i>
                             </button>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-submit mb-4">
+                    <button type="submit" class="btn btn-submit mb-4 fs-6 py-3 fw-bold">
                         <i class="bi bi-box-arrow-in-right me-2"></i> Access Green GSM Portal
                     </button>
                 </form>
 
                 <!-- Quick Team 7 Role Selector Buttons -->
-                <div class="pt-3 border-top border-secondary border-opacity-25">
-                    <span class="d-block text-muted small fw-semibold mb-2">⚡ Quick 1-Click Role Access (Team 7 Internal Staff):</span>
+                <div class="pt-3 border-top border-secondary border-opacity-30">
+                    <span class="d-block text-white small fw-bold mb-2">⚡ Quick 1-Click Role Access (Team 7 Internal Staff):</span>
                     <div class="d-flex flex-wrap gap-2">
                         <button type="button" onclick="fillRole('admin@greengsm.com')" class="role-pill">
                             <i class="bi bi-shield-check text-success me-1"></i> System Admin

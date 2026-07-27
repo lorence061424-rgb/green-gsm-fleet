@@ -274,7 +274,6 @@
                         <i class="bi bi-shield-shaded text-success fs-2 me-2"></i>
                         <span class="fs-3 fw-bold text-white">Sign In to Portal</span>
                     </div>
-                    <p class="text-slate-300 small fw-medium" style="color: #CBD5E1;">Access your Team 7 role-restricted Green GSM portal.</p>
                 </div>
 
                 <!-- Flash Messages -->

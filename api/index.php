@@ -21,9 +21,11 @@ if (!file_exists($dbFile)) {
     touch($dbFile);
 }
 
-// Set environment variables for Vercel serverless SQLite
+// Force SQLite database connection in all PHP superglobals for Vercel
 $_ENV['DB_CONNECTION'] = 'sqlite';
 $_ENV['DB_DATABASE'] = $dbFile;
+$_SERVER['DB_CONNECTION'] = 'sqlite';
+$_SERVER['DB_DATABASE'] = $dbFile;
 putenv("DB_CONNECTION=sqlite");
 putenv("DB_DATABASE={$dbFile}");
 

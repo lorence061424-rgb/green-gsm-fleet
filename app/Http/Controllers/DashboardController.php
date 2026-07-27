@@ -25,12 +25,12 @@ class DashboardController extends Controller
         $completedTrips = Trip::where('status', 'completed')->count();
         $activeTrips = Trip::where('status', 'active')->count();
 
-        // 3. Fuel Logs & Cost
+        // 3. Energy Logs & Charging Cost (kWh)
         $totalFuelCost = FuelLog::sum('cost');
-        $totalFuelLiters = FuelLog::sum('amount_liters');
+        $totalFuelLiters = FuelLog::sum('amount_liters'); // Stores kWh
         $totalDistance = Trip::where('status', 'completed')->sum('distance_km');
         
-        // Average L/100km
+        // Average kWh/100km
         $avgEfficiency = ($totalDistance > 0) ? ($totalFuelLiters / $totalDistance) * 100 : 0;
 
         // 4. Maintenance Expense
@@ -42,20 +42,23 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // 6. Chart 1: Fuel Usage by Vehicle Type
+        // 6. VinFast EV Fleet Breakdown
+        $vinfastFleet = Vehicle::orderBy('id', 'asc')->get();
+
+        // 7. Chart 1: Energy Usage by VinFast EV Category
         $fuelByType = FuelLog::join('vehicles', 'fuel_logs.vehicle_id', '=', 'vehicles.id')
             ->select('vehicles.type', DB::raw('SUM(fuel_logs.amount_liters) as total_liters'))
             ->groupBy('vehicles.type')
             ->get();
 
-        // 7. Chart 2: Fuel Cost by Date (Last 7 Logs)
+        // 8. Chart 2: Charging Cost History (Last 10 Logs)
         $costHistory = FuelLog::orderBy('date', 'asc')
             ->limit(10)
             ->select('date', DB::raw('SUM(cost) as daily_cost'), DB::raw('SUM(amount_liters) as daily_liters'))
             ->groupBy('date')
             ->get();
 
-        // 8. Alerts: Vehicles requiring maintenance (based on active status and scheduled maintenance)
+        // 9. Maintenance Alerts
         $pendingMaintenance = MaintenanceRecord::where('status', 'scheduled')
             ->where('scheduled_date', '<=', now()->addDays(3))
             ->with('vehicle')
@@ -65,7 +68,7 @@ class DashboardController extends Controller
             'totalVehicles', 'activeVehicles', 'maintenanceVehicles', 'offlineVehicles',
             'totalTrips', 'completedTrips', 'activeTrips',
             'totalFuelCost', 'totalFuelLiters', 'avgEfficiency', 'totalMaintenanceCost',
-            'topDrivers', 'fuelByType', 'costHistory', 'pendingMaintenance'
+            'topDrivers', 'vinfastFleet', 'fuelByType', 'costHistory', 'pendingMaintenance'
         ));
     }
 }

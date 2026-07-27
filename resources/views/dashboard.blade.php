@@ -3,8 +3,12 @@
 @section('content')
 <div class="row align-items-center mb-4">
     <div class="col">
-        <h2 class="page-header-title">Analytics Dashboard</h2>
-        <p class="page-header-subtitle">Real-time performance metrics, fuel analytics, and vehicle summaries.</p>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success text-white px-3 py-1 rounded-pill" style="font-size: 11px; letter-spacing: 0.5px;">GREEN GSM METRO MANILA</span>
+            <span class="text-muted" style="font-size: 12px;">Hotline: (02) 7777-8080</span>
+        </div>
+        <h2 class="page-header-title mt-1">Green GSM Fleet Analytics Dashboard</h2>
+        <p class="page-header-subtitle">Real-time performance metrics, VinFast EV fleet status, and AI energy predictions.</p>
     </div>
     <div class="col-auto">
         <button class="btn btn-premium d-flex align-items-center" onclick="window.location.reload();">
@@ -15,31 +19,31 @@
 
 <!-- KPI Cards Grid -->
 <div class="row mb-4">
-    <!-- Active Fleet -->
+    <!-- Active Electric Fleet -->
     <div class="col-md-3">
         <div class="card premium-card p-3">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px;">Active Fleet</span>
-                    <h3 class="fw-bold mt-1 mb-0 text-primary">{{ $activeVehicles }}<span class="fs-6 text-muted font-normal"> / {{ $totalVehicles }}</span></h3>
+                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px;">Active Electric Fleet</span>
+                    <h3 class="fw-bold mt-1 mb-0 text-primary">{{ $activeVehicles }}<span class="fs-6 text-muted font-normal"> / {{ $totalVehicles }} units</span></h3>
                 </div>
                 <div class="bg-primary bg-opacity-10 p-3 rounded-4">
-                    <i class="bi bi-truck fs-3 text-primary"></i>
+                    <i class="bi bi-ev-front fs-3 text-primary"></i>
                 </div>
             </div>
             <div class="mt-3">
-                <span class="badge bg-success rounded-pill">{{ $activeVehicles }} Active</span>
-                <span class="badge bg-warning text-dark rounded-pill">{{ $maintenanceVehicles }} Servicing</span>
+                <span class="badge bg-success rounded-pill">{{ $activeVehicles }} Active VinFast EVs</span>
+                <span class="badge bg-warning text-dark rounded-pill">{{ $maintenanceVehicles }} PMS Servicing</span>
             </div>
         </div>
     </div>
 
-    <!-- Active Trips -->
+    <!-- Active Dispatches -->
     <div class="col-md-3">
         <div class="card premium-card p-3">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px;">Active Trips</span>
+                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px;">Active Dispatches</span>
                     <h3 class="fw-bold mt-1 mb-0 text-info">{{ $activeTrips }}</h3>
                 </div>
                 <div class="bg-info bg-opacity-10 p-3 rounded-4">
@@ -47,43 +51,107 @@
                 </div>
             </div>
             <div class="mt-3 text-muted" style="font-size: 13px;">
-                <span class="loader-pulse me-1"></span> <span class="fw-bold text-danger">Live</span> tracking on-going
+                <span class="loader-pulse me-1"></span> <span class="fw-bold text-danger">Live GPS</span> tracking online
             </div>
         </div>
     </div>
 
-    <!-- Fuel Costs -->
+    <!-- EV Energy Charging Expenses -->
     <div class="col-md-3">
         <div class="card premium-card p-3">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px;">Total Fuel Expense</span>
+                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px;">Total Charging Expense</span>
                     <h3 class="fw-bold mt-1 mb-0 text-success">₱{{ number_format($totalFuelCost, 2) }}</h3>
                 </div>
                 <div class="bg-success bg-opacity-10 p-3 rounded-4">
-                    <i class="bi bi-cash-stack fs-3 text-success"></i>
+                    <i class="bi bi-lightning-charge-fill fs-3 text-success"></i>
                 </div>
             </div>
             <div class="mt-3 text-muted" style="font-size: 13px;">
-                Liters Consumed: <strong class="text-dark">{{ number_format($totalFuelLiters, 1) }} L</strong>
+                Energy Consumed: <strong class="text-dark">{{ number_format($totalFuelLiters, 1) }} kWh</strong>
             </div>
         </div>
     </div>
 
-    <!-- Odometer Avg Efficiency -->
+    <!-- Odometer Avg EV Efficiency -->
     <div class="col-md-3">
         <div class="card premium-card p-3">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px;">Avg Fuel Efficiency</span>
-                    <h3 class="fw-bold mt-1 mb-0 text-dark">{{ number_format($avgEfficiency, 2) }} <span class="fs-6 text-muted fw-normal">L/100km</span></h3>
+                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px;">EV Energy Consumption</span>
+                    <h3 class="fw-bold mt-1 mb-0 text-dark">{{ number_format($avgEfficiency, 2) }} <span class="fs-6 text-muted fw-normal">kWh/100km</span></h3>
                 </div>
                 <div class="bg-dark bg-opacity-10 p-3 rounded-4">
                     <i class="bi bi-speedometer2 fs-3 text-dark"></i>
                 </div>
             </div>
             <div class="mt-3 text-muted" style="font-size: 13px;">
-                Maintenance Cost: <strong class="text-danger">₱{{ number_format($totalMaintenanceCost, 2) }}</strong>
+                Maintenance Expense: <strong class="text-danger">₱{{ number_format($totalMaintenanceCost, 2) }}</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- VinFast EV Fleet Inventory Overview Panel -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card premium-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <h5 class="fw-bold mb-1"><i class="bi bi-shield-shaded text-success me-2"></i> Green GSM VinFast 100% Electric Vehicles Fleet</h5>
+                    <p class="text-muted small mb-0">Active VinFast electric car lineup deployed across Metro Manila hubs.</p>
+                </div>
+                <a href="{{ route('vehicles.index') }}" class="btn btn-sm btn-outline-primary rounded-3 px-3 fw-medium">
+                    Manage Fleet Inventory <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr class="text-muted" style="font-size: 12px; font-weight: 700;">
+                            <th>VINFAST MODEL</th>
+                            <th>LICENSE PLATE</th>
+                            <th>EV CATEGORY</th>
+                            <th>BATTERY CAPACITY</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($vinfastFleet as $ev)
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-success bg-opacity-10 p-2 rounded-3 me-2">
+                                            <i class="bi bi-ev-front-fill text-success fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <strong class="d-block text-dark" style="font-size: 14px;">{{ $ev->make }} {{ $ev->model }}</strong>
+                                            <small class="text-muted" style="font-size: 11px;">Cyan Fleet Unit &bull; Year {{ $ev->year }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-dark px-3 py-2 rounded-3 fw-bold" style="font-size: 12px; letter-spacing: 0.5px;">{{ $ev->license_plate }}</span>
+                                </td>
+                                <td style="font-size: 13px;" class="fw-semibold text-secondary">{{ $ev->type }}</td>
+                                <td style="font-size: 13px;" class="fw-bold text-success">
+                                    <i class="bi bi-battery-charging me-1"></i> {{ $ev->fuel_capacity }} kWh
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill {{ $ev->status == 'active' ? 'bg-success' : ($ev->status == 'maintenance' ? 'bg-warning text-dark' : 'bg-secondary') }} px-3 py-1">
+                                        <i class="bi {{ $ev->status == 'active' ? 'bi-check-circle-fill' : 'bi-wrench-adjustable' }} me-1"></i> {{ ucfirst($ev->status) }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">No VinFast vehicles registered in fleet inventory.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -91,25 +159,25 @@
 
 <!-- Graphs and Data Lists -->
 <div class="row mb-4">
-    <!-- Chart 1: Fuel Expense Trend -->
+    <!-- Chart 1: Energy Expense Trend -->
     <div class="col-md-8">
         <div class="card premium-card p-4 h-100">
-            <h5 class="fw-bold mb-3"><i class="bi bi-graph-up text-primary me-2"></i> Fuel Transaction Expense Trend</h5>
+            <h5 class="fw-bold mb-3"><i class="bi bi-graph-up text-primary me-2"></i> EV Charging Expense & kWh Trend</h5>
             <div style="position: relative; height: 300px;">
                 <canvas id="costHistoryChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Chart 2: Fuel Consumption by Type -->
+    <!-- Chart 2: Energy Consumption by VinFast Class -->
     <div class="col-md-4">
         <div class="card premium-card p-4 h-100">
-            <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart text-primary me-2"></i> Fuel by Vehicle Class</h5>
+            <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart text-primary me-2"></i> Energy by VinFast Class</h5>
             <div style="position: relative; height: 220px;" class="d-flex align-items-center justify-content-center">
                 <canvas id="fuelTypeChart"></canvas>
             </div>
             <div class="mt-3 text-center text-muted" style="font-size: 12px;">
-                Displays the cumulative liters consumed per vehicle class based on trip fuel logs.
+                Cumulative kWh energy consumed per VinFast EV category.
             </div>
         </div>
     </div>
@@ -163,7 +231,7 @@
     <!-- Active Alerts / Service Warnings -->
     <div class="col-md-6">
         <div class="card premium-card p-4 h-100">
-            <h5 class="fw-bold mb-4 text-danger"><i class="bi bi-bell-fill me-2"></i> Maintenance Alerts & Alerts Panel</h5>
+            <h5 class="fw-bold mb-4 text-danger"><i class="bi bi-bell-fill me-2"></i> Maintenance Alerts & PMS Panel</h5>
             @if(count($pendingMaintenance) > 0)
                 <div class="list-group list-group-flush">
                     @foreach($pendingMaintenance as $record)
@@ -188,7 +256,7 @@
                     <div class="bg-success bg-opacity-10 p-3 rounded-circle d-inline-flex mb-3">
                         <i class="bi bi-check-circle-fill text-success fs-3"></i>
                     </div>
-                    <h6 class="fw-bold text-dark">All Vehicles Clear</h6>
+                    <h6 class="fw-bold text-dark">All VinFast Units Clear</h6>
                     <p class="text-muted mb-0" style="font-size: 13px;">No vehicles scheduled for PMS in the next 3 days.</p>
                 </div>
             @endif
@@ -212,19 +280,19 @@
             labels: costDates,
             datasets: [
                 {
-                    label: 'Fuel Spend (₱)',
+                    label: 'Charging Expense (₱)',
                     data: costData,
-                    borderColor: '#4F46E5',
-                    backgroundColor: 'rgba(79, 70, 229, 0.05)',
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.05)',
                     borderWidth: 3,
                     fill: true,
                     tension: 0.3,
                     yAxisID: 'y'
                 },
                 {
-                    label: 'Liters Consumed (L)',
+                    label: 'Energy Consumed (kWh)',
                     data: litersData,
-                    borderColor: '#06B6D4',
+                    borderColor: '#0284C7',
                     backgroundColor: 'transparent',
                     borderWidth: 2,
                     borderDash: [5, 5],
@@ -248,27 +316,14 @@
                 }
             },
             scales: {
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        font: {
-                            family: 'Outfit'
-                        }
-                    }
-                },
                 y: {
                     type: 'linear',
                     display: true,
                     position: 'left',
-                    grid: {
-                        color: 'rgba(0,0,0,0.05)'
-                    },
-                    ticks: {
-                        font: {
-                            family: 'Outfit'
-                        }
+                    title: {
+                        display: true,
+                        text: 'Cost (₱)',
+                        font: { family: 'Outfit' }
                     }
                 },
                 y1: {
@@ -276,39 +331,37 @@
                     display: true,
                     position: 'right',
                     grid: {
-                        drawOnChartArea: false // prevent grid lines overlapping
+                        drawOnChartArea: false
                     },
-                    ticks: {
-                        font: {
-                            family: 'Outfit'
-                        }
+                    title: {
+                        display: true,
+                        text: 'Energy (kWh)',
+                        font: { family: 'Outfit' }
                     }
                 }
             }
         }
     });
 
-    // 2. Chart 2: Fuel Type Chart (Doughnut Chart)
-    const typeCtx = document.getElementById('fuelTypeChart').getContext('2d');
-    
-    const typeLabels = {!! json_encode($fuelByType->pluck('type')) !!};
-    const typeData = {!! json_encode($fuelByType->pluck('total_liters')) !!};
+    // 2. Chart 2: Fuel/Energy Distribution by Type (Doughnut Chart)
+    const fuelCtx = document.getElementById('fuelTypeChart').getContext('2d');
+    const fuelTypes = {!! json_encode($fuelByType->pluck('type')) !!};
+    const fuelTotals = {!! json_encode($fuelByType->pluck('total_liters')) !!};
 
-    new Chart(typeCtx, {
+    new Chart(fuelCtx, {
         type: 'doughnut',
         data: {
-            labels: typeLabels,
+            labels: fuelTypes,
             datasets: [{
-                data: typeData,
+                data: fuelTotals,
                 backgroundColor: [
-                    '#4F46E5', // Sedan
-                    '#06B6D4', // SUV
-                    '#10B981', // Van
-                    '#F59E0B', // Hatchback
-                    '#EF4444'  // Truck
+                    '#10B981',
+                    '#0284C7',
+                    '#6366F1',
+                    '#F59E0B',
+                    '#EC4899'
                 ],
-                borderWidth: 2,
-                borderColor: '#ffffff'
+                borderWidth: 0
             }]
         },
         options: {
@@ -320,12 +373,11 @@
                     labels: {
                         font: {
                             family: 'Outfit'
-                        },
-                        boxWidth: 12
+                        }
                     }
                 }
             },
-            cutout: '65%'
+            cutout: '70%'
         }
     });
 </script>

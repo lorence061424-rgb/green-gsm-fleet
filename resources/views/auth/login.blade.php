@@ -320,9 +320,9 @@
                     </button>
                 </form>
 
-                <!-- Quick Team 7 Role Selector Buttons -->
+                <!-- Quick Role Selector Buttons -->
                 <div class="pt-3 border-top border-secondary border-opacity-30">
-                    <span class="d-block text-white small fw-bold mb-2">⚡ Quick 1-Click Role Access (Team 7 Internal Staff):</span>
+                    <span class="d-block text-white small fw-bold mb-2">⚡ Quick 1-Click Role Access (Internal Staff):</span>
                     <div class="d-flex flex-wrap gap-2">
                         <button type="button" onclick="fillRole('admin@greengsm.com')" class="role-pill">
                             <i class="bi bi-shield-check text-success me-1"></i> System Admin

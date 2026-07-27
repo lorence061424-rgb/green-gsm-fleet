@@ -3,158 +3,369 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - TNVS Fleet & Transportation Management System (Team 7)</title>
+    <title>Green GSM - Enterprise Fleet Portal Login</title>
+    
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     
     <style>
+        :root {
+            --primary: #10B981;
+            --primary-hover: #059669;
+            --accent: #0284C7;
+            --dark-bg: #0B132B;
+            --card-bg: rgba(15, 23, 42, 0.75);
+        }
+
         body {
             font-family: 'Outfit', sans-serif;
-            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            background: radial-gradient(circle at 15% 20%, #0F382C 0%, #0B132B 50%, #030712 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 1.5rem;
-            color: #0F172A;
+            color: #F8FAFC;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        .login-card {
-            background: #FFFFFF;
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        /* Glowing Background Ambient Orbs */
+        .ambient-orb-1 {
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .ambient-orb-2 {
+            position: absolute;
+            bottom: -15%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(2, 132, 199, 0.25) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .login-wrapper {
             width: 100%;
-            max-width: 440px;
+            max-width: 960px;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), 0 0 40px rgba(16, 185, 129, 0.15);
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1;
         }
 
-        .login-header {
-            background: #0F172A;
-            color: white;
-            padding: 2.5rem 2rem 2rem 2rem;
-            text-align: center;
-            border-bottom: 3px solid #4F46E5;
+        /* Left Hero Showcase Section */
+        .hero-section {
+            background: linear-gradient(145deg, rgba(6, 78, 59, 0.6) 0%, rgba(15, 23, 42, 0.9) 100%);
+            padding: 3.5rem 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
         }
 
-        .login-body {
-            padding: 2.25rem 2rem;
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34D399;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.825rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            width: fit-content;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 1.1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        /* Form Input Section */
+        .form-section {
+            padding: 3.5rem 3rem;
         }
 
         .form-control {
-            border-radius: 10px;
-            padding: 0.75rem 1rem;
-            border: 1px solid #E2E8F0;
+            background: rgba(30, 41, 59, 0.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            color: #F8FAFC !important;
+            border-radius: 12px;
+            padding: 0.8rem 1.1rem;
             font-size: 0.95rem;
-        }
-
-        .form-control:focus {
-            border-color: #4F46E5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
-        }
-
-        .btn-signin {
-            background: #4F46E5;
-            color: white;
-            border-radius: 10px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            border: none;
-            width: 100%;
             transition: all 0.2s ease;
         }
 
-        .btn-signin:hover {
-            background: #4338CA;
-            color: white;
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+        .form-control:focus {
+            border-color: #10B981 !important;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2) !important;
         }
 
-        .demo-btn {
+        .input-group-text {
+            background: rgba(30, 41, 59, 0.8) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            color: #94A3B8 !important;
+            border-radius: 12px 0 0 12px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 0.85rem 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            width: 100%;
+            transition: all 0.25 ease;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            box-shadow: 0 12px 28px rgba(16, 185, 129, 0.5);
+            transform: translateY(-1px);
+        }
+
+        /* Role Quick Selection Pills */
+        .role-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #CBD5E1;
+            padding: 0.45rem 0.85rem;
+            border-radius: 10px;
             font-size: 0.8rem;
-            border-radius: 8px;
-            padding: 0.4rem 0.6rem;
             font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .role-pill:hover {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: #10B981;
+            color: #FFFFFF;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 991.98px) {
+            .hero-section {
+                display: none;
+            }
+            .form-section {
+                padding: 2.5rem 1.75rem;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="login-card">
-    <!-- Header -->
-    <div class="login-header" style="border-bottom: 3px solid #10B981;">
-        <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-20 p-3 rounded-circle mb-3">
-            <i class="bi bi-shield-shaded text-success fs-2"></i>
+    <div class="ambient-orb-1"></div>
+    <div class="ambient-orb-2"></div>
+
+    <div class="login-wrapper">
+        <div class="row g-0">
+            
+            <!-- Left Panel: Enterprise Branding & Live Specs -->
+            <div class="col-lg-6 hero-section">
+                <div>
+                    <div class="hero-badge mb-4">
+                        <span class="spinner-grow spinner-grow-sm text-success" role="status"></span>
+                        100% ALL-ELECTRIC VINFAST FLEET
+                    </div>
+                    
+                    <h2 class="fw-extrabold text-white display-6 mb-3" style="letter-spacing: -0.03em;">
+                        Green GSM Fleet Management
+                    </h2>
+                    
+                    <p class="text-slate-300 leading-relaxed mb-4" style="font-size: 0.95rem; color: #94A3B8;">
+                        Enterprise transportation telemetry, zero-emission route planning, AI fuel/kWh prediction, and transport cost optimization for Metro Manila operations.
+                    </p>
+
+                    <!-- EV Specifications Grid -->
+                    <div class="row g-3 mt-2">
+                        <div class="col-6">
+                            <div class="stat-box">
+                                <div class="d-flex align-items-center text-success mb-1">
+                                    <i class="bi bi-ev-front fs-5 me-2"></i>
+                                    <span class="fw-bold small text-white">VinFast EVs</span>
+                                </div>
+                                <small class="text-muted" style="font-size: 11px;">Nerio Green, VF 8, VF e34</small>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="stat-box">
+                                <div class="d-flex align-items-center text-info mb-1">
+                                    <i class="bi bi-cpu fs-5 me-2"></i>
+                                    <span class="fw-bold small text-white">AI Engine</span>
+                                </div>
+                                <small class="text-muted" style="font-size: 11px;">Gradient Descent kWh ML</small>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="stat-box">
+                                <div class="d-flex align-items-center text-warning mb-1">
+                                    <i class="bi bi-shield-check fs-5 me-2"></i>
+                                    <span class="fw-bold small text-white">Digital Tracking</span>
+                                </div>
+                                <small class="text-muted" style="font-size: 11px;">AI Cameras & Safety Score</small>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="stat-box">
+                                <div class="d-flex align-items-center text-primary mb-1">
+                                    <i class="bi bi-telephone-fill fs-5 me-2"></i>
+                                    <span class="fw-bold small text-white">Hotline Support</span>
+                                </div>
+                                <small class="text-muted" style="font-size: 11px;">(02) 7777-8080</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer branding -->
+                <div class="pt-4 border-top border-secondary border-opacity-25 mt-4">
+                    <div class="d-flex align-items-center justify-content-between text-muted small">
+                        <span>Team 7 Scope &bull; Capstone 2026</span>
+                        <span class="badge bg-success bg-opacity-20 text-success">Metro Manila Fleet Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Modern Login Form -->
+            <div class="col-lg-6 form-section d-flex flex-column justify-content-center">
+                
+                <div class="mb-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-shield-shaded text-success fs-2 me-2"></i>
+                        <span class="fs-4 fw-bold text-white">Sign In to Portal</span>
+                    </div>
+                    <p class="text-muted small">Access your Team 7 role-restricted Green GSM portal.</p>
+                </div>
+
+                <!-- Flash Messages -->
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show border-0 rounded-3 small mb-3 bg-success bg-opacity-20 text-success" role="alert">
+                        <i class="bi bi-check-circle-fill me-1"></i> {{ session('success') }}
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+                @if(session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3 small mb-3 bg-danger bg-opacity-20 text-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ session('error') }}
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+
+                <form action="{{ route('login.post') }}" method="POST">
+                    @csrf
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-slate-300">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-end-0"><i class="bi bi-envelope"></i></span>
+                            <input type="email" id="emailInput" name="email" class="form-control border-start-0" value="admin@greengsm.com" required placeholder="name@greengsm.com">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label small fw-semibold text-slate-300 mb-0">Password</label>
+                            <span class="text-muted" style="font-size: 11px;">Default: <code>password</code></span>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text border-end-0"><i class="bi bi-lock"></i></span>
+                            <input type="password" id="passwordInput" name="password" class="form-control border-start-0 border-end-0" value="password" required>
+                            <button class="btn btn-outline-secondary border border-start-0 text-muted" type="button" id="togglePassword">
+                                <i class="bi bi-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-submit mb-4">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Access Green GSM Portal
+                    </button>
+                </form>
+
+                <!-- Quick Team 7 Role Selector Buttons -->
+                <div class="pt-3 border-top border-secondary border-opacity-25">
+                    <span class="d-block text-muted small fw-semibold mb-2">⚡ Quick 1-Click Role Access (Team 7 Internal Staff):</span>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" onclick="fillRole('admin@greengsm.com')" class="role-pill">
+                            <i class="bi bi-shield-check text-success me-1"></i> System Admin
+                        </button>
+                        <button type="button" onclick="fillRole('fleetmanager@greengsm.com')" class="role-pill">
+                            <i class="bi bi-truck text-primary me-1"></i> Fleet Manager
+                        </button>
+                        <button type="button" onclick="fillRole('dispatcher@greengsm.com')" class="role-pill">
+                            <i class="bi bi-calendar-event text-info me-1"></i> Dispatcher
+                        </button>
+                        <button type="button" onclick="fillRole('finance@greengsm.com')" class="role-pill">
+                            <i class="bi bi-graph-up-arrow text-warning me-1"></i> Finance Officer
+                        </button>
+                        <button type="button" onclick="fillRole('operations@greengsm.com')" class="role-pill">
+                            <i class="bi bi-speedometer2 text-secondary me-1"></i> Operations Manager
+                        </button>
+                    </div>
+                </div>
+
+            </div>
         </div>
-        <h4 class="fw-bold mb-1">GREEN GSM</h4>
-        <p class="text-white-50 small mb-0">Fleet & Transportation Management System</p>
     </div>
 
-    <!-- Body -->
-    <div class="login-body">
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show border-0 rounded-3 small mb-3" role="alert">
-                <i class="bi bi-check-circle-fill me-1"></i> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3 small mb-3" role="alert">
-                <i class="bi bi-exclamation-circle-fill me-1"></i> {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    function fillRole(email) {
+        document.getElementById('emailInput').value = email;
+        document.getElementById('passwordInput').value = 'password';
+    }
 
-        <form action="{{ route('login.post') }}" method="POST">
-            @csrf
-            <div class="mb-3">
-                <label class="form-label fw-semibold small text-muted">Email Address</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0 rounded-start-3 text-muted"><i class="bi bi-envelope"></i></span>
-                    <input type="email" id="emailInput" name="email" class="form-control border-start-0 rounded-end-3" value="admin@greengsm.com" required>
-                </div>
-            </div>
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('passwordInput');
+    const eyeIcon = document.getElementById('eyeIcon');
 
-            <div class="mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <label class="form-label fw-semibold small text-muted mb-0">Password</label>
-                    <small class="text-muted" style="font-size: 11px;">Default: password</small>
-                </div>
-                <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0 rounded-start-3 text-muted"><i class="bi bi-lock"></i></span>
-                    <input type="password" id="passwordInput" name="password" class="form-control border-start-0 rounded-end-3" value="password" required>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-signin mb-4" style="background: #10B981;">
-                <i class="bi bi-box-arrow-in-right me-2"></i> Sign In to Green GSM
-            </button>
-        </form>
-
-        <!-- Capstone Defense Quick Role Selector -->
-        <div class="pt-3 border-top">
-            <span class="d-block text-muted small fw-semibold text-center mb-2">⚡ Quick Sign-In Options (Team 7 Internal Staff):</span>
-            <div class="d-flex flex-wrap gap-1 justify-content-center">
-                <button type="button" onclick="fillRole('admin@greengsm.com')" class="btn btn-sm btn-outline-success demo-btn">Admin</button>
-                <button type="button" onclick="fillRole('fleetmanager@greengsm.com')" class="btn btn-sm btn-outline-primary demo-btn">Fleet Manager</button>
-                <button type="button" onclick="fillRole('dispatcher@greengsm.com')" class="btn btn-sm btn-outline-info demo-btn">Dispatcher</button>
-                <button type="button" onclick="fillRole('finance@greengsm.com')" class="btn btn-sm btn-outline-warning demo-btn">Finance</button>
-                <button type="button" onclick="fillRole('operations@greengsm.com')" class="btn btn-sm btn-outline-secondary demo-btn">Operations</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-function fillRole(email) {
-    document.getElementById('emailInput').value = email;
-    document.getElementById('passwordInput').value = 'password';
-}
-</script>
+    togglePassword.addEventListener('click', function () {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        eyeIcon.classList.toggle('bi-eye');
+        eyeIcon.classList.toggle('bi-eye-slash');
+    });
+    </script>
 </body>
 </html>

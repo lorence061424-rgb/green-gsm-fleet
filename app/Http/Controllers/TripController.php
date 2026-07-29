@@ -56,22 +56,38 @@ class TripController extends Controller
         $validated = $request->validate([
             'start_location' => 'required|string',
             'end_location' => 'required|string',
-            'distance_km' => 'required|numeric|min:0.1',
-            'estimated_duration_minutes' => 'required|integer|min:1',
-            'estimated_fuel_liters' => 'required|numeric',
+            'distance_km' => 'nullable|numeric',
+            'estimated_duration_minutes' => 'nullable|integer',
+            'estimated_fuel_liters' => 'nullable|numeric',
             'vehicle_id' => 'nullable|exists:vehicles,id',
             'driver_id' => 'nullable|exists:drivers,id',
             'auto_assign' => 'nullable|boolean',
         ]);
 
+        // Auto-calculate route metrics if missing in form request
+        if (empty($validated['distance_km']) || empty($validated['estimated_duration_minutes']) || empty($validated['estimated_fuel_liters'])) {
+            $vehicleType = $request->get('vehicle_type', 'Sedan');
+            $routeData = $this->routingService->planRoute($validated['start_location'], $validated['end_location'], $vehicleType);
+            if (!empty($routeData['routes'])) {
+                $best = $routeData['routes'][0];
+                $validated['distance_km'] = $best['distance_km'];
+                $validated['estimated_duration_minutes'] = $best['duration_minutes'];
+                $validated['estimated_fuel_liters'] = $best['estimated_fuel'];
+            } else {
+                $validated['distance_km'] = 15.0;
+                $validated['estimated_duration_minutes'] = 30;
+                $validated['estimated_fuel_liters'] = 2.5;
+            }
+        }
+
         $startCoords = $this->routingService->getHubs()[$validated['start_location']] ?? ['lat' => 14.5995, 'lng' => 120.9842];
         $endCoords = $this->routingService->getHubs()[$validated['end_location']] ?? ['lat' => 14.5547, 'lng' => 121.0244];
 
-        $vehicleId = $validated['vehicle_id'];
-        $driverId = $validated['driver_id'];
+        $vehicleId = $validated['vehicle_id'] ?? null;
+        $driverId = $validated['driver_id'] ?? null;
 
         // Auto assignment logic
-        if ($request->has('auto_assign') && $validated['auto_assign']) {
+        if ($request->has('auto_assign') && $request->auto_assign) {
             // Find first active and available vehicle
             $vehicle = Vehicle::where('status', 'active')
                 ->whereDoesntHave('trips', function($q) {
@@ -85,7 +101,13 @@ class TripController extends Controller
                 })->first();
 
             if (!$vehicle || !$driver) {
-                return redirect()->back()->with('error', 'Auto-assignment failed: No available vehicles or drivers.');
+                // Fallback to any active vehicle/driver if available
+                $vehicle = Vehicle::where('status', 'active')->first();
+                $driver = Driver::first();
+
+                if (!$vehicle || !$driver) {
+                    return redirect()->back()->with('error', 'Auto-assignment failed: No available vehicles or drivers in system.');
+                }
             }
 
             $vehicleId = $vehicle->id;
@@ -107,93 +129,25 @@ class TripController extends Controller
             'status' => 'scheduled',
         ]);
 
-        // Mark driver and vehicle as assigned/on_trip
-        if ($driverId) {
-            Driver::find($driverId)->update(['status' => 'on_trip']);
+        // Mark driver as on_trip
+        if ($driver = Driver::find($driverId)) {
+            $driver->update(['status' => 'on_trip']);
         }
 
-        return redirect()->route('trips.index')->with('success', 'Trip scheduled successfully. Trip ID: ' . $trip->id);
+        return redirect()->route('trips.index')->with('success', 'Trip successfully dispatched and scheduled!');
     }
 
     /**
-     * Start the trip (make it active)
+     * Start a scheduled trip.
      */
     public function startTrip(Trip $trip)
     {
-        $trip->update([
-            'status' => 'active',
-            'start_time' => now(),
-        ]);
-
-        return redirect()->back()->with('success', 'Trip started. Live tracking simulation active.');
+        $trip->update(['status' => 'active', 'started_at' => now()]);
+        return redirect()->back()->with('success', 'Trip is now active and live telemetry tracking is enabled.');
     }
 
     /**
-     * Simulate real-time GPS telemetry updates, speeding behavior, and harsh braking.
-     */
-    public function simulateTelemetry(Request $request, Trip $trip)
-    {
-        if ($trip->status !== 'active') {
-            return response()->json(['error' => 'Trip is not active'], 400);
-        }
-
-        $validated = $request->validate([
-            'lat' => 'required|numeric',
-            'lng' => 'required|numeric',
-            'speed' => 'required|numeric',
-            'idle_seconds' => 'nullable|integer',
-            'is_harsh_braking' => 'nullable|boolean',
-        ]);
-
-        // Log coordinate breadcrumb
-        $log = TripLog::create([
-            'trip_id' => $trip->id,
-            'lat' => $validated['lat'],
-            'lng' => $validated['lng'],
-            'speed_kmh' => $validated['speed'],
-            'idle_time_seconds' => $validated['idle_seconds'] ?? 0,
-        ]);
-
-        // Check for safety violations
-        $speeding = $validated['speed'] > 80 ? 1 : 0;
-        $harshBraking = ($request->has('is_harsh_braking') && $validated['is_harsh_braking']) ? 1 : 0;
-        $idleMin = ($validated['idle_seconds'] ?? 0) / 60;
-
-        // Update or Create Performance Record
-        $performance = PerformanceRecord::firstOrCreate(
-            ['trip_id' => $trip->id, 'driver_id' => $trip->driver_id]
-        );
-
-        $performance->increment('speeding_events', $speeding);
-        $performance->increment('harsh_braking_events', $harshBraking);
-        $performance->increment('idle_minutes', $idleMin);
-
-        // Calculate Safety Score: Start at 100, deduct points per violation
-        $penalty = ($performance->speeding_events * 5) + ($performance->harsh_braking_events * 10) + (int)($performance->idle_minutes * 2);
-        $score = max(0, 100 - $penalty);
-        $performance->update(['safety_score' => $score]);
-
-        // Live coordinate update for the vehicle
-        if ($trip->vehicle) {
-            $trip->vehicle->update([
-                'current_gps_lat' => $validated['lat'],
-                'current_gps_lng' => $validated['lng'],
-            ]);
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'log' => $log,
-            'violations' => [
-                'speeding' => $speeding,
-                'harsh_braking' => $harshBraking,
-            ],
-            'current_safety_score' => $score
-        ]);
-    }
-
-    /**
-     * Complete the trip and calculate final fuel, duration, and driver metrics.
+     * Complete an active trip.
      */
     public function completeTrip(Request $request, Trip $trip)
     {
@@ -202,46 +156,75 @@ class TripController extends Controller
             'actual_duration_minutes' => 'required|integer|min:1',
         ]);
 
-        // Calculate average speed
-        $avgSpeed = $trip->distance_km / ($validated['actual_duration_minutes'] / 60);
-
         $trip->update([
             'status' => 'completed',
-            'end_time' => now(),
             'actual_fuel_liters' => $validated['actual_fuel_liters'],
             'actual_duration_minutes' => $validated['actual_duration_minutes'],
+            'completed_at' => now(),
         ]);
 
-        // Release driver and vehicle
-        if ($trip->driver) {
-            // Update driver cumulative metrics
-            $perf = PerformanceRecord::where('trip_id', $trip->id)->first();
-            $tripScore = $perf ? $perf->safety_score : 100;
+        // Calculate continuous cumulative odometer reading
+        $latestOdometer = FuelLog::where('vehicle_id', $trip->vehicle_id)->max('odometer_reading');
+        $newOdometer = $latestOdometer ? ((float) $latestOdometer + (float) $trip->distance_km) : (12500.00 + (float) $trip->distance_km);
 
-            $driver = $trip->driver;
-            $newTotalTrips = $driver->total_trips + 1;
-            $newTotalDistance = $driver->total_distance_km + $trip->distance_km;
-            // Running average for safety score
-            $newScore = (($driver->performance_score * $driver->total_trips) + $tripScore) / $newTotalTrips;
-
-            $driver->update([
-                'status' => 'available',
-                'total_trips' => $newTotalTrips,
-                'total_distance_km' => $newTotalDistance,
-                'performance_score' => round($newScore, 2)
-            ]);
-        }
-
-        // Add to fuel logs for reporting & AI training
+        // Record fuel log automatically
         FuelLog::create([
             'vehicle_id' => $trip->vehicle_id,
             'trip_id' => $trip->id,
-            'date' => date('Y-m-d'),
             'amount_liters' => $validated['actual_fuel_liters'],
-            'cost' => $validated['actual_fuel_liters'] * 60, // Assumed cost of 60 PHP per liter
-            'odometer_reading' => ($trip->vehicle->year * 100) + $trip->distance_km, // dummy mileage increase
+            'cost' => $validated['actual_fuel_liters'] * 11.50, // EV kWh rate
+            'odometer_reading' => round($newOdometer, 2),
+            'fuel_type' => 'Electric (kWh)',
+            'date' => now()->toDateString(),
         ]);
 
-        return redirect()->route('trips.index')->with('success', 'Trip completed successfully! Fuel usage and driver stats logged.');
+        // Free up vehicle and driver
+        if ($trip->driver) {
+            $trip->driver->update([
+                'status' => 'available',
+                'total_trips' => $trip->driver->total_trips + 1,
+                'total_distance_km' => $trip->driver->total_distance_km + $trip->distance_km,
+            ]);
+        }
+
+        return redirect()->route('trips.index')->with('success', 'Trip completed! Energy logs and driver records updated.');
+    }
+
+    /**
+     * Process live telemetry GPS simulation broadcast.
+     */
+    public function simulateTelemetry(Request $request, Trip $trip)
+    {
+        $validated = $request->validate([
+            'lat' => 'required|numeric',
+            'lng' => 'required|numeric',
+            'speed' => 'required|numeric',
+            'idle_seconds' => 'nullable|integer',
+            'is_harsh_braking' => 'nullable|boolean',
+        ]);
+
+        $tripLog = TripLog::create([
+            'trip_id' => $trip->id,
+            'current_lat' => $validated['lat'],
+            'current_lng' => $validated['lng'],
+            'current_speed' => $validated['speed'],
+            'idle_duration_seconds' => $validated['idle_seconds'] ?? 0,
+            'is_harsh_braking' => $validated['is_harsh_braking'] ?? false,
+            'recorded_at' => now(),
+        ]);
+
+        // Calculate real-time safety score deduction
+        $safetyScore = 100;
+        if ($validated['speed'] > 80) $safetyScore -= 15;
+        if ($validated['is_harsh_braking'] ?? false) $safetyScore -= 10;
+        if (($validated['idle_seconds'] ?? 0) > 30) $safetyScore -= 5;
+
+        $safetyScore = max(50, $safetyScore);
+
+        return response()->json([
+            'status' => 'success',
+            'current_safety_score' => $safetyScore,
+            'log' => $tripLog,
+        ]);
     }
 }

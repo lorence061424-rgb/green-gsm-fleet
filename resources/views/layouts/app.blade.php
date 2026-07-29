@@ -12,10 +12,38 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    
-    <!-- Custom Responsive Style System -->
+    <!-- Leaflet Interactive GPS Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Custom Instant SPA Tab Switcher Animation Styles -->
+    <style>
+        #mainContentBody {
+            transition: opacity 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tab-fade-out {
+            opacity: 0;
+        }
+        .tab-fade-in {
+            opacity: 1;
+        }
+        #tabLoadingProgress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #10B981 0%, #06B6D4 100%);
+            z-index: 99999;
+            width: 0%;
+            transition: width 0.2s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Loading Bar for SPA Tab Transitions -->
+    <div id="tabLoadingProgress"></div>
+
+    <!-- Mobile Navigation Offcanvas Drawer (Only visible on small screens) -->
     <style>
         :root {
             --primary: #10B981;
@@ -420,14 +448,136 @@
             </div>
         @endif
 
-        @yield('content')
+        <div id="mainContentBody" class="tab-fade-in">
+            @yield('content')
+        </div>
     </div>
 
     <!-- Bootstrap 5 Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Chart.js (for analytics rendering) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Leaflet Interactive GPS Map Engine JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
+    <!-- Instant SPA Tab Switcher Engine -->
+    <script>
+    (function () {
+        const tabCache = new Map();
+
+        async function navigateTab(url, pushState = true) {
+            const progress = document.getElementById('tabLoadingProgress');
+            const container = document.getElementById('mainContentBody');
+            if (!container) return;
+
+            if (progress) {
+                progress.style.width = '35%';
+                progress.style.display = 'block';
+            }
+
+            try {
+                let htmlContent = '';
+                if (tabCache.has(url)) {
+                    // Client-Side Cache Hit: Instant Swap!
+                    htmlContent = tabCache.get(url);
+                    if (progress) progress.style.width = '100%';
+                } else {
+                    // Fetch background page HTML via AJAX
+                    const response = await fetch(url, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    if (!response.ok) throw new Error('Network error');
+                    const text = await response.text();
+
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(text, 'text/html');
+                    const newContent = doc.getElementById('mainContentBody');
+                    htmlContent = newContent ? newContent.innerHTML : text;
+
+                    // Cache extracted page HTML
+                    tabCache.set(url, htmlContent);
+                    if (progress) progress.style.width = '100%';
+                }
+
+                // Smooth Fade Transition
+                container.classList.remove('tab-fade-in');
+                container.classList.add('tab-fade-out');
+
+                setTimeout(() => {
+                    container.innerHTML = htmlContent;
+                    container.classList.remove('tab-fade-out');
+                    container.classList.add('tab-fade-in');
+
+                    // Update URL and Active link highlighting
+                    if (pushState) {
+                        window.history.pushState({ url: url }, '', url);
+                    }
+                    updateActiveSidebarLinks(url);
+
+                    // Re-execute scripts dynamically (Leaflet maps, Chart.js, GPS tracking)
+                    const scripts = container.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                        oldScript.parentNode.replaceChild(newScript, oldScript);
+                    });
+
+                    // Scroll to top smoothly
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                }, 100);
+
+            } catch (err) {
+                console.warn('SPA tab transition fallback:', err);
+                window.location.href = url;
+            } finally {
+                setTimeout(() => {
+                    if (progress) {
+                        progress.style.width = '0%';
+                        progress.style.display = 'none';
+                    }
+                }, 220);
+            }
+        }
+
+        function updateActiveSidebarLinks(targetUrl) {
+            document.querySelectorAll('.sidebar-nav-link').forEach(link => {
+                if (link.href === targetUrl || (link.getAttribute('href') && targetUrl.endsWith(link.getAttribute('href')))) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        // Intercept sidebar link clicks for instant tab switching
+        document.addEventListener('click', function (e) {
+            const link = e.target.closest('.sidebar-nav-link');
+            if (link && link.href && !link.href.includes('#') && !link.target && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+
+                // Close mobile offcanvas if open
+                const mobileDrawer = document.getElementById('mobileSidebar');
+                if (mobileDrawer) {
+                    const bsOffcanvas = bootstrap.Offcanvas.getInstance(mobileDrawer);
+                    if (bsOffcanvas) bsOffcanvas.hide();
+                }
+
+                navigateTab(link.href);
+            }
+        });
+
+        // Handle Browser Back / Forward buttons smoothly
+        window.addEventListener('popstate', function (e) {
+            if (e.state && e.state.url) {
+                navigateTab(e.state.url, false);
+            } else {
+                navigateTab(window.location.href, false);
+            }
+        });
+    })();
+    </script>
+
     @yield('scripts')
 </body>
 </html>

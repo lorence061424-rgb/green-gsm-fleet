@@ -110,7 +110,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-premium w-100 rounded-3 mt-2" id="btnSubmitTrip" disabled>
+                <button type="submit" class="btn btn-premium w-100 rounded-3 mt-2" id="btnSubmitTrip">
                     <i class="bi bi-calendar-check me-1"></i> Dispatch Trip
                 </button>
             </form>
@@ -179,10 +179,25 @@
         <div class="modal-content border-0">
             <div class="modal-header bg-dark text-white border-0">
                 <h5 class="modal-title fw-bold" id="telemetryLabel"><i class="bi bi-compass-fill text-info me-2"></i> Live Fleet Telemetry Simulator</h5>
-                <span class="badge bg-danger rounded-pill px-3 py-1">GPS Broadcast Live</span>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-danger rounded-pill px-3 py-1">GPS Broadcast Live</span>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
             </div>
+
             <div class="modal-body p-4 bg-light">
                 <div class="row g-3">
+                    <!-- Interactive Leaflet Live GPS Map -->
+                    <div class="col-12">
+                        <div class="card border-0 rounded-4 overflow-hidden shadow-sm" style="height: 230px; position: relative;">
+                            <div id="liveGpsMap" style="width: 100%; height: 100%; z-index: 1; min-height: 230px;"></div>
+                            <div class="position-absolute top-0 end-0 m-2 bg-dark bg-opacity-80 text-white px-3 py-1 rounded-pill small shadow-sm" style="z-index: 10; font-size: 11px; backdrop-filter: blur(4px);">
+                                <span class="spinner-grow spinner-grow-sm text-success me-1" role="status"></span>
+                                <span class="fw-bold text-success">LIVE METRO MANILA GPS</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Progress and Speedometers -->
                     <div class="col-md-7">
                         <div class="card border-0 rounded-4 p-3 shadow-sm mb-3">
@@ -326,6 +341,12 @@
                 return;
             }
 
+            // Immediately enable Dispatch button & set fallback metrics
+            document.getElementById('distance_km').value = "14.5";
+            document.getElementById('estimated_duration_minutes').value = "28";
+            document.getElementById('estimated_fuel_liters').value = "2.4";
+            document.getElementById('btnSubmitTrip').removeAttribute('disabled');
+
             // Perform fetch call to get preview path and AI estimation
             fetch("{{ route('trips.plan-preview') }}", {
                 method: "POST",
@@ -400,6 +421,19 @@
     let simPredictedFuel = 0.0;
     let simVehicleType = "";
 
+    // Leaflet Live GPS Map Objects
+    let leafletMap = null;
+    let carMarker = null;
+    let polylineTrail = null;
+
+    const hubCoords = {
+        'Manila Hub (Port Area)': [14.5995, 120.9842],
+        'Makati Hub (Ayala Ave)': [14.5547, 121.0244],
+        'BGC Taguig Hub (9th Ave)': [14.5515, 121.0510],
+        'Pasay Hub (MOA Complex)': [14.5352, 120.9820],
+        'Quezon City Hub (Cubao)': [14.6178, 121.0572]
+    };
+
     // Simulated path arrays (simple latitude/longitude interpolation arrays)
     let simulatedPath = [];
     let currentStepIndex = 0;
@@ -412,6 +446,47 @@
     let currentVehicleSpeed = 50; 
     let aggressiveSpeedTrigger = false;
     let harshBrakeTrigger = false;
+
+    function initLeafletGpsMap(startName, endName) {
+        const mapContainer = document.getElementById('liveGpsMap');
+        if (!mapContainer) return;
+
+        const startLatLng = hubCoords[startName] || [14.5995, 120.9842];
+        const endLatLng = hubCoords[endName] || [14.5547, 121.0244];
+
+        if (!leafletMap) {
+            leafletMap = L.map('liveGpsMap', { zoomControl: false }).setView(startLatLng, 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap &bull; Green GSM Telemetry'
+            }).addTo(leafletMap);
+        } else {
+            leafletMap.setView(startLatLng, 13);
+        }
+
+        // Clear existing markers & lines if present
+        if (carMarker) leafletMap.removeLayer(carMarker);
+        if (polylineTrail) leafletMap.removeLayer(polylineTrail);
+
+        // Start & Destination Hub Markers
+        L.circleMarker(startLatLng, { color: '#10B981', radius: 8, fillColor: '#10B981', fillOpacity: 0.9 }).addTo(leafletMap).bindPopup("<b>Start Hub:</b> " + startName);
+        L.circleMarker(endLatLng, { color: '#EF4444', radius: 8, fillColor: '#EF4444', fillOpacity: 0.9 }).addTo(leafletMap).bindPopup("<b>Destination:</b> " + endName);
+
+        // Polyline Trail
+        polylineTrail = L.polyline([startLatLng], { color: '#10B981', weight: 4, opacity: 0.85, dashArray: '6, 6' }).addTo(leafletMap);
+
+        // Custom Leaflet EV Icon
+        const carIcon = L.divIcon({
+            className: 'custom-ev-marker',
+            html: `<div style="background:#064E3B; border:2px solid #10B981; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 12px rgba(16,185,129,0.8);"><i class="bi bi-ev-front-fill text-white fs-6"></i></div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+        });
+
+        carMarker = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMap).bindPopup("<b>VinFast EV Live Position</b>");
+
+        setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 350);
+    }
 
     function launchTelemetrySimulator(tripId, start, end, type, distance, predictedFuel) {
         simTripId = tripId;
@@ -432,35 +507,41 @@
         document.getElementById('simStartHub').innerText = start;
         document.getElementById('simEndHub').innerText = end;
         document.getElementById('simProgressBar').style.width = "0%";
-        document.getElementById('simPredictedFuel').innerText = predictedFuel.toFixed(2) + " L";
-        document.getElementById('simRealtimeFuel').innerText = "0.00 L";
+        document.getElementById('simPredictedFuel').innerText = predictedFuel.toFixed(2) + " kWh";
+        document.getElementById('simRealtimeFuel').innerText = "0.00 kWh";
         document.getElementById('simSpeed').innerHTML = "0 <span class='fs-6 fw-normal'>km/h</span>";
         document.getElementById('simIdle').innerText = "0s";
         document.getElementById('simSafetyScore').innerText = "100%";
         document.getElementById('telemetryFeed').innerHTML = "<span class='text-muted text-center py-4'>Ready to run simulation stream.</span>";
 
         // Generate coordinate path
-        generateSimulatedPathCoordinates();
+        generateSimulatedPathCoordinates(start, end);
 
-        // Show Modal
-        const simModal = new bootstrap.Modal(document.getElementById('telemetrySimulatorModal'));
+        // Move modal directly to document.body to prevent any stacking context issues
+        const simModalElement = document.getElementById('telemetrySimulatorModal');
+        if (simModalElement && simModalElement.parentNode !== document.body) {
+            document.body.appendChild(simModalElement);
+        }
+        const simModal = bootstrap.Modal.getOrCreateInstance(simModalElement);
         simModal.show();
+
+        simModalElement.addEventListener('shown.bs.modal', function () {
+            initLeafletGpsMap(start, end);
+        }, { once: true });
     }
 
-    function generateSimulatedPathCoordinates() {
+    function generateSimulatedPathCoordinates(startName, endName) {
         simulatedPath = [];
-        // Approximate points using Manila and Makati coordinates as hubs
-        const points = 12; // 12 updates
-        const startLat = 14.5995;
-        const startLng = 120.9842;
-        const endLat = 14.5547;
-        const endLng = 121.0244;
+        const startLatLng = hubCoords[startName] || [14.5995, 120.9842];
+        const endLatLng = hubCoords[endName] || [14.5547, 121.0244];
+        
+        const points = 14; // 14 real-time GPS updates
 
         for (let i = 0; i <= points; i++) {
             let f = i / points;
             simulatedPath.push({
-                lat: startLat + (endLat - startLat) * f + (Math.random() - 0.5) * 0.002,
-                lng: startLng + (endLng - startLng) * f + (Math.random() - 0.5) * 0.002
+                lat: startLatLng[0] + (endLatLng[0] - startLatLng[0]) * f + (Math.random() - 0.5) * 0.0015,
+                lng: startLatLng[1] + (endLatLng[1] - startLatLng[1]) * f + (Math.random() - 0.5) * 0.0015
             });
         }
     }
@@ -524,6 +605,17 @@
         }
 
         const point = simulatedPath[currentStepIndex];
+        
+        // Update Leaflet Map Marker Position & Polyline Breadcrumb Trail
+        if (carMarker) {
+            carMarker.setLatLng([point.lat, point.lng]);
+        }
+        if (polylineTrail) {
+            polylineTrail.addLatLng([point.lat, point.lng]);
+        }
+        if (leafletMap) {
+            leafletMap.panTo([point.lat, point.lng], { animate: true, duration: 0.8 });
+        }
         
         // Randomize speed based on triggers
         let speed = 40 + Math.floor(Math.random() * 20); // standard
@@ -619,7 +711,11 @@
         const form = document.getElementById('completeTripForm');
         form.action = `/trips/${simTripId}/complete`;
 
-        const completeModal = new bootstrap.Modal(document.getElementById('completeTripModal'));
+        const completeModalElement = document.getElementById('completeTripModal');
+        if (completeModalElement && completeModalElement.parentNode !== document.body) {
+            document.body.appendChild(completeModalElement);
+        }
+        const completeModal = bootstrap.Modal.getOrCreateInstance(completeModalElement);
         completeModal.show();
     }
 </script>

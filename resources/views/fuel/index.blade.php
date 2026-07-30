@@ -150,8 +150,8 @@
                         <td class="fw-bold text-dark" style="font-size: 14px;">₱{{ number_format($log->cost, 2) }}</td>
                         <td style="font-size: 13px;">{{ number_format($log->odometer_reading, 1) }} km</td>
                         <td>
-                            <span class="badge bg-info bg-opacity-20 text-info px-3 py-1 rounded-pill">
-                                {{ $log->fuel_type }}
+                            <span class="badge bg-primary text-white px-3 py-2 rounded-3 shadow-sm fw-bold">
+                                <i class="bi bi-ev-station me-1"></i> {{ $log->fuel_type ?: 'DC Fast Charge (kWh)' }}
                             </span>
                         </td>
                     </tr>

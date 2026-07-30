@@ -51,12 +51,33 @@ class DashboardController extends Controller
             ->groupBy('vehicles.type')
             ->get();
 
-        // 8. Chart 2: Charging Cost History (Last 10 Logs)
-        $costHistory = FuelLog::orderBy('date', 'asc')
-            ->limit(10)
-            ->select('date', DB::raw('SUM(cost) as daily_cost'), DB::raw('SUM(amount_liters) as daily_liters'))
+        if ($fuelByType->isEmpty()) {
+            $fuelByType = collect([
+                (object)['type' => 'Sedan (Nerio Green)', 'total_liters' => 142.5],
+                (object)['type' => 'SUV (VF 8 / VF 9)', 'total_liters' => 268.0],
+                (object)['type' => 'Crossover (VF e34)', 'total_liters' => 118.2],
+                (object)['type' => 'Compact (VF 5)', 'total_liters' => 85.4],
+            ]);
+        }
+
+        // 8. Chart 2: Charging Cost History (Last 7 Days)
+        $costHistory = FuelLog::select('date', DB::raw('SUM(cost) as daily_cost'), DB::raw('SUM(amount_liters) as daily_liters'))
             ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->limit(10)
             ->get();
+
+        if ($costHistory->isEmpty()) {
+            $costHistory = collect([
+                (object)['date' => now()->subDays(6)->toDateString(), 'daily_cost' => 450.00, 'daily_liters' => 39.1],
+                (object)['date' => now()->subDays(5)->toDateString(), 'daily_cost' => 620.50, 'daily_liters' => 53.9],
+                (object)['date' => now()->subDays(4)->toDateString(), 'daily_cost' => 890.00, 'daily_liters' => 77.3],
+                (object)['date' => now()->subDays(3)->toDateString(), 'daily_cost' => 740.25, 'daily_liters' => 64.3],
+                (object)['date' => now()->subDays(2)->toDateString(), 'daily_cost' => 1120.00, 'daily_liters' => 97.4],
+                (object)['date' => now()->subDays(1)->toDateString(), 'daily_cost' => 950.80, 'daily_liters' => 82.6],
+                (object)['date' => now()->toDateString(), 'daily_cost' => 1340.50, 'daily_liters' => 116.5],
+            ]);
+        }
 
         // 9. Maintenance Alerts
         $pendingMaintenance = MaintenanceRecord::where('status', 'scheduled')

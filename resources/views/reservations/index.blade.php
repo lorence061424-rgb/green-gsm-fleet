@@ -183,8 +183,19 @@
         </div>
     </div>
 
-    <!-- Right Side: Availability Checker & Dispatch Quick Schedule -->
+    <!-- Right Side: Availability Checker & Visual Schedule Calendar -->
     <div class="col-lg-4">
+        <!-- Interactive Visual Schedule Calendar -->
+        <div class="card premium-card border-0 p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-calendar3 text-success me-2"></i> Vehicle Schedule Calendar</h5>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20">Live Sync</span>
+            </div>
+            <p class="small text-muted mb-3">Click any date to instantly view reserved and available VinFast EV cars.</p>
+            
+            <div id="reservationCalendar" style="min-height: 280px;"></div>
+        </div>
+
         <!-- Quick Availability Lookup -->
         <div class="card premium-card border-0 p-4 mb-4">
             <h5 class="fw-bold mb-3"><i class="bi bi-calendar-range text-primary me-2"></i> Check Vehicle Availability</h5>
@@ -196,10 +207,10 @@
                 <i class="bi bi-calendar-check me-1"></i> Check Schedule Slot
             </button>
             <div id="availabilityResults" class="d-none">
-                <h6 class="fw-bold text-success small mb-2"><i class="bi bi-check2-circle"></i> Available Vehicles:</h6>
-                <div id="availableList" class="mb-3"></div>
-                <h6 class="fw-bold text-danger small mb-2"><i class="bi bi-exclamation-circle"></i> Already Reserved:</h6>
-                <div id="reservedList"></div>
+                <h6 class="fw-bold text-success small mb-2"><i class="bi bi-check2-circle me-1"></i> Available VinFast EVs:</h6>
+                <div id="availableList" class="mb-3 d-flex flex-wrap gap-1"></div>
+                <h6 class="fw-bold text-danger small mb-2"><i class="bi bi-exclamation-circle me-1"></i> Already Reserved:</h6>
+                <div id="reservedList" class="d-flex flex-wrap gap-1"></div>
             </div>
         </div>
 
@@ -324,21 +335,21 @@ function checkAvailability() {
             if (resList) resList.innerHTML = '';
 
             if (!data.available || data.available.length === 0) {
-                if (availList) availList.innerHTML = '<span class="text-muted small">No vehicles available on this date.</span>';
+                if (availList) availList.innerHTML = '<span class="text-muted small fw-semibold">No vehicles available on this date.</span>';
             } else {
                 data.available.forEach(v => {
                     if (availList) {
-                        availList.innerHTML += `<span class="badge bg-success bg-opacity-20 text-success me-1 mb-1 border border-success border-opacity-30 px-2 py-1">${v.license_plate} (${v.make} ${v.model})</span> `;
+                        availList.innerHTML += `<div class="badge bg-success text-white px-3 py-2 me-1 mb-1 rounded-3 shadow-sm d-inline-flex align-items-center"><i class="bi bi-ev-front-fill me-1"></i> ${v.license_plate} (${v.make} ${v.model})</div> `;
                     }
                 });
             }
 
             if (!data.reserved || data.reserved.length === 0) {
-                if (resList) resList.innerHTML = '<span class="text-muted small">No vehicles reserved on this date.</span>';
+                if (resList) resList.innerHTML = '<span class="text-muted small fw-semibold">No vehicles reserved on this date.</span>';
             } else {
                 data.reserved.forEach(v => {
                     if (resList) {
-                        resList.innerHTML += `<span class="badge bg-danger bg-opacity-20 text-danger me-1 mb-1 border border-danger border-opacity-30 px-2 py-1">${v.license_plate} (${v.make} ${v.model})</span> `;
+                        resList.innerHTML += `<div class="badge bg-danger text-white px-3 py-2 me-1 mb-1 rounded-3 shadow-sm d-inline-flex align-items-center"><i class="bi bi-x-circle-fill me-1"></i> ${v.license_plate} (${v.make} ${v.model})</div> `;
                     }
                 });
             }
@@ -374,7 +385,34 @@ function exportReservationsToCSV() {
     downloadLink.click();
     document.body.removeChild(downloadLink);
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('reservationCalendar');
+    if (calendarEl && typeof FullCalendar !== 'undefined') {
+        const eventsData = @json($calendarEvents ?? []);
+
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            height: 'auto',
+            headerToolbar: {
+                left: 'prev,next',
+                center: 'title',
+                right: 'today'
+            },
+            events: eventsData,
+            dateClick: function(info) {
+                const checkInput = document.getElementById('checkDateInput');
+                if (checkInput) {
+                    checkInput.value = info.dateStr;
+                    checkAvailability();
+                }
+            }
+        });
+        calendar.render();
+    }
+});
 </script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
 <!-- Import Reservations CSV Modal -->
 <div class="modal fade" id="importReservationsCsvModal" tabindex="-1" aria-hidden="true">

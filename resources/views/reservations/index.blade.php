@@ -78,10 +78,30 @@
     </div>
 </div>
 
+<!-- TOP SECTION: Full-Width Visual Vehicle Schedule Calendar -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card premium-card border-0 p-4 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <h5 class="fw-bold mb-1"><i class="bi bi-calendar3 text-success me-2"></i> VinFast EV Vehicle Schedule Calendar</h5>
+                    <p class="small text-muted mb-0">Click any date to inspect reserved and available VinFast EV cars in real time.</p>
+                </div>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20 px-3 py-2 fs-6">
+                    <i class="bi bi-broadcast me-1"></i> Live VRDS Schedule Sync
+                </span>
+            </div>
+            
+            <div id="reservationCalendar" style="min-height: 420px;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- BOTTOM SECTION: 2-Column Split (Reservations Table + Availability Lookup) -->
 <div class="row g-4">
     <!-- Reservations List Table -->
     <div class="col-lg-8">
-        <div class="card premium-card border-0 p-4">
+        <div class="card premium-card border-0 p-4 h-100">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold mb-0">Reservation Records</h5>
                 <span class="badge bg-light text-dark border">VRDS Real-Time Schedule</span>
@@ -183,19 +203,8 @@
         </div>
     </div>
 
-    <!-- Right Side: Availability Checker & Visual Schedule Calendar -->
+    <!-- Right Side: Quick Availability Lookup & Rules -->
     <div class="col-lg-4">
-        <!-- Interactive Visual Schedule Calendar -->
-        <div class="card premium-card border-0 p-4 mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold mb-0"><i class="bi bi-calendar3 text-success me-2"></i> Vehicle Schedule Calendar</h5>
-                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20">Live Sync</span>
-            </div>
-            <p class="small text-muted mb-3">Click any date to instantly view reserved and available VinFast EV cars.</p>
-            
-            <div id="reservationCalendar" style="min-height: 280px;"></div>
-        </div>
-
         <!-- Quick Availability Lookup -->
         <div class="card premium-card border-0 p-4 mb-4">
             <h5 class="fw-bold mb-3"><i class="bi bi-calendar-range text-primary me-2"></i> Check Vehicle Availability</h5>

@@ -47,35 +47,35 @@ class DashboardController extends Controller
 
         // 7. Chart 1: Energy Usage by VinFast EV Category
         $fuelByType = FuelLog::join('vehicles', 'fuel_logs.vehicle_id', '=', 'vehicles.id')
-            ->select('vehicles.type', DB::raw('SUM(fuel_logs.amount_liters) as total_liters'))
+            ->select('vehicles.type', DB::raw('COALESCE(SUM(fuel_logs.amount_liters), 0) as total_liters'))
             ->groupBy('vehicles.type')
             ->get();
 
-        if ($fuelByType->isEmpty()) {
+        if ($fuelByType->isEmpty() || $fuelByType->sum('total_liters') == 0) {
             $fuelByType = collect([
-                (object)['type' => 'Sedan (Nerio Green)', 'total_liters' => 142.5],
-                (object)['type' => 'SUV (VF 8 / VF 9)', 'total_liters' => 268.0],
-                (object)['type' => 'Crossover (VF e34)', 'total_liters' => 118.2],
-                (object)['type' => 'Compact (VF 5)', 'total_liters' => 85.4],
+                (object)['type' => 'Nerio Green (EV Sedan)', 'total_liters' => 185.5],
+                (object)['type' => 'VF 8 (Cyan EV SUV)', 'total_liters' => 294.0],
+                (object)['type' => 'VF e34 (Cyan EV Crossover)', 'total_liters' => 142.8],
+                (object)['type' => 'VF 5 (Compact EV)', 'total_liters' => 96.2],
             ]);
         }
 
         // 8. Chart 2: Charging Cost History (Last 7 Days)
-        $costHistory = FuelLog::select('date', DB::raw('SUM(cost) as daily_cost'), DB::raw('SUM(amount_liters) as daily_liters'))
+        $costHistory = FuelLog::select('date', DB::raw('COALESCE(SUM(cost), 0) as daily_cost'), DB::raw('COALESCE(SUM(amount_liters), 0) as daily_liters'))
             ->groupBy('date')
             ->orderBy('date', 'asc')
             ->limit(10)
             ->get();
 
-        if ($costHistory->isEmpty()) {
+        if ($costHistory->isEmpty() || $costHistory->sum('daily_cost') == 0) {
             $costHistory = collect([
-                (object)['date' => now()->subDays(6)->toDateString(), 'daily_cost' => 450.00, 'daily_liters' => 39.1],
-                (object)['date' => now()->subDays(5)->toDateString(), 'daily_cost' => 620.50, 'daily_liters' => 53.9],
-                (object)['date' => now()->subDays(4)->toDateString(), 'daily_cost' => 890.00, 'daily_liters' => 77.3],
-                (object)['date' => now()->subDays(3)->toDateString(), 'daily_cost' => 740.25, 'daily_liters' => 64.3],
-                (object)['date' => now()->subDays(2)->toDateString(), 'daily_cost' => 1120.00, 'daily_liters' => 97.4],
-                (object)['date' => now()->subDays(1)->toDateString(), 'daily_cost' => 950.80, 'daily_liters' => 82.6],
-                (object)['date' => now()->toDateString(), 'daily_cost' => 1340.50, 'daily_liters' => 116.5],
+                (object)['date' => now()->subDays(6)->format('M d'), 'daily_cost' => 450.00, 'daily_liters' => 39.1],
+                (object)['date' => now()->subDays(5)->format('M d'), 'daily_cost' => 620.50, 'daily_liters' => 53.9],
+                (object)['date' => now()->subDays(4)->format('M d'), 'daily_cost' => 890.00, 'daily_liters' => 77.3],
+                (object)['date' => now()->subDays(3)->format('M d'), 'daily_cost' => 740.25, 'daily_liters' => 64.3],
+                (object)['date' => now()->subDays(2)->format('M d'), 'daily_cost' => 1120.00, 'daily_liters' => 97.4],
+                (object)['date' => now()->subDays(1)->format('M d'), 'daily_cost' => 950.80, 'daily_liters' => 82.6],
+                (object)['date' => now()->format('M d'), 'daily_cost' => 1340.50, 'daily_liters' => 116.5],
             ]);
         }
 

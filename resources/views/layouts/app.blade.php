@@ -316,7 +316,7 @@
             <a href="{{ route('cost-analysis.index') }}" class="sidebar-nav-link {{ Route::is('cost-analysis.*') ? 'active' : '' }}">
                 <i class="bi bi-graph-up-arrow"></i> Transport Cost Analysis
             </a>
-            <a href="{{ route('maintenance.index') }}" class="sidebar-nav-link {{ Route::is('maintenance.*') ? 'active' : '' }}">
+            <a href="{{ route('routes.index') }}" class="sidebar-nav-link {{ Route::is('routes.*') ? 'active' : '' }}">
                 <i class="bi bi-compass"></i> Route Planning and Optimization
             </a>
         </nav>
@@ -354,7 +354,7 @@
                 <a href="{{ route('cost-analysis.index') }}" class="sidebar-nav-link {{ Route::is('cost-analysis.*') ? 'active' : '' }}">
                     <i class="bi bi-graph-up-arrow"></i> Transport Cost Analysis
                 </a>
-                <a href="{{ route('maintenance.index') }}" class="sidebar-nav-link {{ Route::is('maintenance.*') ? 'active' : '' }}">
+                <a href="{{ route('routes.index') }}" class="sidebar-nav-link {{ Route::is('routes.*') ? 'active' : '' }}">
                     <i class="bi bi-compass"></i> Route Planning and Optimization
                 </a>
             </nav>

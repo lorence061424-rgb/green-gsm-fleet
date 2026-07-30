@@ -60,4 +60,8 @@ Route::middleware(['role'])->group(function () {
     Route::post('/maintenance', [MaintenanceController::class, 'store'])->middleware('role:fleet_manager')->name('maintenance.store');
     Route::post('/maintenance/{record}/status', [MaintenanceController::class, 'updateStatus'])->middleware('role:fleet_manager')->name('maintenance.update-status');
 
+    // Route Planning & Optimization (Module 6)
+    Route::get('/routes', [\App\Http\Controllers\RouteController::class, 'index'])->name('routes.index');
+    Route::post('/routes/plan', [\App\Http\Controllers\RouteController::class, 'planRoute'])->name('routes.plan');
+
 });

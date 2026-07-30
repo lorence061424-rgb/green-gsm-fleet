@@ -192,8 +192,8 @@
                 <label class="form-label text-muted small fw-semibold">Select Reservation Date</label>
                 <input type="date" id="checkDateInput" class="form-control rounded-3" value="{{ date('Y-m-d') }}">
             </div>
-            <button type="button" onclick="checkAvailability()" class="btn btn-outline-primary w-100 rounded-3 mb-3">
-                Check Schedule Slot
+            <button type="button" id="btnCheckSlot" onclick="checkAvailability()" class="btn btn-primary w-100 rounded-3 mb-3 fw-bold shadow-sm">
+                <i class="bi bi-calendar-check me-1"></i> Check Schedule Slot
             </button>
             <div id="availabilityResults" class="d-none">
                 <h6 class="fw-bold text-success small mb-2"><i class="bi bi-check2-circle"></i> Available Vehicles:</h6>
@@ -289,34 +289,63 @@
 @section('scripts')
 <script>
 function checkAvailability() {
-    const date = document.getElementById('checkDateInput').value;
-    if(!date) return;
+    const btn = document.getElementById('btnCheckSlot');
+    const input = document.getElementById('checkDateInput');
+    const date = input ? input.value : '';
+
+    if (!date) {
+        alert('Please select a reservation date to check schedule slots!');
+        return;
+    }
+
+    const originalHtml = btn ? btn.innerHTML : '<i class="bi bi-calendar-check me-1"></i> Check Schedule Slot';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Checking Availability...';
+    }
 
     fetch(`{{ route('reservations.check-availability') }}?date=${date}`)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('HTTP error ' + res.status);
+            return res.json();
+        })
         .then(data => {
             const results = document.getElementById('availabilityResults');
             const availList = document.getElementById('availableList');
             const resList = document.getElementById('reservedList');
 
-            results.classList.remove('d-none');
-            availList.innerHTML = '';
-            resList.innerHTML = '';
+            if (results) results.classList.remove('d-none');
+            if (availList) availList.innerHTML = '';
+            if (resList) resList.innerHTML = '';
 
-            if(data.available.length === 0) {
-                availList.innerHTML = '<span class="text-muted small">No vehicles available on this date.</span>';
+            if (!data.available || data.available.length === 0) {
+                if (availList) availList.innerHTML = '<span class="text-muted small">No vehicles available on this date.</span>';
             } else {
                 data.available.forEach(v => {
-                    availList.innerHTML += `<span class="badge bg-success-subtle text-success me-1 mb-1 border">${v.license_plate} (${v.make} ${v.model})</span> `;
+                    if (availList) {
+                        availList.innerHTML += `<span class="badge bg-success bg-opacity-20 text-success me-1 mb-1 border border-success border-opacity-30 px-2 py-1">${v.license_plate} (${v.make} ${v.model})</span> `;
+                    }
                 });
             }
 
-            if(data.reserved.length === 0) {
-                resList.innerHTML = '<span class="text-muted small">No vehicles reserved on this date.</span>';
+            if (!data.reserved || data.reserved.length === 0) {
+                if (resList) resList.innerHTML = '<span class="text-muted small">No vehicles reserved on this date.</span>';
             } else {
                 data.reserved.forEach(v => {
-                    resList.innerHTML += `<span class="badge bg-danger-subtle text-danger me-1 mb-1 border">${v.license_plate} (${v.make} ${v.model})</span> `;
+                    if (resList) {
+                        resList.innerHTML += `<span class="badge bg-danger bg-opacity-20 text-danger me-1 mb-1 border border-danger border-opacity-30 px-2 py-1">${v.license_plate} (${v.make} ${v.model})</span> `;
+                    }
                 });
+            }
+        })
+        .catch(err => {
+            console.error('Availability check failed:', err);
+            alert('Could not fetch schedule slot availability. Please try again.');
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
             }
         });
 }

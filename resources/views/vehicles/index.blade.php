@@ -78,14 +78,14 @@
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">
-                                        <button class="btn btn-sm btn-outline-primary border-0 rounded-2" data-bs-toggle="modal" data-bs-target="#editVehicleModal{{ $vehicle->id }}">
-                                            <i class="bi bi-pencil-fill"></i>
+                                        <button class="btn btn-sm btn-primary rounded-2 px-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#editVehicleModal{{ $vehicle->id }}" title="Edit Vehicle">
+                                            <i class="bi bi-pencil-fill me-1"></i> Edit
                                         </button>
                                         <form action="{{ route('vehicles.destroy', $vehicle) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this vehicle?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger border-0 rounded-2">
-                                                <i class="bi bi-trash-fill"></i>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-2 px-2 shadow-sm" title="Delete Vehicle">
+                                                <i class="bi bi-trash-fill me-1"></i> Delete
                                             </button>
                                         </form>
                                     </div>

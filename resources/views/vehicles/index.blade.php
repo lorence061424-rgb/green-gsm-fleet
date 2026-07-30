@@ -3,15 +3,21 @@
 @section('content')
 <div class="row align-items-center mb-4">
     <div class="col">
-        <h2 class="page-header-title">Fleet & Drivers Registry</h2>
-        <p class="page-header-subtitle">Manage vehicle records, driver registrations, and active fleet statuses.</p>
+        <h2 class="page-header-title">Fleet and Vehicle Management</h2>
+        <p class="page-header-subtitle">Manage VinFast All-Electric EV vehicle inventory, battery storage, and active fleet statuses.</p>
     </div>
-    <div class="col-auto d-flex gap-2">
-        <button class="btn btn-premium d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
-            <i class="bi bi-plus-circle me-1"></i> Register Vehicle
+    <div class="col-auto d-flex gap-2 flex-wrap">
+        <button class="btn btn-outline-success rounded-3" onclick="exportVehiclesToCSV();">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
         </button>
-        <button class="btn btn-outline-dark d-flex align-items-center rounded-3" data-bs-toggle="modal" data-bs-target="#addDriverModal">
-            <i class="bi bi-person-plus me-1"></i> Register Driver
+        <button class="btn btn-outline-primary rounded-3" data-bs-toggle="modal" data-bs-target="#importVehiclesCsvModal">
+            <i class="bi bi-file-earmark-arrow-up me-1"></i> Import CSV
+        </button>
+        <button class="btn btn-outline-dark rounded-3" onclick="window.print();">
+            <i class="bi bi-printer me-1"></i> Print / PDF
+        </button>
+        <button class="btn btn-premium d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
+            <i class="bi bi-plus-circle me-1"></i> Register VinFast EV
         </button>
     </div>
 </div>
@@ -21,12 +27,12 @@
     <ul class="nav nav-tabs border-bottom mb-4" id="registryTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active fw-bold text-dark border-0 border-bottom border-primary" id="vehicles-tab" data-bs-toggle="tab" data-bs-target="#vehicles-pane" type="button" role="tab" aria-controls="vehicles-pane" aria-selected="true">
-                <i class="bi bi-truck me-1"></i> Fleet Vehicles ({{ $vehicles->count() }})
+                <i class="bi bi-truck me-1"></i> VinFast EV Units ({{ $vehicles->count() }})
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link fw-bold text-muted border-0" id="drivers-tab" data-bs-toggle="tab" data-bs-target="#drivers-pane" type="button" role="tab" aria-controls="drivers-pane" aria-selected="false">
-                <i class="bi bi-people me-1"></i> Drivers Directory ({{ $drivers->count() }})
+                <i class="bi bi-people me-1"></i> Driver Directory (Synced from Team 9)
             </button>
         </li>
     </ul>
@@ -35,13 +41,13 @@
         <!-- Vehicles List Tab -->
         <div class="tab-pane fade show active" id="vehicles-pane" role="tabpanel" aria-labelledby="vehicles-tab" tabindex="0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle" id="vehiclesTable">
                     <thead>
                         <tr class="text-muted" style="font-size: 13px;">
-                            <th>VEHICLE / CLASS</th>
+                            <th>VINFAST EV MODEL</th>
                             <th>PLATE NUMBER</th>
                             <th>YEAR</th>
-                            <th>FUEL TANK</th>
+                            <th>BATTERY CAPACITY</th>
                             <th>STATUS</th>
                             <th>ACTIONS</th>
                         </tr>
@@ -51,18 +57,20 @@
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-2">
-                                            <i class="bi bi-truck text-primary fs-5"></i>
+                                        <div class="bg-success bg-opacity-10 p-2 rounded-3 me-2">
+                                            <i class="bi bi-ev-front-fill text-success fs-5"></i>
                                         </div>
                                         <div>
-                                            <span class="fw-bold d-block">{{ $vehicle->make }} {{ $vehicle->model }}</span>
+                                            <span class="fw-bold d-block text-dark">{{ $vehicle->make }} {{ $vehicle->model }}</span>
                                             <small class="badge bg-secondary" style="font-size: 10px;">{{ $vehicle->type }}</small>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="fw-bold">{{ $vehicle->license_plate }}</td>
+                                <td class="fw-bold text-dark">{{ $vehicle->license_plate }}</td>
                                 <td>{{ $vehicle->year }}</td>
-                                <td>{{ $vehicle->fuel_capacity }} Liters</td>
+                                <td class="fw-bold text-success">
+                                    <i class="bi bi-battery-charging me-1"></i> {{ $vehicle->fuel_capacity }} kWh
+                                </td>
                                 <td>
                                     <span class="badge rounded-pill {{ $vehicle->status === 'active' ? 'bg-success' : ($vehicle->status === 'maintenance' ? 'bg-warning text-dark' : 'bg-secondary') }}">
                                         {{ ucfirst($vehicle->status) }}
@@ -92,7 +100,7 @@
                                             @csrf
                                             @method('PUT')
                                             <div class="modal-header bg-secondary text-white border-0">
-                                                <h5 class="modal-title fw-bold" id="editVehicleModalLabel{{ $vehicle->id }}">Edit Vehicle Details</h5>
+                                                <h5 class="modal-title fw-bold" id="editVehicleModalLabel{{ $vehicle->id }}">Edit VinFast EV Details</h5>
                                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body p-4">
@@ -114,17 +122,16 @@
                                                         <input type="number" name="year" value="{{ $vehicle->year }}" class="form-control rounded-3" required>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <label class="form-label" style="font-weight: 500;">Vehicle Type</label>
+                                                        <label class="form-label" style="font-weight: 500;">Vehicle Category</label>
                                                         <select name="type" class="form-select rounded-3" required>
-                                                            <option value="Sedan" {{ $vehicle->type === 'Sedan' ? 'selected' : '' }}>Sedan</option>
-                                                            <option value="SUV" {{ $vehicle->type === 'SUV' ? 'selected' : '' }}>SUV</option>
-                                                            <option value="Van" {{ $vehicle->type === 'Van' ? 'selected' : '' }}>Van</option>
-                                                            <option value="Hatchback" {{ $vehicle->type === 'Hatchback' ? 'selected' : '' }}>Hatchback</option>
-                                                            <option value="Truck" {{ $vehicle->type === 'Truck' ? 'selected' : '' }}>Truck</option>
+                                                            <option value="Sedan" {{ $vehicle->type === 'Sedan' ? 'selected' : '' }}>Sedan (Nerio Green)</option>
+                                                            <option value="SUV" {{ $vehicle->type === 'SUV' ? 'selected' : '' }}>SUV (VF 8 / VF 9)</option>
+                                                            <option value="Crossover" {{ $vehicle->type === 'Crossover' ? 'selected' : '' }}>Crossover (VF e34)</option>
+                                                            <option value="Hatchback" {{ $vehicle->type === 'Hatchback' ? 'selected' : '' }}>Compact (VF 5)</option>
                                                         </select>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <label class="form-label" style="font-weight: 500;">Fuel Capacity (L)</label>
+                                                        <label class="form-label" style="font-weight: 500;">Battery Storage (kWh)</label>
                                                         <input type="number" name="fuel_capacity" value="{{ $vehicle->fuel_capacity }}" step="0.1" class="form-control rounded-3" required>
                                                     </div>
                                                     <div class="col-12">
@@ -155,8 +162,12 @@
             </div>
         </div>
 
-        <!-- Drivers Tab -->
+        <!-- Drivers Tab (Team 9 Synced Read-Only View) -->
         <div class="tab-pane fade" id="drivers-pane" role="tabpanel" aria-labelledby="drivers-tab" tabindex="0">
+            <div class="alert alert-info border-0 rounded-3 small mb-3" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i> <strong>Note:</strong> Driver Registration & Account Management is handled by <strong>Team 9 (TNVS Operations & Driver Management System)</strong>. The roster below is a read-only directory synced via API.
+            </div>
+
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead>
@@ -212,41 +223,40 @@
         <div class="modal-content border-0">
             <form action="{{ route('vehicles.store') }}" method="POST">
                 @csrf
-                <div class="modal-header bg-primary text-white border-0">
-                    <h5 class="modal-title fw-bold" id="addVehicleModalLabel">Register New Vehicle</h5>
+                <div class="modal-header bg-success text-white border-0">
+                    <h5 class="modal-title fw-bold" id="addVehicleModalLabel"><i class="bi bi-ev-front me-2"></i> Register New VinFast EV</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 500;">Make (Brand)</label>
-                            <input type="text" name="make" placeholder="e.g. Toyota" class="form-control rounded-3" required>
+                            <input type="text" name="make" value="VinFast" class="form-control rounded-3" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 500;">Model (Name)</label>
-                            <input type="text" name="model" placeholder="e.g. Vios" class="form-control rounded-3" required>
+                            <input type="text" name="model" placeholder="e.g. Nerio Green / VF 8" class="form-control rounded-3" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 500;">License Plate</label>
-                            <input type="text" name="license_plate" placeholder="e.g. NBD-1234" class="form-control rounded-3" required>
+                            <input type="text" name="license_plate" placeholder="e.g. NGA-1029" class="form-control rounded-3" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 500;">Year</label>
-                            <input type="number" name="year" placeholder="e.g. 2023" class="form-control rounded-3" required>
+                            <input type="number" name="year" value="2026" class="form-control rounded-3" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label" style="font-weight: 500;">Vehicle Type</label>
+                            <label class="form-label" style="font-weight: 500;">Vehicle Category</label>
                             <select name="type" class="form-select rounded-3" required>
-                                <option value="Sedan" selected>Sedan</option>
-                                <option value="SUV">SUV</option>
-                                <option value="Van">Van</option>
-                                <option value="Hatchback">Hatchback</option>
-                                <option value="Truck">Truck</option>
+                                <option value="Sedan" selected>Sedan (Nerio Green)</option>
+                                <option value="SUV">SUV (VF 8 / VF 9)</option>
+                                <option value="Crossover">Crossover (VF e34)</option>
+                                <option value="Hatchback">Compact (VF 5)</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label" style="font-weight: 500;">Fuel Capacity (L)</label>
-                            <input type="number" name="fuel_capacity" placeholder="e.g. 42" step="0.1" class="form-control rounded-3" required>
+                            <label class="form-label" style="font-weight: 500;">Battery Storage (kWh)</label>
+                            <input type="number" name="fuel_capacity" placeholder="e.g. 42.0" step="0.1" class="form-control rounded-3" required>
                         </div>
                         <div class="col-12">
                             <label class="form-label" style="font-weight: 500;">Initial Status</label>
@@ -260,46 +270,60 @@
                 </div>
                 <div class="modal-footer border-0 p-3 bg-light">
                     <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-premium rounded-3">Register Vehicle</button>
+                    <button type="submit" class="btn btn-success rounded-3"><i class="bi bi-plus-circle me-1"></i> Register Vehicle</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+@endsection
 
-<!-- Add Driver Modal -->
-<div class="modal fade" id="addDriverModal" tabindex="-1" aria-labelledby="addDriverModalLabel" aria-hidden="true">
+@section('scripts')
+<script>
+function exportVehiclesToCSV() {
+    let csv = [];
+    const rows = document.querySelectorAll("#vehiclesTable tr");
+    
+    for (let i = 0; i < rows.length; i++) {
+        let row = [], cols = rows[i].querySelectorAll("td, th");
+        for (let j = 0; j < cols.length - 1; j++) // exclude ACTIONS column
+            row.push('"' + cols[j].innerText.replace(/"/g, '""').trim() + '"');
+        csv.push(row.join(","));
+    }
+
+    const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+    const downloadLink = document.createElement("a");
+    downloadLink.download = "Green_GSM_VinFast_EV_Fleet_Inventory.csv";
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+}
+</script>
+
+<!-- Import Vehicles CSV Modal -->
+<div class="modal fade" id="importVehiclesCsvModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog rounded-4 overflow-hidden">
         <div class="modal-content border-0">
-            <form action="{{ route('fleet.drivers.store') }}" method="POST">
+            <form action="{{ route('import.csv') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <div class="modal-header bg-dark text-white border-0">
-                    <h5 class="modal-title fw-bold" id="addDriverModalLabel">Register New Driver</h5>
+                <input type="hidden" name="module_type" value="vehicles">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-arrow-up me-2"></i> Import Fleet Inventory (CSV)</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label" style="font-weight: 500;">Driver Full Name</label>
-                            <input type="text" name="name" placeholder="e.g. Juan Dela Cruz" class="form-control rounded-3" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" style="font-weight: 500;">Email Address</label>
-                            <input type="email" name="email" placeholder="e.g. juan@gmail.com" class="form-control rounded-3" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label" style="font-weight: 500;">Password</label>
-                            <input type="password" name="password" placeholder="At least 6 chars" class="form-control rounded-3" required>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label" style="font-weight: 500;">Professional License Number</label>
-                            <input type="text" name="license_number" placeholder="e.g. N01-99-999999" class="form-control rounded-3" required>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 500;">Select CSV File (.csv)</label>
+                        <input type="file" name="csv_file" accept=".csv, .txt" class="form-control rounded-3" required>
+                        <small class="text-muted mt-1 d-block">Expected columns: Make, Model, License Plate, Year, Category, Battery Capacity (kWh).</small>
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-3 bg-light">
                     <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-dark rounded-3">Register Driver</button>
+                    <button type="submit" class="btn btn-primary rounded-3"><i class="bi bi-cloud-upload me-1"></i> Import Fleet CSV</button>
                 </div>
             </form>
         </div>

@@ -3,8 +3,19 @@
 @section('content')
 <div class="row align-items-center mb-4">
     <div class="col">
-        <h2 class="page-header-title">Scheduling & Live Tracking Dispatch</h2>
-        <p class="page-header-subtitle">Auto-dispatch available units, plan optimized eco-routes, and monitor live trips.</p>
+        <h2 class="page-header-title">Driver and Trip Performance Monitoring</h2>
+        <p class="page-header-subtitle">Auto-dispatch available VinFast EV units, plan optimized eco-routes, and monitor live trips.</p>
+    </div>
+    <div class="col-auto d-flex gap-2 flex-wrap">
+        <button class="btn btn-outline-success rounded-3" onclick="exportTripsToCSV();">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
+        </button>
+        <button class="btn btn-outline-primary rounded-3" data-bs-toggle="modal" data-bs-target="#importTripsCsvModal">
+            <i class="bi bi-file-earmark-arrow-up me-1"></i> Import CSV
+        </button>
+        <button class="btn btn-outline-dark rounded-3" onclick="window.print();">
+            <i class="bi bi-printer me-1"></i> Print / PDF
+        </button>
     </div>
 </div>
 
@@ -718,5 +729,52 @@
         const completeModal = bootstrap.Modal.getOrCreateInstance(completeModalElement);
         completeModal.show();
     }
+
+    function exportTripsToCSV() {
+        let csv = [];
+        const rows = document.querySelectorAll("table tr");
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll("td, th");
+            for (let j = 0; j < cols.length; j++) 
+                row.push('"' + cols[j].innerText.replace(/"/g, '""').trim() + '"');
+            csv.push(row.join(","));
+        }
+
+        const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+        const downloadLink = document.createElement("a");
+        downloadLink.download = "Green_GSM_Driver_and_Trip_Dispatches.csv";
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
 </script>
+
+<!-- Import Trips CSV Modal -->
+<div class="modal fade" id="importTripsCsvModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog rounded-4 overflow-hidden">
+        <div class="modal-content border-0">
+            <form action="{{ route('import.csv') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="module_type" value="trips">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-arrow-up me-2"></i> Import Trip Dispatches (CSV)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 500;">Select CSV File (.csv)</label>
+                        <input type="file" name="csv_file" accept=".csv, .txt" class="form-control rounded-3" required>
+                        <small class="text-muted mt-1 d-block">Expected columns: Start Hub, Destination, Distance (km), Estimated kWh, Duration (min).</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 bg-light">
+                    <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-3"><i class="bi bi-cloud-upload me-1"></i> Import Trips CSV</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection

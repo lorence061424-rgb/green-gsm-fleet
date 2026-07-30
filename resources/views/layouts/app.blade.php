@@ -302,22 +302,22 @@
                 <i class="bi bi-grid-1x2-fill"></i> Dashboard
             </a>
             <a href="{{ route('vehicles.index') }}" class="sidebar-nav-link {{ Route::is('vehicles.*') ? 'active' : '' }}">
-                <i class="bi bi-truck"></i> Fleet & Vehicles (FVM)
+                <i class="bi bi-truck"></i> Fleet and Vehicle Management
             </a>
             <a href="{{ route('reservations.index') }}" class="sidebar-nav-link {{ Route::is('reservations.*') ? 'active' : '' }}">
-                <i class="bi bi-calendar-event"></i> Reservations (VRDS)
+                <i class="bi bi-calendar-event"></i> Vehicle Reservation and Dispatch
             </a>
             <a href="{{ route('trips.index') }}" class="sidebar-nav-link {{ Route::is('trips.*') ? 'active' : '' }}">
-                <i class="bi bi-geo-alt"></i> Dispatch & Tracking
+                <i class="bi bi-geo-alt"></i> Driver and Trip Performance Monitoring
             </a>
             <a href="{{ route('fuel.index') }}" class="sidebar-nav-link {{ Route::is('fuel.*') ? 'active' : '' }}">
-                <i class="bi bi-fuel-pump"></i> Fuel & AI Prediction
+                <i class="bi bi-fuel-pump"></i> Fuel Management System
             </a>
             <a href="{{ route('cost-analysis.index') }}" class="sidebar-nav-link {{ Route::is('cost-analysis.*') ? 'active' : '' }}">
-                <i class="bi bi-graph-up-arrow"></i> Cost Analysis (TCAO)
+                <i class="bi bi-graph-up-arrow"></i> Transport Cost Analysis
             </a>
             <a href="{{ route('maintenance.index') }}" class="sidebar-nav-link {{ Route::is('maintenance.*') ? 'active' : '' }}">
-                <i class="bi bi-wrench-adjustable"></i> Maintenance Records
+                <i class="bi bi-compass"></i> Route Planning and Optimization
             </a>
         </nav>
     </div>
@@ -340,22 +340,22 @@
                     <i class="bi bi-grid-1x2-fill"></i> Dashboard
                 </a>
                 <a href="{{ route('vehicles.index') }}" class="sidebar-nav-link {{ Route::is('vehicles.*') ? 'active' : '' }}">
-                    <i class="bi bi-truck"></i> Fleet & Vehicles (FVM)
+                    <i class="bi bi-truck"></i> Fleet and Vehicle Management
                 </a>
                 <a href="{{ route('reservations.index') }}" class="sidebar-nav-link {{ Route::is('reservations.*') ? 'active' : '' }}">
-                    <i class="bi bi-calendar-event"></i> Reservations (VRDS)
+                    <i class="bi bi-calendar-event"></i> Vehicle Reservation and Dispatch
                 </a>
                 <a href="{{ route('trips.index') }}" class="sidebar-nav-link {{ Route::is('trips.*') ? 'active' : '' }}">
-                    <i class="bi bi-geo-alt"></i> Dispatch & Tracking
+                    <i class="bi bi-geo-alt"></i> Driver and Trip Performance Monitoring
                 </a>
                 <a href="{{ route('fuel.index') }}" class="sidebar-nav-link {{ Route::is('fuel.*') ? 'active' : '' }}">
-                    <i class="bi bi-fuel-pump"></i> Fuel & AI Prediction
+                    <i class="bi bi-fuel-pump"></i> Fuel Management System
                 </a>
                 <a href="{{ route('cost-analysis.index') }}" class="sidebar-nav-link {{ Route::is('cost-analysis.*') ? 'active' : '' }}">
-                    <i class="bi bi-graph-up-arrow"></i> Cost Analysis (TCAO)
+                    <i class="bi bi-graph-up-arrow"></i> Transport Cost Analysis
                 </a>
                 <a href="{{ route('maintenance.index') }}" class="sidebar-nav-link {{ Route::is('maintenance.*') ? 'active' : '' }}">
-                    <i class="bi bi-wrench-adjustable"></i> Maintenance Records
+                    <i class="bi bi-compass"></i> Route Planning and Optimization
                 </a>
             </nav>
         </div>
@@ -367,8 +367,8 @@
         <!-- Mobile Top Header Bar (Shown only on mobile/tablets) -->
         <div class="mobile-header-bar">
             <div class="d-flex align-items-center">
-                <button class="btn btn-sm btn-outline-light me-3 border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
-                    <i class="bi bi-list fs-3"></i>
+                <button class="btn btn-success text-white me-3 border-0 shadow-sm rounded-3 px-2 py-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" style="background: #10B981 !important; z-index: 10;">
+                    <i class="bi bi-list fs-2 text-white fw-bold"></i>
                 </button>
                 <div>
                     <span class="fw-bold d-block text-white" style="font-size: 14px;">GREEN GSM FLEET</span>

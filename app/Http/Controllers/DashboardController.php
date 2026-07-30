@@ -71,4 +71,66 @@ class DashboardController extends Controller
             'topDrivers', 'vinfastFleet', 'fuelByType', 'costHistory', 'pendingMaintenance'
         ));
     }
+
+    /**
+     * Import dataset (CSV / JSON) into system database
+     */
+    public function importData(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'import_file' => 'required|file|max:5048',
+            'import_type' => 'required|string',
+        ]);
+
+        $file = $request->file('import_file');
+        $type = $request->get('import_type', 'vehicles');
+        $extension = strtolower($file->getClientOriginalExtension());
+        $count = 0;
+
+        if ($extension === 'json') {
+            $data = json_decode(file_get_contents($file->getRealPath()), true);
+            if (is_array($data)) {
+                foreach ($data as $item) {
+                    if ($type === 'vehicles' && isset($item['license_plate'])) {
+                        Vehicle::updateOrCreate(
+                            ['license_plate' => $item['license_plate']],
+                            [
+                                'make' => $item['make'] ?? 'VinFast',
+                                'model' => $item['model'] ?? 'Nerio Green',
+                                'year' => $item['year'] ?? 2026,
+                                'type' => $item['type'] ?? 'Sedan',
+                                'fuel_capacity' => $item['fuel_capacity'] ?? 42.0,
+                                'status' => $item['status'] ?? 'active',
+                            ]
+                        );
+                        $count++;
+                    }
+                }
+            }
+        } else {
+            $handle = fopen($file->getRealPath(), 'r');
+            $header = fgetcsv($handle);
+            while (($row = fgetcsv($handle)) !== false) {
+                if (count($row) >= 2) {
+                    if ($type === 'vehicles') {
+                        Vehicle::updateOrCreate(
+                            ['license_plate' => trim($row[1] ?? $row[0])],
+                            [
+                                'make' => trim($row[0] ?? 'VinFast'),
+                                'model' => trim($row[1] ?? 'Nerio Green'),
+                                'year' => intval($row[2] ?? 2026),
+                                'type' => trim($row[3] ?? 'Sedan'),
+                                'fuel_capacity' => floatval($row[4] ?? 42.0),
+                                'status' => 'active',
+                            ]
+                        );
+                        $count++;
+                    }
+                }
+            }
+            fclose($handle);
+        }
+
+        return redirect()->back()->with('success', "Import successful! Processed {$count} records into system database.");
+    }
 }

@@ -10,7 +10,16 @@
         <h2 class="page-header-title mt-1">Green GSM Fleet Analytics Dashboard</h2>
         <p class="page-header-subtitle">Real-time performance metrics, VinFast EV fleet status, and AI energy predictions.</p>
     </div>
-    <div class="col-auto">
+    <div class="col-auto d-flex gap-2 flex-wrap">
+        <button class="btn btn-outline-success rounded-3" onclick="exportDashboardToCSV();">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
+        </button>
+        <button class="btn btn-outline-dark rounded-3" onclick="window.print();">
+            <i class="bi bi-printer me-1"></i> Print / PDF Report
+        </button>
+        <button class="btn btn-outline-primary rounded-3" data-bs-toggle="modal" data-bs-target="#importDataModal">
+            <i class="bi bi-file-earmark-arrow-up me-1"></i> Import Data File
+        </button>
         <button class="btn btn-premium d-flex align-items-center" onclick="window.location.reload();">
             <i class="bi bi-arrow-clockwise me-1"></i> Refresh Data
         </button>
@@ -378,7 +387,70 @@
                 }
             },
             cutout: '70%'
-        }
     });
+
+    function exportDashboardToCSV() {
+        let csv = [];
+        const tables = document.querySelectorAll("table");
+        tables.forEach((table, index) => {
+            csv.push(`"--- TABLE ${index + 1} ---"`);
+            const rows = table.querySelectorAll("tr");
+            for (let i = 0; i < rows.length; i++) {
+                let row = [], cols = rows[i].querySelectorAll("td, th");
+                for (let j = 0; j < cols.length; j++) 
+                    row.push('"' + cols[j].innerText.replace(/"/g, '""').trim() + '"');
+                csv.push(row.join(","));
+            }
+            csv.push("");
+        });
+
+        const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+        const downloadLink = document.createElement("a");
+        downloadLink.download = "Green_GSM_Fleet_Analytics_Dashboard.csv";
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
 </script>
+
+<!-- Import Data Modal -->
+<div class="modal fade" id="importDataModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog rounded-4 overflow-hidden">
+        <div class="modal-content border-0">
+            <form action="{{ route('import.data') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-arrow-up me-2"></i> Import System Data (CSV / JSON)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 500;">Select Target Dataset Category</label>
+                        <select name="import_type" class="form-select rounded-3" required>
+                            <option value="vehicles" selected>VinFast EV Fleet Inventory (Vehicles)</option>
+                            <option value="fuel">EV Energy & Charging Logs (kWh)</option>
+                            <option value="trips">Driver & Trip Dispatches</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 500;">Choose Data File (.csv or .json)</label>
+                        <input type="file" name="import_file" accept=".csv, .json, .txt" class="form-control rounded-3" required>
+                        <small class="text-muted mt-1 d-block">Supported formats: Standard CSV or structured JSON arrays.</small>
+                    </div>
+
+                    <div class="alert alert-info border-0 rounded-3 small mb-0">
+                        <i class="bi bi-info-circle-fill me-1"></i> Data will be parsed and safely updated into system records based on vehicle license plate / ID mapping.
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 bg-light">
+                    <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-3"><i class="bi bi-cloud-upload me-1"></i> Start Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection

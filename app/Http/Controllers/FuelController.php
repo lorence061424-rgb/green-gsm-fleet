@@ -18,11 +18,11 @@ class FuelController extends Controller
 
     public function index()
     {
-        $fuelLogs = FuelLog::with(['vehicle', 'trip'])->latest()->get();
+        $logs = FuelLog::with(['vehicle', 'trip'])->latest()->get();
         $vehicles = Vehicle::all();
         $weights = $this->fuelPredictionService->getWeights();
 
-        return view('fuel.index', compact('fuelLogs', 'vehicles', 'weights'));
+        return view('fuel.index', ['logs' => $logs, 'fuelLogs' => $logs, 'vehicles' => $vehicles, 'weights' => $weights]);
     }
 
     public function store(Request $request)

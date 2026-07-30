@@ -7,21 +7,18 @@ use App\Models\Trip;
 
 class FuelPredictionService
 {
-    // Model parameters: intercept, weight_distance, weight_speed
-    // We also use a multiplier based on vehicle type (Sedan=1.0, SUV=1.3, Van=1.6, Hatchback=0.8, Truck=2.2)
+    // Model parameters for VinFast EV Battery Energy (kWh)
     private $weights = [
         'intercept' => 0.5,
-        'distance' => 0.08,    // 8L/100km base rate (0.08 liters per km)
+        'distance' => 0.12,    // ~12 kWh per 100km base energy rate
         'speed' => 0.0005,     // Speed factor
     ];
 
     /**
-     * Train the linear regression model on historical completed trips that have fuel logs.
-     * We'll run a few iterations of Gradient Descent to update the weights based on actual data!
+     * Train the linear regression model on historical completed trips that have fuel/kWh logs.
      */
     public function trainModel(): array
     {
-        // Get completed trips that have actual_fuel_liters and actual duration/speed
         $trips = Trip::where('status', 'completed')
             ->whereNotNull('actual_fuel_liters')
             ->whereNotNull('actual_duration_minutes')
@@ -31,17 +28,15 @@ class FuelPredictionService
         if ($trips->count() < 5) {
             return [
                 'success' => false,
-                'message' => 'Insufficient data. Need at least 5 completed trips with fuel logs to train.'
+                'message' => 'Insufficient data. Need at least 5 completed trips with energy logs to train.'
             ];
         }
 
-        // Format data: feature array and target array
         $samples = [];
         foreach ($trips as $trip) {
             $avgSpeed = ($trip->distance_km / ($trip->actual_duration_minutes / 60));
             $typeMultiplier = $this->getVehicleTypeMultiplier($trip->vehicle->type ?? 'Sedan');
             
-            // Adjust fuel by the type multiplier to normalize features
             $normalizedFuel = $trip->actual_fuel_liters / $typeMultiplier;
 
             $samples[] = [
@@ -51,8 +46,7 @@ class FuelPredictionService
             ];
         }
 
-        // Simple Multi-variable Gradient Descent
-        $lr = 0.0001; // Learning rate
+        $lr = 0.0001;
         $epochs = 1500;
 
         $w0 = $this->weights['intercept'];
@@ -75,51 +69,42 @@ class FuelPredictionService
                 $grad_w2 += $error * $sample['speed'];
             }
 
-            // Update weights using gradients
             $w0 -= $lr * ($grad_w0 / $n);
             $w1 -= $lr * ($grad_w1 / $n);
             $w2 -= $lr * ($grad_w2 / $n);
         }
 
-        // Save the updated weights
         $this->weights['intercept'] = max(0.01, $w0);
         $this->weights['distance'] = max(0.01, $w1);
         $this->weights['speed'] = max(0.00001, $w2);
 
-        // Store weights in Laravel cache to persist them!
         cache(['ai_fuel_weights' => $this->weights], now()->addYears(1));
 
         return [
             'success' => true,
             'weights' => $this->weights,
-            'message' => 'Model trained successfully on ' . $n . ' trips.'
+            'message' => 'AI EV Energy Model trained successfully on ' . $n . ' completed rides.'
         ];
     }
 
-    /**
-     * Get weights, loading from cache if trained.
-     */
     public function getWeights()
     {
         return cache('ai_fuel_weights', $this->weights);
     }
 
     /**
-     * Predict fuel usage.
+     * Predict EV battery energy usage in Kilowatt-Hours (kWh).
      */
     public function predict(float $distance, float $avgSpeed, string $vehicleType): float
     {
         $weights = $this->getWeights();
         $typeMultiplier = $this->getVehicleTypeMultiplier($vehicleType);
 
-        // Speed efficiency penalty:
-        // Optimal speed for fuel economy is usually 60-80 km/h.
-        // Speeds lower than 30 km/h (heavy traffic/idling) or higher than 90 km/h (high drag) consume more.
         $speedFactor = 1.0;
         if ($avgSpeed > 90) {
-            $speedFactor = 1.0 + (($avgSpeed - 90) * 0.012); // high drag penalty
+            $speedFactor = 1.0 + (($avgSpeed - 90) * 0.012);
         } elseif ($avgSpeed < 30) {
-            $speedFactor = 1.0 + ((30 - $avgSpeed) * 0.025); // idling/traffic penalty
+            $speedFactor = 1.0 + ((30 - $avgSpeed) * 0.025);
         }
 
         $predicted = ($weights['intercept'] + 
@@ -131,17 +116,16 @@ class FuelPredictionService
     }
 
     /**
-     * Get multiplier based on vehicle type
+     * Get multiplier based on VinFast EV model category
      */
     public function getVehicleTypeMultiplier(string $type): float
     {
         return match ($type) {
-            'Hatchback' => 0.8,
-            'Sedan' => 1.0,
-            'Crossover' => 1.1,
-            'SUV' => 1.3,
-            'Van' => 1.6,
-            'Truck' => 2.2,
+            'VF 5', 'Hatchback', 'Compact' => 0.85,
+            'Nerio Green', 'Sedan' => 1.0,
+            'VF e34', 'Crossover' => 1.1,
+            'VF 8', 'SUV' => 1.35,
+            'VF 9', 'Van', 'Truck' => 1.6,
             default => 1.0,
         };
     }
@@ -154,24 +138,22 @@ class FuelPredictionService
         $predicted = $this->predict($distance, $avgSpeed, $vehicleType);
         $insights = [];
 
-        // Check speed efficiency
         if ($avgSpeed < 30) {
-            $insights[] = "Heavy traffic or excessive idling detected. Suggest routes with fewer traffic signals or dispatch outside peak hours.";
+            $insights[] = "Heavy traffic or excessive idling detected. Recommend eco-routing to bypass traffic signals.";
         } elseif ($avgSpeed > 90) {
-            $insights[] = "High speed detected. Driving above 90 km/h increases aerodynamic drag. Advise driver to maintain speeds between 60-80 km/h for optimal fuel efficiency.";
+            $insights[] = "High speed detected. Speeds above 90 km/h increase aerodynamic drag. Advise driver to maintain speeds between 60-80 km/h for optimal EV battery range.";
         } else {
-            $insights[] = "Average speed was within the optimal fuel efficiency range (60-80 km/h).";
+            $insights[] = "Average speed was within optimal EV battery efficiency range (60-80 km/h).";
         }
 
-        // Compare actual vs predicted if actual fuel is logged
         $isInefficient = false;
         if ($actualFuel !== null) {
             $deviation = (($actualFuel - $predicted) / $predicted) * 100;
             if ($deviation > 15) {
                 $isInefficient = true;
-                $insights[] = sprintf("Actual fuel usage was %.1f%% higher than predicted. This could indicate aggressive driving (harsh acceleration/braking) or maintenance issues.", $deviation);
+                $insights[] = sprintf("Actual energy usage was %.1f%% higher than predicted. This could indicate aggressive acceleration or HVAC overload.", $deviation);
             } elseif ($deviation < -15) {
-                $insights[] = sprintf("Actual fuel usage was %.1f%% lower than predicted. Driver displayed highly efficient driving habits.", abs($deviation));
+                $insights[] = sprintf("Actual energy usage was %.1f%% lower than predicted. Driver displayed optimal eco-driving habits.", abs($deviation));
             }
         }
 
@@ -180,9 +162,9 @@ class FuelPredictionService
             'is_inefficient' => $isInefficient,
             'insights' => $insights,
             'recommendations' => [
-                "Ensure tires are inflated to the recommended PSI (saves up to 3% fuel).",
-                "Minimize engine idling. Idle for more than 10 seconds uses more fuel than restarting the engine.",
-                "Smooth accelerations: Avoid stomping on the pedal."
+                "Optimize regenerative braking mode to recapture up to 12% energy during deceleration.",
+                "Ensure tire pressure is maintained at recommended PSI levels to reduce rolling resistance.",
+                "Smooth accelerations: Maintain steady speed to optimize VinFast EV battery pack range."
             ]
         ];
     }

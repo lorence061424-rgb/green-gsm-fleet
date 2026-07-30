@@ -1,13 +1,22 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="page-header-title">Vehicle Reservation & Dispatch System (VRDS)</h2>
-        <p class="page-header-subtitle">Schedule, approve, and track vehicle bookings for ride-hailing and fleet dispatches.</p>
+<div class="row align-items-center mb-4">
+    <div class="col">
+        <h2 class="page-header-title">Vehicle Reservation and Dispatch</h2>
+        <p class="page-header-subtitle">Schedule, approve, and track VinFast EV vehicle bookings for dispatches.</p>
     </div>
-    <div>
-        <button class="btn btn-primary rounded-3 px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#newReservationModal">
+    <div class="col-auto d-flex gap-2 flex-wrap">
+        <button class="btn btn-outline-success rounded-3" onclick="exportReservationsToCSV();">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
+        </button>
+        <button class="btn btn-outline-primary rounded-3" data-bs-toggle="modal" data-bs-target="#importReservationsCsvModal">
+            <i class="bi bi-file-earmark-arrow-up me-1"></i> Import CSV
+        </button>
+        <button class="btn btn-outline-dark rounded-3" onclick="window.print();">
+            <i class="bi bi-printer me-1"></i> Print / PDF
+        </button>
+        <button class="btn btn-premium rounded-3 px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#newReservationModal">
             <i class="bi bi-plus-circle me-1"></i> New Vehicle Reservation
         </button>
     </div>
@@ -311,5 +320,52 @@ function checkAvailability() {
             }
         });
 }
+
+function exportReservationsToCSV() {
+    let csv = [];
+    const rows = document.querySelectorAll("table tr");
+    for (let i = 0; i < rows.length; i++) {
+        let row = [], cols = rows[i].querySelectorAll("td, th");
+        for (let j = 0; j < cols.length - 1; j++) // Exclude ACTIONS column
+            row.push('"' + cols[j].innerText.replace(/"/g, '""').trim() + '"');
+        csv.push(row.join(","));
+    }
+
+    const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+    const downloadLink = document.createElement("a");
+    downloadLink.download = "Green_GSM_Vehicle_Reservations_and_Dispatch.csv";
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
 </script>
+
+<!-- Import Reservations CSV Modal -->
+<div class="modal fade" id="importReservationsCsvModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog rounded-4 overflow-hidden">
+        <div class="modal-content border-0">
+            <form action="{{ route('import.csv') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="module_type" value="reservations">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-arrow-up me-2"></i> Import Vehicle Reservations (CSV)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 500;">Select CSV File (.csv)</label>
+                        <input type="file" name="csv_file" accept=".csv, .txt" class="form-control rounded-3" required>
+                        <small class="text-muted mt-1 d-block">Expected columns: Purpose/Title, Vehicle Plate, Start Time, End Time.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 bg-light">
+                    <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-3"><i class="bi bi-cloud-upload me-1"></i> Import Reservations CSV</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection

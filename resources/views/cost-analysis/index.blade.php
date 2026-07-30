@@ -1,12 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="page-header-title">Transport Cost Analysis & Optimization (TCAO)</h2>
+<div class="row align-items-center mb-4">
+    <div class="col">
+        <h2 class="page-header-title">Transport Cost Analysis</h2>
         <p class="page-header-subtitle">Analyze fleet operational costs per kilometer, driver cost efficiency, and AI savings recommendations.</p>
     </div>
-    <div>
+    <div class="col-auto d-flex gap-2 flex-wrap">
+        <button class="btn btn-outline-success rounded-3" onclick="exportTcaoToCSV();">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
+        </button>
+        <button class="btn btn-outline-primary rounded-3" data-bs-toggle="modal" data-bs-target="#importTcaoCsvModal">
+            <i class="bi bi-file-earmark-arrow-up me-1"></i> Import CSV
+        </button>
+        <button class="btn btn-outline-dark rounded-3" onclick="window.print();">
+            <i class="bi bi-printer me-1"></i> Print / PDF
+        </button>
         <span class="badge bg-primary px-3 py-2 fs-6 rounded-pill"><i class="bi bi-cpu me-1"></i> AI Optimization Active</span>
     </div>
 </div>
@@ -186,6 +195,57 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@section('scripts')
+<script>
+function exportTcaoToCSV() {
+    let csv = [];
+    const rows = document.querySelectorAll("table tr");
+    for (let i = 0; i < rows.length; i++) {
+        let row = [], cols = rows[i].querySelectorAll("td, th");
+        for (let j = 0; j < cols.length; j++) 
+            row.push('"' + cols[j].innerText.replace(/"/g, '""').trim() + '"');
+        csv.push(row.join(","));
+    }
+
+    const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+    const downloadLink = document.createElement("a");
+    downloadLink.download = "Green_GSM_Transport_Cost_Analysis_TCAO.csv";
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+</script>
+
+<!-- Import TCAO CSV Modal -->
+<div class="modal fade" id="importTcaoCsvModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog rounded-4 overflow-hidden">
+        <div class="modal-content border-0">
+            <form action="{{ route('import.csv') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="module_type" value="fuel">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-arrow-up me-2"></i> Import Transport Cost Logs (CSV)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 500;">Select CSV File (.csv)</label>
+                        <input type="file" name="csv_file" accept=".csv, .txt" class="form-control rounded-3" required>
+                        <small class="text-muted mt-1 d-block">Expected columns: Date, Vehicle Plate, kWh Used, Cost (₱), Maintenance Expense.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 bg-light">
+                    <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-3"><i class="bi bi-cloud-upload me-1"></i> Import TCAO CSV</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

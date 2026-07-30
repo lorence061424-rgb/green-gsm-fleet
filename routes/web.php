@@ -18,8 +18,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // All Protected Internal Routes (Require Active Login Session)
 Route::middleware(['role'])->group(function () {
 
-    // Dashboard
+    // Dashboard & Data Import
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/import-data', [DashboardController::class, 'importData'])->name('import.data');
+    Route::post('/import/csv', [\App\Http\Controllers\ImportController::class, 'importCsv'])->name('import.csv');
     Route::get('/switch-role', [AuthController::class, 'switchRole'])->name('switch-role');
 
     // Fleet Management (FVM)

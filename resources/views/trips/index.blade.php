@@ -272,10 +272,10 @@
                                 $score = $drv->safety_score ?? 95;
                                 $statusClass = $drv->status == 'available' ? 'bg-success' : ($drv->status == 'on_trip' ? 'bg-primary' : 'bg-secondary');
                                 $tierBadge = $score >= 90 
-                                    ? '<span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-30 px-2 py-1"><i class="bi bi-leaf-fill me-1"></i> Tier 1: Master Eco-Driver</span>' 
+                                    ? '<span class="badge bg-success text-white px-3 py-2 rounded-3 shadow-sm fw-bold"><i class="bi bi-leaf-fill me-1"></i> Tier 1: Master Eco-Driver</span>' 
                                     : ($score >= 75 
-                                        ? '<span class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-30 px-2 py-1"><i class="bi bi-shield-check me-1"></i> Tier 2: Standard Driver</span>' 
-                                        : '<span class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-30 px-2 py-1"><i class="bi bi-exclamation-triangle-fill me-1"></i> Tier 3: Re-Training Flagged</span>');
+                                        ? '<span class="badge bg-info text-white px-3 py-2 rounded-3 shadow-sm fw-bold"><i class="bi bi-shield-check me-1"></i> Tier 2: Standard Driver</span>' 
+                                        : '<span class="badge bg-danger text-white px-3 py-2 rounded-3 shadow-sm fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i> Tier 3: Re-Training Flagged</span>');
                                 $speedAlerts = rand(0, 2);
                             @endphp
                             <tr class="driver-row" data-status="{{ $score < 75 ? 'flagged' : $drv->status }}">

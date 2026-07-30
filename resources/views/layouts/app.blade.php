@@ -428,14 +428,39 @@
                         <li><a class="dropdown-item {{ $currentRole == 'operations' ? 'active' : '' }}" href="{{ route('switch-role', ['role' => 'operations']) }}"><i class="bi bi-speedometer2 me-2"></i> Operations Manager</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                            <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                                @csrf
-                                <button type="submit" class="dropdown-item text-danger fw-semibold">
-                                    <i class="bi bi-box-arrow-right me-2"></i> Logout
-                                </button>
-                            </form>
+                            <button type="button" class="dropdown-item text-danger fw-semibold" data-bs-toggle="modal" data-bs-target="#logoutConfirmationModal">
+                                <i class="bi bi-box-arrow-right me-2"></i> Logout
+                            </button>
                         </li>
                     </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logout Confirmation Modal -->
+        <div class="modal fade" id="logoutConfirmationModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow">
+                    <div class="modal-header border-0 bg-danger text-white rounded-top-4">
+                        <h5 class="modal-title fw-bold"><i class="bi bi-box-arrow-right me-2"></i> Confirm Logout</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4 text-center">
+                        <div class="bg-danger bg-opacity-10 text-danger p-3 rounded-circle d-inline-flex mb-3">
+                            <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark">Are you sure you want to log out?</h6>
+                        <p class="text-muted small mb-0">Your active session will be ended, and you will return to the sign-in portal.</p>
+                    </div>
+                    <div class="modal-footer border-0 p-3 bg-light rounded-bottom-4">
+                        <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
+                        <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-danger rounded-3 px-4 fw-bold">
+                                <i class="bi bi-box-arrow-right me-1"></i> Yes, Log Out
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

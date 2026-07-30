@@ -387,6 +387,7 @@
                 }
             },
             cutout: '70%'
+        }
     });
 
     function exportDashboardToCSV() {

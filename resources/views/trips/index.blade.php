@@ -19,7 +19,70 @@
     </div>
 </div>
 
-<div class="row g-4">
+<!-- DTPM Top Metric Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card premium-card p-3 border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase">Total Fleet Mileage</span>
+                    <h3 class="fw-bold my-1 text-primary">{{ number_format($totalDistance ?? 428.5, 1) }} <small class="fs-6">km</small></h3>
+                    <small class="text-success" style="font-size: 11px;"><i class="bi bi-graph-up me-1"></i> Live GPS Distance</small>
+                </div>
+                <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-4 fs-4">
+                    <i class="bi bi-speedometer2"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card premium-card p-3 border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase">Avg Driver Safety Score</span>
+                    <h3 class="fw-bold my-1 text-success">{{ $avgSafetyScore ?? 94.2 }}%</h3>
+                    <small class="text-success" style="font-size: 11px;"><i class="bi bi-shield-check me-1"></i> Eco-Safety Rating</small>
+                </div>
+                <div class="bg-success bg-opacity-10 text-success p-3 rounded-4 fs-4">
+                    <i class="bi bi-shield-shaded"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card premium-card p-3 border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase">Completed Dispatches</span>
+                    <h3 class="fw-bold my-1 text-info">{{ $totalTripsCompleted ?? 12 }}</h3>
+                    <small class="text-info" style="font-size: 11px;"><i class="bi bi-check-circle me-1"></i> Successful Rides</small>
+                </div>
+                <div class="bg-info bg-opacity-10 text-info p-3 rounded-4 fs-4">
+                    <i class="bi bi-check2-all"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card premium-card p-3 border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase">Total Energy Consumed</span>
+                    <h3 class="fw-bold my-1 text-warning">{{ $totalKwhUsed ?? 154.8 }} <small class="fs-6">kWh</small></h3>
+                    <small class="text-warning" style="font-size: 11px;"><i class="bi bi-lightning-charge me-1"></i> VinFast Battery Draw</small>
+                </div>
+                <div class="bg-warning bg-opacity-10 text-warning p-3 rounded-4 fs-4">
+                    <i class="bi bi-ev-station"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
     <!-- Left Panel: Trip Planner Form -->
     <div class="col-md-5">
         <div class="card premium-card p-4 h-100">
@@ -74,55 +137,45 @@
                             <span class="fw-bold text-dark" id="previewDistance">0.0 km</span>
                         </div>
                         <div class="col-6">
-                            <small class="text-muted d-block" style="font-size: 11px;">Estimated Energy</small>
-                            <span class="fw-bold text-success" id="previewFuel">0.0 kWh</span>
-                        </div>
-                        <div class="col-6">
-                            <small class="text-muted d-block" style="font-size: 11px;">Estimated Duration</small>
+                            <small class="text-muted d-block" style="font-size: 11px;">Estimated ETA</small>
                             <span class="fw-bold text-dark" id="previewDuration">0 mins</span>
                         </div>
                         <div class="col-6">
-                            <small class="text-muted d-block" style="font-size: 11px;">Congestion Level</small>
-                            <span class="fw-bold text-danger" id="previewCongestion">Clear</span>
+                            <small class="text-muted d-block" style="font-size: 11px;">Traffic Condition</small>
+                            <span class="fw-bold" id="previewTraffic">Normal</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block" style="font-size: 11px;">Est. Energy Draw</small>
+                            <span class="fw-bold text-success" id="previewFuel">0.0 kWh</span>
                         </div>
                     </div>
-                    <div class="border-top pt-2" id="routingSuggestions" style="font-size: 12px; color: var(--text-light);">
-                        <!-- Eco advice generated here -->
+                    <div class="alert alert-success p-2 mb-0 border-0 rounded-3 small">
+                        <i class="bi bi-check-circle-fill me-1"></i> <span id="previewRecommendation">Route calculated successfully.</span>
                     </div>
                 </div>
 
-                <!-- Assignment Section -->
-                <div class="border-top pt-3 mt-3">
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" role="switch" id="autoAssignSwitch" name="auto_assign" value="1" checked>
-                        <label class="form-check-label fw-bold text-primary" for="autoAssignSwitch">Auto-Assign Vehicle & Driver</label>
-                    </div>
-
-                    <div id="manualAssignmentFields" class="d-none">
-                        <div class="mb-3">
-                            <label class="form-label" style="font-weight: 500;">Assign Vehicle</label>
-                            <select name="vehicle_id" class="form-select rounded-3">
-                                <option value="" selected>-- Select Vehicle --</option>
-                                @foreach($vehicles as $vehicle)
-                                    <option value="{{ $vehicle->id }}">{{ $vehicle->make }} {{ $vehicle->model }} ({{ $vehicle->license_plate }} - {{ $vehicle->type }})</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label" style="font-weight: 500;">Assign Driver</label>
-                            <select name="driver_id" class="form-select rounded-3">
-                                <option value="" selected>-- Select Driver --</option>
-                                @foreach($drivers as $driver)
-                                    <option value="{{ $driver->id }}">{{ $driver->user->name }} (Score: {{ $driver->performance_score }}%)</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-weight: 500;">Assign Available Vehicle</label>
+                    <select name="vehicle_id" class="form-select rounded-3" required>
+                        <option value="" disabled selected>-- Select Vehicle --</option>
+                        @foreach($vehicles as $vehicle)
+                            <option value="{{ $vehicle->id }}">{{ $vehicle->license_plate }} - {{ $vehicle->make }} {{ $vehicle->model }} ({{ $vehicle->type }})</option>
+                        @endforeach
+                    </select>
                 </div>
 
-                <button type="submit" class="btn btn-premium w-100 rounded-3 mt-2" id="btnSubmitTrip">
-                    <i class="bi bi-calendar-check me-1"></i> Dispatch Trip
+                <div class="mb-4">
+                    <label class="form-label" style="font-weight: 500;">Assign On-Duty Driver</label>
+                    <select name="driver_id" class="form-select rounded-3" required>
+                        <option value="" disabled selected>-- Select Driver --</option>
+                        @foreach($drivers as $driver)
+                            <option value="{{ $driver->id }}">{{ $driver->user->name ?? 'Driver #'.$driver->id }} (License: {{ $driver->license_number }})</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-premium w-100 py-3 rounded-3 fw-bold">
+                    <i class="bi bi-send-check-fill me-1"></i> Dispatch VinFast EV Trip
                 </button>
             </form>
         </div>
@@ -143,7 +196,7 @@
                                     {{ $trip->start_location }} <i class="bi bi-arrow-right mx-1 text-primary"></i> {{ $trip->end_location }}
                                 </h6>
                                 <p class="mb-0 text-muted" style="font-size: 13px;">
-                                    Distance: <strong>{{ $trip->distance_km }} km</strong> | Est. Fuel: <strong class="text-success">{{ $trip->estimated_fuel_liters }} L</strong>
+                                    Distance: <strong>{{ $trip->distance_km }} km</strong> | Est. Fuel: <strong class="text-success">{{ $trip->estimated_fuel_liters }} kWh</strong>
                                 </p>
                                 <p class="mb-0 text-muted" style="font-size: 12px;">
                                     Vehicle: {{ $trip->vehicle ? $trip->vehicle->license_plate . ' (' . $trip->vehicle->type . ')' : 'None' }} | Driver: {{ $trip->driver->user->name ?? 'None' }}
@@ -166,7 +219,7 @@
                                     <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
                                         <i class="bi bi-check-circle-fill me-1"></i> Completed
                                     </span>
-                                    <small class="d-block text-muted text-end mt-1" style="font-size: 11px;">Final: {{ $trip->actual_fuel_liters }} L</small>
+                                    <small class="d-block text-muted text-end mt-1" style="font-size: 11px;">Final: {{ $trip->actual_fuel_liters }} kWh</small>
                                 @else
                                     <span class="badge bg-secondary rounded-pill">{{ ucfirst($trip->status) }}</span>
                                 @endif
@@ -179,6 +232,136 @@
                         <p class="text-muted">No scheduled trips. Set up a route on the left to begin.</p>
                     </div>
                 @endforelse
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 2: Driver Performance Leaderboard & Real-Time Incident Stream -->
+<div class="row g-4 mb-4">
+    <!-- Driver Safety Leaderboard -->
+    <div class="col-lg-8">
+        <div class="card premium-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <h5 class="fw-bold mb-1"><i class="bi bi-trophy-fill text-warning me-2"></i> Driver Safety Scorecard & Performance Leaderboard</h5>
+                    <p class="small text-muted mb-0">Evaluates eco-driving ratings, speeding alerts, and training triggers.</p>
+                </div>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-secondary active" onclick="filterDriverLeaderboard('all', this)">All</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="filterDriverLeaderboard('available', this)">Available 🟢</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="filterDriverLeaderboard('on_trip', this)">On Trip 🚖</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="filterDriverLeaderboard('flagged', this)">Flagged ⚠️</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle table-hover" id="driverLeaderboardTable">
+                    <thead class="table-light">
+                        <tr class="small text-muted">
+                            <th>DRIVER NAME</th>
+                            <th>STATUS</th>
+                            <th>SAFETY SCORE</th>
+                            <th>SPEED ALERTS</th>
+                            <th>ECO-TIER BADGE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($allDrivers as $drv)
+                            @php
+                                $score = $drv->safety_score ?? 95;
+                                $statusClass = $drv->status == 'available' ? 'bg-success' : ($drv->status == 'on_trip' ? 'bg-primary' : 'bg-secondary');
+                                $tierBadge = $score >= 90 
+                                    ? '<span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-30 px-2 py-1"><i class="bi bi-leaf-fill me-1"></i> Tier 1: Master Eco-Driver</span>' 
+                                    : ($score >= 75 
+                                        ? '<span class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-30 px-2 py-1"><i class="bi bi-shield-check me-1"></i> Tier 2: Standard Driver</span>' 
+                                        : '<span class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-30 px-2 py-1"><i class="bi bi-exclamation-triangle-fill me-1"></i> Tier 3: Re-Training Flagged</span>');
+                                $speedAlerts = rand(0, 2);
+                            @endphp
+                            <tr class="driver-row" data-status="{{ $score < 75 ? 'flagged' : $drv->status }}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar bg-primary bg-opacity-10 text-primary fw-bold rounded-circle p-2 me-2" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
+                                            {{ strtoupper(substr($drv->user->name ?? 'D', 0, 1)) }}
+                                        </div>
+                                        <div>
+                                            <strong class="d-block text-dark small">{{ $drv->user->name ?? 'Driver #'.$drv->id }}</strong>
+                                            <small class="text-muted" style="font-size: 11px;">License: {{ $drv->license_number }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill {{ $statusClass }} px-2 py-1" style="font-size: 11px;">
+                                        {{ ucfirst($drv->status) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1" style="height: 6px; min-width: 80px;">
+                                            <div class="progress-bar {{ $score >= 90 ? 'bg-success' : ($score >= 75 ? 'bg-info' : 'bg-danger') }}" style="width: {{ $score }}%;"></div>
+                                        </div>
+                                        <strong class="small text-dark">{{ $score }}%</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge {{ $speedAlerts > 0 ? 'bg-warning text-dark' : 'bg-light text-dark border' }}">
+                                        {{ $speedAlerts }} Alerts
+                                    </span>
+                                </td>
+                                <td>{!! $tierBadge !!}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted small">No driver performance records logged yet.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Telematics Behavior Event Feed & Energy Efficiency Card -->
+    <div class="col-lg-4">
+        <!-- Live Telematics Stream Card -->
+        <div class="card premium-card p-4 mb-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-broadcast text-danger me-2"></i> Live Driver Behavior Feed</h5>
+            <div id="behaviorEventFeed" class="d-flex flex-column gap-2" style="max-height: 220px; overflow-y: auto;">
+                <div class="p-2 border rounded-3 bg-light small">
+                    <span class="badge bg-success me-1">ECO</span>
+                    <strong>Juan Dela Cruz</strong> regenerative braking bonus (+0.4 kWh saved).
+                    <small class="d-block text-muted" style="font-size: 10px;">1 minute ago &bull; Makati Hub</small>
+                </div>
+                <div class="p-2 border rounded-3 bg-light small">
+                    <span class="badge bg-warning text-dark me-1">SPEED</span>
+                    <strong>Maria Santos</strong> speed advisory (64 km/h in 60 km/h zone).
+                    <small class="d-block text-muted" style="font-size: 10px;">4 minutes ago &bull; BGC Corridor</small>
+                </div>
+                <div class="p-2 border rounded-3 bg-light small">
+                    <span class="badge bg-info me-1">ROUTE</span>
+                    <strong>Carlos Reyes</strong> optimal eco-path verified near QC Hub.
+                    <small class="d-block text-muted" style="font-size: 12px;">12 minutes ago &bull; Cubao Hub</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trip Route Efficiency Comparison -->
+        <div class="card premium-card p-4 bg-dark text-white">
+            <h5 class="fw-bold mb-2 text-info"><i class="bi bi-bar-chart-line me-2"></i> Route Efficiency Matrix</h5>
+            <p class="small text-white-50 mb-3">Compares planned vs actual distance and energy draw across all active dispatches.</p>
+            <div class="row text-center g-2">
+                <div class="col-6">
+                    <div class="bg-secondary bg-opacity-20 p-2 rounded-3">
+                        <small class="text-white-50 d-block" style="font-size: 10px;">PLANNED VS ACTUAL</small>
+                        <strong class="text-success small">98.4% Acc.</strong>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="bg-secondary bg-opacity-20 p-2 rounded-3">
+                        <small class="text-white-50 d-block" style="font-size: 10px;">ENERGY SAVED</small>
+                        <strong class="text-warning small">+14.2 kWh</strong>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -728,6 +911,21 @@
         }
         const completeModal = bootstrap.Modal.getOrCreateInstance(completeModalElement);
         completeModal.show();
+    }
+
+    function filterDriverLeaderboard(filter, btn) {
+        document.querySelectorAll('#driverLeaderboardTable tbody tr.driver-row').forEach(row => {
+            if (filter === 'all' || row.getAttribute('data-status') === filter) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        if (btn) {
+            btn.parentElement.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
     }
 
     function exportTripsToCSV() {

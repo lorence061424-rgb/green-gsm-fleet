@@ -304,6 +304,9 @@
             <a href="{{ route('vehicles.index') }}" class="sidebar-nav-link {{ Route::is('vehicles.*') ? 'active' : '' }}">
                 <i class="bi bi-truck"></i> Fleet and Vehicle Management
             </a>
+            <a href="{{ route('maintenance.index') }}" class="sidebar-nav-link {{ Route::is('maintenance.*') ? 'active' : '' }}">
+                <i class="bi bi-wrench-adjustable"></i> Preventive Maintenance (PMS)
+            </a>
             <a href="{{ route('reservations.index') }}" class="sidebar-nav-link {{ Route::is('reservations.*') ? 'active' : '' }}">
                 <i class="bi bi-calendar-event"></i> Vehicle Reservation and Dispatch
             </a>
@@ -341,6 +344,9 @@
                 </a>
                 <a href="{{ route('vehicles.index') }}" class="sidebar-nav-link {{ Route::is('vehicles.*') ? 'active' : '' }}">
                     <i class="bi bi-truck"></i> Fleet and Vehicle Management
+                </a>
+                <a href="{{ route('maintenance.index') }}" class="sidebar-nav-link {{ Route::is('maintenance.*') ? 'active' : '' }}">
+                    <i class="bi bi-wrench-adjustable"></i> Preventive Maintenance (PMS)
                 </a>
                 <a href="{{ route('reservations.index') }}" class="sidebar-nav-link {{ Route::is('reservations.*') ? 'active' : '' }}">
                     <i class="bi bi-calendar-event"></i> Vehicle Reservation and Dispatch

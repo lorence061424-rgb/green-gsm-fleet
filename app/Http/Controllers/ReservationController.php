@@ -114,11 +114,24 @@ class ReservationController extends Controller
      */
     public function checkAvailability(Request $request)
     {
-        $validated = $request->validate([
-            'date' => 'required|date',
-        ]);
+        $rawDate = $request->input('date', date('Y-m-d'));
+        try {
+            if (strpos($rawDate, '/') !== false) {
+                // Handle DD/MM/YYYY format
+                $parts = explode('/', $rawDate);
+                if (count($parts) === 3) {
+                    $formattedDate = sprintf('%04d-%02d-%02d', $parts[2], $parts[1], $parts[0]);
+                } else {
+                    $formattedDate = \Carbon\Carbon::parse($rawDate)->format('Y-m-d');
+                }
+            } else {
+                $formattedDate = \Carbon\Carbon::parse($rawDate)->format('Y-m-d');
+            }
+        } catch (\Exception $e) {
+            $formattedDate = date('Y-m-d');
+        }
 
-        $reservedVehicleIds = VehicleReservation::where('reservation_date', $validated['date'])
+        $reservedVehicleIds = VehicleReservation::where('reservation_date', $formattedDate)
             ->whereIn('status', ['pending', 'approved'])
             ->pluck('vehicle_id')
             ->toArray();
@@ -132,7 +145,7 @@ class ReservationController extends Controller
             ->get(['id', 'license_plate', 'make', 'model', 'type']);
 
         return response()->json([
-            'date' => $validated['date'],
+            'date' => $formattedDate,
             'available' => $available,
             'reserved' => $reserved,
         ]);

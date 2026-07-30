@@ -304,7 +304,12 @@ function checkAvailability() {
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Checking Availability...';
     }
 
-    fetch(`{{ route('reservations.check-availability') }}?date=${date}`)
+    fetch(`{{ route('reservations.check-availability') }}?date=${date}`, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
         .then(res => {
             if (!res.ok) throw new Error('HTTP error ' + res.status);
             return res.json();

@@ -44,13 +44,19 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-medium">Select VinFast EV Unit</label>
+                    <label class="form-label fw-medium">Select Active VinFast EV Unit (Synced with FVM)</label>
                     <select id="routeVehicleType" class="form-select rounded-3" required>
-                        <option value="Nerio Green" selected>VinFast Nerio Green (EV Sedan - 42 kWh)</option>
-                        <option value="VF 8">VinFast VF 8 (EV SUV - 87.7 kWh)</option>
-                        <option value="VF e34">VinFast VF e34 (EV Crossover - 42 kWh)</option>
-                        <option value="VF 5">VinFast VF 5 (EV Compact - 37.2 kWh)</option>
-                        <option value="VF 9">VinFast VF 9 (EV Premium SUV - 92 kWh)</option>
+                        @forelse($vehicles as $v)
+                            <option value="{{ $v->type }}" {{ $loop->first ? 'selected' : '' }}>
+                                {{ $v->license_plate }} &bull; {{ $v->make }} {{ $v->model }} ({{ $v->type }} - {{ $v->fuel_capacity }} kWh)
+                            </option>
+                        @empty
+                            <option value="Nerio Green" selected>VinFast Nerio Green (EV Sedan - 42 kWh)</option>
+                            <option value="VF 8">VinFast VF 8 (EV SUV - 87.7 kWh)</option>
+                            <option value="VF e34">VinFast VF e34 (EV Crossover - 42 kWh)</option>
+                            <option value="VF 5">VinFast VF 5 (EV Compact - 37.2 kWh)</option>
+                            <option value="VF 9">VinFast VF 9 (EV Premium SUV - 92 kWh)</option>
+                        @endforelse
                     </select>
                 </div>
 

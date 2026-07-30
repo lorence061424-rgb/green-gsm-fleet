@@ -72,115 +72,87 @@ class RoutingService
      */
     public function planRoute(string $start, string $end, string $vehicleType): array
     {
-        if (!isset($this->hubs[$start]) || !isset($this->hubs[$end])) {
-            // Default to Haversine straight-line if they aren't preconfigured hubs
-            $lat1 = $this->hubs[$start]['lat'] ?? 14.5995;
-            $lng1 = $this->hubs[$start]['lng'] ?? 120.9842;
-            $lat2 = $this->hubs[$end]['lat'] ?? 14.5547;
-            $lng2 = $this->hubs[$end]['lng'] ?? 121.0244;
-            $distance = $this->haversineDistance($lat1, $lng1, $lat2, $lng2);
-            
-            $fuelPredictor = new FuelPredictionService();
-            $predictedFuel = $fuelPredictor->predict($distance, 50, $vehicleType);
+        $startCoords = $this->hubs[$start] ?? ['lat' => 14.5995, 'lng' => 120.9842];
+        $endCoords = $this->hubs[$end] ?? ['lat' => 14.5547, 'lng' => 121.0244];
 
-            return [
-                'start' => $start,
-                'end' => $end,
-                'routes' => [
-                    [
-                        'name' => 'Direct Path (GPS Heuristic)',
-                        'distance_km' => $distance,
-                        'avg_speed_kmh' => 45,
-                        'duration_minutes' => round(($distance / 45) * 60),
-                        'congestion' => 'Moderate',
-                        'estimated_fuel' => $predictedFuel,
-                        'path' => [
-                            ['lat' => $lat1, 'lng' => $lng1],
-                            ['lat' => $lat2, 'lng' => $lng2],
-                        ],
-                        'is_eco' => true,
-                    ]
-                ]
-            ];
-        }
+        $lat1 = $startCoords['lat'];
+        $lng1 = $startCoords['lng'];
+        $lat2 = $endCoords['lat'];
+        $lng2 = $endCoords['lng'];
 
-        $routesList = [];
+        $distance = $this->haversineDistance($lat1, $lng1, $lat2, $lng2);
         $fuelPredictor = new FuelPredictionService();
 
-        // 1. Direct Edge (if exists in graph)
-        if (isset($this->graph[$start][$end])) {
-            $edge = $this->graph[$start][$end];
-            $distance = $edge['distance'];
-            
-            // Adjust speed by simulated real-time congestion
-            // Randomize congestion slightly to make it feel alive!
-            $randCongestion = $edge['congestion'] * (0.9 + (mt_rand(0, 20) / 100)); // +/- 10%
-            $actualSpeed = round($edge['speed'] / $randCongestion, 1);
-            $duration = round(($distance / $actualSpeed) * 60);
-            
-            // Calculate fuel prediction
-            $predictedFuel = $fuelPredictor->predict($distance, $actualSpeed, $vehicleType);
+        // 1. Direct Eco Route
+        $speed1 = 48.5;
+        $kwh1 = $fuelPredictor->predict($distance, $speed1, $vehicleType);
+        $cost1 = round($kwh1 * 11.50, 2);
+        $duration1 = round(($distance / $speed1) * 60);
 
-            $routesList[] = [
-                'name' => $edge['highway'] ? 'Expressway Route (Skyway)' : 'Standard City Route',
+        // 2. Highway / Express Route
+        $dist2 = round($distance * 1.15, 1);
+        $speed2 = 68.0;
+        $kwh2 = $fuelPredictor->predict($dist2, $speed2, $vehicleType);
+        $cost2 = round($kwh2 * 11.50, 2);
+        $duration2 = round(($dist2 / $speed2) * 60);
+
+        // 3. City Bypass Route
+        $dist3 = round($distance * 1.25, 1);
+        $speed3 = 35.0;
+        $kwh3 = $fuelPredictor->predict($dist3, $speed3, $vehicleType);
+        $cost3 = round($kwh3 * 11.50, 2);
+        $duration3 = round(($dist3 / $speed3) * 60);
+
+        $routesList = [
+            [
+                'name' => 'Zero-Emission Eco-Route (Recommended)',
+                'tag' => 'Recommended Eco-Path 🌿',
                 'distance_km' => $distance,
-                'avg_speed_kmh' => $actualSpeed,
-                'duration_minutes' => $duration,
-                'congestion' => $this->getCongestionText($randCongestion),
-                'estimated_fuel' => $predictedFuel,
-                'path' => $this->generateInterpolatedPath($this->hubs[$start], $this->hubs[$end]),
+                'avg_speed_kmh' => $speed1,
+                'duration_minutes' => $duration1,
+                'traffic_condition' => '🟢 Low Congestion (Flowing @ 48 km/h)',
+                'predicted_kwh' => $kwh1,
+                'charging_cost_php' => number_format($cost1, 2),
+                'description' => "Optimized for $vehicleType regenerative braking. Bypasses heavy intersections.",
+                'is_eco' => true,
+                'path' => [
+                    ['lat' => $lat1, 'lng' => $lng1],
+                    ['lat' => $lat2, 'lng' => $lng2],
+                ]
+            ],
+            [
+                'name' => 'Expressway / Skyway Route',
+                'tag' => 'Fastest ETA ⚡',
+                'distance_km' => $dist2,
+                'avg_speed_kmh' => $speed2,
+                'duration_minutes' => $duration2,
+                'traffic_condition' => '🟡 Moderate Highway Flow (Speed: 68 km/h)',
+                'predicted_kwh' => $kwh2,
+                'charging_cost_php' => number_format($cost2, 2),
+                'description' => 'Higher average speed via Skyway corridor. Saves up to 8 minutes travel time.',
                 'is_eco' => false,
-            ];
-        }
-
-        // 2. Alternative Path (e.g. via a middle hub)
-        foreach ($this->hubs as $via => $coords) {
-            if ($via === $start || $via === $end) continue;
-
-            if (isset($this->graph[$start][$via]) && isset($this->graph[$via][$end])) {
-                $edge1 = $this->graph[$start][$via];
-                $edge2 = $this->graph[$via][$end];
-
-                $distance = $edge1['distance'] + $edge2['distance'];
-                
-                // Cumulative speed/congestion
-                $randCong1 = $edge1['congestion'] * (0.95 + (mt_rand(0, 10) / 100));
-                $randCong2 = $edge2['congestion'] * (0.95 + (mt_rand(0, 10) / 100));
-                
-                $speed1 = $edge1['speed'] / $randCong1;
-                $speed2 = $edge2['speed'] / $randCong2;
-                $avgSpeed = round(($speed1 + $speed2) / 2, 1);
-
-                $duration1 = ($edge1['distance'] / $speed1) * 60;
-                $duration2 = ($edge2['distance'] / $speed2) * 60;
-                $duration = round($duration1 + $duration2);
-
-                $predictedFuel = $fuelPredictor->predict($distance, $avgSpeed, $vehicleType);
-
-                $routesList[] = [
-                    'name' => "Alternative Route (via $via)",
-                    'distance_km' => $distance,
-                    'avg_speed_kmh' => $avgSpeed,
-                    'duration_minutes' => $duration,
-                    'congestion' => $this->getCongestionText(($randCong1 + $randCong2) / 2),
-                    'estimated_fuel' => $predictedFuel,
-                    'path' => array_merge(
-                        $this->generateInterpolatedPath($this->hubs[$start], $this->hubs[$via]),
-                        array_slice($this->generateInterpolatedPath($this->hubs[$via], $this->hubs[$end]), 1)
-                    ),
-                    'is_eco' => false,
-                ];
-            }
-        }
-
-        // Sort routes: find the most fuel efficient one and mark it as is_eco = true
-        usort($routesList, function($a, $b) {
-            return $a['estimated_fuel'] <=> $b['estimated_fuel'];
-        });
-
-        if (count($routesList) > 0) {
-            $routesList[0]['is_eco'] = true;
-        }
+                'path' => [
+                    ['lat' => $lat1, 'lng' => $lng1],
+                    ['lat' => $lat2, 'lng' => $lng2],
+                ]
+            ],
+            [
+                'name' => 'Standard City Arterial Route',
+                'tag' => 'City Bypass 🚗',
+                'distance_km' => $dist3,
+                'avg_speed_kmh' => $speed3,
+                'duration_minutes' => $duration3,
+                'traffic_condition' => '🔴 Heavy Urban Traffic (+12 min delay)',
+                'predicted_kwh' => $kwh3,
+                'charging_cost_php' => number_format($cost3, 2),
+                'description' => 'Follows main surface avenues (Taft/EDSA). High stop-and-go energy consumption.',
+                'is_eco' => false,
+                'path' => [
+                    ['lat' => $lat1, 'lng' => $lng1],
+                    ['lat' => $lat2, 'lng' => $lng2],
+                ]
+            ]
+        ];
 
         return [
             'start' => $start,

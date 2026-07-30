@@ -255,11 +255,28 @@
         if (endMarker) map.removeLayer(endMarker);
         if (polyline) map.removeLayer(polyline);
 
-        startMarker = L.circleMarker(startLatLng, { color: '#10B981', radius: 9, fillColor: '#10B981', fillOpacity: 0.9 }).addTo(map).bindPopup("<b>Origin Hub:</b> " + startName);
-        endMarker = L.circleMarker(endLatLng, { color: '#EF4444', radius: 9, fillColor: '#EF4444', fillOpacity: 0.9 }).addTo(map).bindPopup("<b>Destination:</b> " + endName);
+        startMarker = L.circleMarker(startLatLng, { color: '#10B981', radius: 10, fillColor: '#10B981', fillOpacity: 0.95 }).addTo(map).bindPopup("<b>Origin Hub:</b> " + startName);
+        endMarker = L.circleMarker(endLatLng, { color: '#EF4444', radius: 10, fillColor: '#EF4444', fillOpacity: 0.95 }).addTo(map).bindPopup("<b>Destination:</b> " + endName);
 
-        polyline = L.polyline([startLatLng, endLatLng], { color: '#10B981', weight: 5, opacity: 0.85, dashArray: '6, 6' }).addTo(map);
-        map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
+        // Fetch real OSRM OpenStreetMap turn-by-turn road geometry (follows real streets, turns, & highways)
+        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${startLatLng[1]},${startLatLng[0]};${endLatLng[1]},${endLatLng[0]}?overview=full&geometries=geojson`;
+
+        fetch(osrmUrl)
+            .then(res => res.json())
+            .then(osrmData => {
+                if (osrmData.routes && osrmData.routes.length > 0) {
+                    const routeCoordinates = osrmData.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                    polyline = L.polyline(routeCoordinates, { color: '#10B981', weight: 6, opacity: 0.9 }).addTo(map);
+                    map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
+                } else {
+                    polyline = L.polyline([startLatLng, endLatLng], { color: '#10B981', weight: 6, opacity: 0.9, dashArray: '6, 6' }).addTo(map);
+                    map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
+                }
+            })
+            .catch(() => {
+                polyline = L.polyline([startLatLng, endLatLng], { color: '#10B981', weight: 6, opacity: 0.9, dashArray: '6, 6' }).addTo(map);
+                map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
+            });
     }
 
     function renderRouteOptionsList(routes) {
@@ -269,12 +286,12 @@
         routes.forEach((r, idx) => {
             const isBest = idx === 0;
             container.innerHTML += `
-                <div class="card border rounded-3 p-3 mb-2 ${isBest ? 'border-success bg-success bg-opacity-10' : ''}">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="fw-bold text-dark">${r.name}</span>
-                        <span class="badge ${isBest ? 'bg-success' : 'bg-secondary'}">${r.tag}</span>
+                <div class="card border rounded-3 p-3 mb-3 ${isBest ? 'border-success bg-success bg-opacity-10' : 'bg-light'}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold text-dark fs-6">${r.name}</span>
+                        <span class="badge ${isBest ? 'bg-success text-white' : 'bg-secondary text-white'} px-3 py-1 rounded-pill">${r.tag || 'Eco-Path'}</span>
                     </div>
-                    <div class="row text-center my-2">
+                    <div class="row text-center my-2 g-2">
                         <div class="col-4">
                             <small class="text-muted d-block" style="font-size: 11px;">DISTANCE</small>
                             <strong class="text-dark">${r.distance_km} km</strong>
@@ -288,7 +305,10 @@
                             <strong class="text-success">${r.predicted_kwh} kWh (₱${r.charging_cost_php})</strong>
                         </div>
                     </div>
-                    <small class="text-muted" style="font-size: 11px;"><i class="bi bi-info-circle me-1"></i> ${r.description}</small>
+                    <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                        <small class="text-muted" style="font-size: 12px;"><i class="bi bi-info-circle me-1"></i> ${r.description}</small>
+                        <span class="badge bg-white text-dark border px-2 py-1 small">${r.traffic_condition || 'Normal Flow'}</span>
+                    </div>
                 </div>
             `;
         });

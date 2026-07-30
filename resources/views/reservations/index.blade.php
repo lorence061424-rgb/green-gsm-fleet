@@ -7,6 +7,9 @@
         <p class="page-header-subtitle">Schedule, approve, and track VinFast EV vehicle bookings for dispatches.</p>
     </div>
     <div class="col-auto d-flex gap-2 flex-wrap">
+        <button class="btn btn-outline-info rounded-3" onclick="window.location.reload();">
+            <i class="bi bi-arrow-clockwise me-1"></i> Refresh Schedule
+        </button>
         <button class="btn btn-outline-success rounded-3" onclick="exportReservationsToCSV();">
             <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
         </button>

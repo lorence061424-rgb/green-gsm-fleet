@@ -307,7 +307,10 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 <script>
+let reservationCalendarInstance = null;
+
 function checkAvailability() {
     const btn = document.getElementById('btnCheckSlot');
     const input = document.getElementById('checkDateInput');
@@ -362,6 +365,11 @@ function checkAvailability() {
                     }
                 });
             }
+
+            // Sync FullCalendar live to date
+            if (reservationCalendarInstance && data.date) {
+                reservationCalendarInstance.gotoDate(data.date);
+            }
         })
         .catch(err => {
             console.error('Availability check failed:', err);
@@ -380,7 +388,7 @@ function exportReservationsToCSV() {
     const rows = document.querySelectorAll("table tr");
     for (let i = 0; i < rows.length; i++) {
         let row = [], cols = rows[i].querySelectorAll("td, th");
-        for (let j = 0; j < cols.length - 1; j++) // Exclude ACTIONS column
+        for (let j = 0; j < cols.length - 1; j++)
             row.push('"' + cols[j].innerText.replace(/"/g, '""').trim() + '"');
         csv.push(row.join(","));
     }
@@ -395,19 +403,20 @@ function exportReservationsToCSV() {
     document.body.removeChild(downloadLink);
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+function initScheduleCalendar() {
     const calendarEl = document.getElementById('reservationCalendar');
     if (calendarEl && typeof FullCalendar !== 'undefined') {
         const eventsData = @json($calendarEvents ?? []);
 
-        const calendar = new FullCalendar.Calendar(calendarEl, {
+        reservationCalendarInstance = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             height: 'auto',
             headerToolbar: {
-                left: 'prev,next',
+                left: 'prev,next today',
                 center: 'title',
-                right: 'today'
+                right: 'dayGridMonth,timeGridWeek'
             },
+            themeSystem: 'bootstrap5',
             events: eventsData,
             dateClick: function(info) {
                 const checkInput = document.getElementById('checkDateInput');
@@ -417,11 +426,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
-        calendar.render();
+        reservationCalendarInstance.render();
     }
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScheduleCalendar);
+} else {
+    initScheduleCalendar();
+}
 </script>
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
 <!-- Import Reservations CSV Modal -->
 <div class="modal fade" id="importReservationsCsvModal" tabindex="-1" aria-hidden="true">

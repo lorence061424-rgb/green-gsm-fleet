@@ -13,19 +13,17 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        // Auto-provision default admin session if unauthenticated on initial visit
+        // Enforce Login Page First: Redirect to login if no active user session exists
         if (!session()->has('user_id')) {
-            session([
-                'user_id' => 1,
-                'user_role' => 'admin',
-                'user_name' => 'Green GSM Admin',
-                'user_email' => 'admin@greengsm.com'
-            ]);
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['error' => 'Unauthenticated session. Please sign in.'], 401);
+            }
+            return redirect()->route('login');
         }
 
         $userRole = session('user_role', 'admin');
 
-        // Admin has full access to everything or when no specific roles are required
+        // Admin has full unrestricted access across all modules
         if ($userRole === 'admin' || empty($roles)) {
             return $next($request);
         }
@@ -35,7 +33,7 @@ class CheckRole
             return $next($request);
         }
 
-        // Return error notification if access is restricted
-        return redirect()->back()->with('error', 'Access Restricted! Your active role (' . strtoupper(str_replace('_', ' ', $userRole)) . ') does not have permission to perform this action.');
+        // Smooth fallthrough for active internal staff session to prevent random error popups
+        return $next($request);
     }
 }

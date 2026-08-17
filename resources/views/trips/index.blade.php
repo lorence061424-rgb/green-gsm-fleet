@@ -1004,7 +1004,26 @@
     let harshBrakeTrigger = false;
 
     document.addEventListener("DOMContentLoaded", function() {
-        initLeafletGpsMap('Manila Hub (Port Area)', 'Makati Hub (Ayala Ave)');
+        simStart = 'Manila Hub (Port Area)';
+        simEnd = 'Makati Hub (Ayala Ave)';
+        simDistance = 9.5;
+        simPredictedFuel = 3.8;
+
+        initLeafletGpsMap(simStart, simEnd);
+        generateSimulatedPathCoordinates(simStart, simEnd);
+
+        // Global Bootstrap modal listener to initialize map tiles when shown
+        const simModalElement = document.getElementById('telemetrySimulatorModal');
+        if (simModalElement) {
+            simModalElement.addEventListener('shown.bs.modal', function () {
+                initModalMap(simStart || 'Manila Hub (Port Area)', simEnd || 'Makati Hub (Ayala Ave)');
+                [50, 150, 300, 500, 1000].forEach(delay => {
+                    setTimeout(() => {
+                        if (leafletMapModal) leafletMapModal.invalidateSize();
+                    }, delay);
+                });
+            });
+        }
 
         const startSelect = document.getElementById('start_location');
         const endSelect = document.getElementById('end_location');
@@ -1014,6 +1033,8 @@
                 const s = startSelect.value;
                 const e = endSelect.value || 'Makati';
                 if (s && e) {
+                    simStart = s;
+                    simEnd = e;
                     initLeafletGpsMap(s, e);
                     generateSimulatedPathCoordinates(s, e);
                 }
@@ -1022,6 +1043,8 @@
                 const s = startSelect.value || 'Manila';
                 const e = endSelect.value;
                 if (s && e) {
+                    simStart = s;
+                    simEnd = e;
                     initLeafletGpsMap(s, e);
                     generateSimulatedPathCoordinates(s, e);
                 }
@@ -1030,7 +1053,7 @@
     });
 
     function initLeafletGpsMap(startName, endName) {
-        const mapContainer = document.getElementById('liveGpsMapMain') || document.getElementById('liveGpsMap');
+        const mapContainer = document.getElementById('liveGpsMapMain');
         if (!mapContainer) return;
 
         const startLatLng = getLatLng(startName) || [14.5995, 120.9842];
@@ -1045,7 +1068,7 @@
         mapContainer._leaflet_id = null;
 
         try {
-            leafletMap = L.map(mapContainer.id, { zoomControl: true }).setView(startLatLng, 13);
+            leafletMap = L.map('liveGpsMapMain', { zoomControl: true }).setView(startLatLng, 13);
             
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
@@ -1084,8 +1107,9 @@
     // Dedicated map initializer for the MODAL container (liveGpsMapModal)
     function initModalMap(startName, endName) {
         const mapContainer = document.getElementById('liveGpsMapModal');
-        if (!mapContainer) { console.error('Modal map container #liveGpsMapModal not found'); return; }
+        if (!mapContainer) return;
 
+        mapContainer.style.height = '230px';
         const startLatLng = getLatLng(startName) || [14.5995, 120.9842];
         const endLatLng = getLatLng(endName) || [14.5547, 121.0244];
 
@@ -1122,7 +1146,7 @@
             carMarkerModal = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMapModal).bindPopup("<b>VinFast EV Live Position</b>");
 
             // Force multiple invalidateSize calls to ensure tiles load inside modal
-            [100, 300, 500, 800, 1200, 2000].forEach(delay => {
+            [50, 150, 300, 500, 800, 1200, 2000].forEach(delay => {
                 setTimeout(() => {
                     if (leafletMapModal) leafletMapModal.invalidateSize();
                 }, delay);
@@ -1201,39 +1225,22 @@
         // Reset feed
         ['telemetryFeed', 'telemetryFeedM'].forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.innerHTML = "<span class='text-muted text-center py-4'>Ready to run simulation stream.</span>";
+            if (el) el.innerHTML = "<span class='text-muted text-center py-4'>Ready to run simulation stream. Click 'Run Telemetry Sim' below.</span>";
         });
 
-        // Reset modal run button
+        // Reset control buttons
         const btnModal = document.getElementById('btnSimulateControl');
-        if (btnModal) {
-            btnModal.innerHTML = "<i class='bi bi-play-circle-fill me-1'></i> Run Telemetry Sim";
-            btnModal.removeAttribute('disabled');
-        }
+        const btnMain = document.getElementById('btnSimulateControlMain');
+        [btnModal, btnMain].forEach(b => {
+            if (b) {
+                b.innerHTML = "<i class='bi bi-play-circle-fill me-1'></i> Run Telemetry Sim";
+                b.removeAttribute('disabled');
+            }
+        });
 
-        // Generate coordinate path
+        // Generate coordinate path & init modal map immediately
         generateSimulatedPathCoordinates(simStart, simEnd);
-
-        // Move modal directly to document.body to prevent any stacking context issues
-        const simModalElement = document.getElementById('telemetrySimulatorModal');
-        if (simModalElement) {
-            if (simModalElement.parentNode !== document.body) {
-                document.body.appendChild(simModalElement);
-            }
-
-            // Listen for modal shown event to init modal map AFTER it's visible
-            simModalElement.addEventListener('shown.bs.modal', function onModalShown() {
-                simModalElement.removeEventListener('shown.bs.modal', onModalShown);
-                initModalMap(simStart, simEnd);
-            });
-
-            try {
-                const simModal = bootstrap.Modal.getOrCreateInstance(simModalElement);
-                simModal.show();
-            } catch (err) {
-                console.log("Bootstrap modal auto fallback:", err);
-            }
-        }
+        initModalMap(simStart, simEnd);
     }
 
     function generateSimulatedPathCoordinates(startName, endName) {
@@ -1241,7 +1248,7 @@
         const startLatLng = getLatLng(startName);
         const endLatLng = getLatLng(endName);
         
-        const points = 14; // 14 real-time GPS updates
+        const points = 18; // 18 real-time GPS updates
 
         for (let i = 0; i <= points; i++) {
             let f = i / points;
@@ -1268,6 +1275,8 @@
             });
         } else {
             // Ensure path exists
+            if (!simStart) simStart = 'Manila Hub (Port Area)';
+            if (!simEnd) simEnd = 'Makati Hub (Ayala Ave)';
             if (!simulatedPath || simulatedPath.length === 0) {
                 generateSimulatedPathCoordinates(simStart, simEnd);
             }
@@ -1284,10 +1293,12 @@
                 const el = document.getElementById(id); if (el) el.removeAttribute('disabled');
             });
 
-            // Clear both feeds
-            ['telemetryFeed', 'telemetryFeedM'].forEach(id => {
-                const el = document.getElementById(id); if (el) el.innerHTML = "";
-            });
+            // Clear placeholder text on first start
+            if (currentStepIndex === 0) {
+                ['telemetryFeed', 'telemetryFeedM'].forEach(id => {
+                    const el = document.getElementById(id); if (el) el.innerHTML = "";
+                });
+            }
 
             streamTelemetryStep(); // Immediately execute step 1!
             activeSimulationInterval = setInterval(streamTelemetryStep, 1200); // send GPS logs every 1.2s
@@ -1306,7 +1317,7 @@
 
     function addSimFeedEvent(message, statusClass) {
         const timeString = new Date().toLocaleTimeString();
-        const icon = statusClass === 'danger' ? 'bi-exclamation-triangle-fill' : (statusClass === 'warning' ? 'bi-x-octagon' : 'bi-info-circle');
+        const icon = statusClass === 'danger' ? 'bi-exclamation-triangle-fill' : (statusClass === 'warning' ? 'bi-x-octagon' : (statusClass === 'success' ? 'bi-check-circle-fill' : 'bi-info-circle'));
         const item = `
             <div class="list-group-item text-${statusClass} px-0 border-0 border-bottom d-flex justify-content-between py-2">
                 <span><i class="bi ${icon} me-1"></i> ${message}</span>
@@ -1326,16 +1337,21 @@
             clearInterval(activeSimulationInterval);
             activeSimulationInterval = null;
 
-            // Disable both sim buttons
-            ['btnSimulateControl', 'btnSimulateControlMain'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.setAttribute('disabled', 'disabled');
+            // Reset buttons
+            const btnModal = document.getElementById('btnSimulateControl');
+            const btnMain = document.getElementById('btnSimulateControlMain');
+            [btnModal, btnMain].forEach(b => {
+                if (b) {
+                    b.innerHTML = "<i class='bi bi-arrow-counterclockwise me-1'></i> Restart Sim";
+                    b.removeAttribute('disabled');
+                }
             });
 
-            addSimFeedEvent("Simulated ride path completed. Preparing ride summary reports.", "success");
+            addSimFeedEvent(`🏁 Route Completed! Destination ${simEnd} reached. Safety Score: ${safetyScoreTracker}%.`, "success");
 
-            // Redirect to final completes
-            setTimeout(showCompleteFormModal, 1500);
+            if (simTripId && simTripId !== 999) {
+                setTimeout(showCompleteFormModal, 1500);
+            }
             return;
         }
 
@@ -1444,9 +1460,6 @@
         } else {
             logDemoStepFeed(speed, isHarsh, idleSec, point);
         }
-
-        currentStepIndex++;
-    }
 
     // Helper to update safety score on both main-page and modal
     function updateSafetyScoreBoth(score) {

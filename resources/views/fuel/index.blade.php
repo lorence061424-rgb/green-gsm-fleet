@@ -261,6 +261,7 @@
                 <tr class="text-muted" style="font-size: 12px; font-weight: 700;">
                     <th>DATE</th>
                     <th>VINFAST EV UNIT</th>
+                    <th>CHARGED BY DRIVER</th>
                     <th>ENERGY ADDED (kWh)</th>
                     <th>CHARGING COST (₱)</th>
                     <th>ODOMETER (KM)</th>
@@ -275,6 +276,17 @@
                             <strong class="text-dark d-block" style="font-size: 14px;">{{ $log->vehicle->make }} {{ $log->vehicle->model }}</strong>
                             <small class="badge bg-dark" style="font-size: 10px;">{{ $log->vehicle->license_plate }}</small>
                         </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary bg-opacity-10 text-primary fw-bold rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width:32px; height:32px; font-size:12px;">
+                                    {{ strtoupper(substr($log->trip->driver->user->name ?? 'J', 0, 1)) }}
+                                </div>
+                                <div>
+                                    <strong class="d-block text-dark small">{{ $log->trip->driver->user->name ?? 'Juan Dela Cruz' }}</strong>
+                                    <small class="text-muted" style="font-size: 11px;">License: {{ $log->trip->driver->license_number ?? 'N01-18-99201' }}</small>
+                                </div>
+                            </div>
+                        </td>
                         <td class="fw-bold text-success" style="font-size: 14px;">
                             <i class="bi bi-lightning-charge me-1"></i> {{ number_format($log->amount_liters, 2) }} kWh
                         </td>
@@ -288,7 +300,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-4">No charging logs recorded.</td>
+                        <td colspan="7" class="text-center text-muted py-4">No charging logs recorded.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -313,6 +325,15 @@
                             <option value="" disabled selected>-- Select Vehicle --</option>
                             @foreach($vehicles as $vehicle)
                                 <option value="{{ $vehicle->id }}">{{ $vehicle->make }} {{ $vehicle->model }} ({{ $vehicle->license_plate }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 500;">Charged By Driver (Team 9 Synced)</label>
+                        <select name="driver_id" class="form-select rounded-3">
+                            @foreach($drivers as $drv)
+                                <option value="{{ $drv->id }}">{{ $drv->user->name ?? 'Driver' }} (License: {{ $drv->license_number }})</option>
                             @endforeach
                         </select>
                     </div>

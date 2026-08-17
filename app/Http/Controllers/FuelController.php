@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FuelLog;
 use App\Models\Vehicle;
+use App\Models\Driver;
 use App\Services\FuelPredictionService;
 use Illuminate\Http\Request;
 
@@ -18,11 +19,12 @@ class FuelController extends Controller
 
     public function index()
     {
-        $logs = FuelLog::with(['vehicle', 'trip'])->latest()->get();
+        $logs = FuelLog::with(['vehicle', 'trip.driver.user'])->latest()->get();
         $vehicles = Vehicle::all();
+        $drivers = Driver::with('user')->get();
         $weights = $this->fuelPredictionService->getWeights();
 
-        return view('fuel.index', ['logs' => $logs, 'fuelLogs' => $logs, 'vehicles' => $vehicles, 'weights' => $weights]);
+        return view('fuel.index', ['logs' => $logs, 'fuelLogs' => $logs, 'vehicles' => $vehicles, 'drivers' => $drivers, 'weights' => $weights]);
     }
 
     public function store(Request $request)

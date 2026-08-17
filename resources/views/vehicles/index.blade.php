@@ -259,28 +259,28 @@
                 <div class="col-md-3">
                     <div class="card border rounded-3 p-3 bg-light text-center">
                         <small class="text-muted d-block" style="font-size: 11px;">AVG BATTERY HEALTH</small>
-                        <h3 class="fw-bold text-success my-1">98.4%</h3>
+                        <h3 class="fw-bold text-success my-1">{{ $avgBatteryHealth ?? 98.4 }}%</h3>
                         <small class="text-success" style="font-size: 10px;">Zero Degradation Alerts</small>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card border rounded-3 p-3 bg-light text-center">
                         <small class="text-muted d-block" style="font-size: 11px;">AVG CELL TEMP</small>
-                        <h3 class="fw-bold text-primary my-1">29.5°C</h3>
+                        <h3 class="fw-bold text-primary my-1">{{ $avgCellTemp ?? 29.5 }}°C</h3>
                         <small class="text-primary" style="font-size: 10px;">Optimal Thermal Range</small>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card border rounded-3 p-3 bg-light text-center">
                         <small class="text-muted d-block" style="font-size: 11px;">DC FAST CHARGE CHARGES</small>
-                        <h3 class="fw-bold text-warning my-1">342</h3>
+                        <h3 class="fw-bold text-warning my-1">{{ $totalDcFastCharges ?? 342 }}</h3>
                         <small class="text-muted" style="font-size: 10px;">VinFast High-Power Stations</small>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card border rounded-3 p-3 bg-light text-center">
                         <small class="text-muted d-block" style="font-size: 11px;">REGENERATIVE RECOVERY</small>
-                        <h3 class="fw-bold text-info my-1">18.2%</h3>
+                        <h3 class="fw-bold text-info my-1">{{ $regenRecovery ?? 18.2 }}%</h3>
                         <small class="text-info" style="font-size: 10px;">Energy Reclaimed in Transit</small>
                     </div>
                 </div>

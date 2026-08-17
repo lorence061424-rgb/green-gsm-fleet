@@ -81,7 +81,7 @@ return new class extends Migration
             $table->decimal('amount_liters', 8, 2);
             $table->decimal('cost', 10, 2);
             $table->decimal('odometer_reading', 10, 2);
-            $table->string('fuel_type')->default('Gasoline');
+            $table->string('fuel_type')->default('DC Fast Charge (kWh)');
             $table->timestamps();
         });
 

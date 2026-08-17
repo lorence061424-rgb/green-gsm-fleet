@@ -932,37 +932,44 @@
             leafletMap = null;
         }
 
-        leafletMap = L.map('liveGpsMap', { zoomControl: true }).setView(startLatLng, 13);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap &bull; Green GSM Telemetry'
-        }).addTo(leafletMap);
+        // Reset Leaflet internal container flag
+        mapContainer._leaflet_id = null;
 
-        // Start & Destination Hub Markers
-        L.circleMarker(startLatLng, { color: '#10B981', radius: 8, fillColor: '#10B981', fillOpacity: 0.9 }).addTo(leafletMap).bindPopup("<b>Start Hub:</b> " + startName);
-        L.circleMarker(endLatLng, { color: '#EF4444', radius: 8, fillColor: '#EF4444', fillOpacity: 0.9 }).addTo(leafletMap).bindPopup("<b>Destination:</b> " + endName);
+        try {
+            leafletMap = L.map('liveGpsMap', { zoomControl: true }).setView(startLatLng, 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap &bull; Green GSM Telemetry'
+            }).addTo(leafletMap);
 
-        // Polyline Trail
-        polylineTrail = L.polyline([startLatLng, endLatLng], { color: '#10B981', weight: 4, opacity: 0.85, dashArray: '6, 6' }).addTo(leafletMap);
+            // Start & Destination Hub Markers
+            L.circleMarker(startLatLng, { color: '#10B981', radius: 8, fillColor: '#10B981', fillOpacity: 0.9 }).addTo(leafletMap).bindPopup("<b>Start Hub:</b> " + startName);
+            L.circleMarker(endLatLng, { color: '#EF4444', radius: 8, fillColor: '#EF4444', fillOpacity: 0.9 }).addTo(leafletMap).bindPopup("<b>Destination:</b> " + endName);
 
-        // Custom Leaflet EV Icon
-        const carIcon = L.divIcon({
-            className: 'custom-ev-marker',
-            html: `<div style="background:#064E3B; border:2px solid #10B981; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 12px rgba(16,185,129,0.8);"><i class="bi bi-ev-front-fill text-white fs-6"></i></div>`,
-            iconSize: [32, 32],
-            iconAnchor: [16, 16]
-        });
+            // Polyline Trail
+            polylineTrail = L.polyline([startLatLng, endLatLng], { color: '#10B981', weight: 4, opacity: 0.85, dashArray: '6, 6' }).addTo(leafletMap);
 
-        carMarker = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMap).bindPopup("<b>VinFast EV Live Position</b>");
+            // Custom Leaflet EV Icon
+            const carIcon = L.divIcon({
+                className: 'custom-ev-marker',
+                html: `<div style="background:#064E3B; border:2px solid #10B981; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 12px rgba(16,185,129,0.8);"><i class="bi bi-ev-front-fill text-white fs-6"></i></div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
 
-        [100, 300, 500, 800].forEach(delay => {
-            setTimeout(() => {
-                if (leafletMap) {
-                    leafletMap.invalidateSize();
-                }
-            }, delay);
-        });
+            carMarker = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMap).bindPopup("<b>VinFast EV Live Position</b>");
+
+            [100, 300, 500, 800, 1200].forEach(delay => {
+                setTimeout(() => {
+                    if (leafletMap) {
+                        leafletMap.invalidateSize();
+                    }
+                }, delay);
+            });
+        } catch(err) {
+            console.error("Leaflet map initialization error:", err);
+        }
     }
 
     function launchTelemetrySimulator(tripId, start, end, type, distance, predictedFuel) {
@@ -1057,18 +1064,32 @@
             // Pause
             clearInterval(activeSimulationInterval);
             activeSimulationInterval = null;
-            btn.innerHTML = "<i class='bi bi-play-circle-fill me-1'></i> Resume Sim";
-            document.getElementById('btnTriggerAggressive').setAttribute('disabled', 'disabled');
-            document.getElementById('btnTriggerHarshBrake').setAttribute('disabled', 'disabled');
+            if (btn) btn.innerHTML = "<i class='bi bi-play-circle-fill me-1'></i> Resume Sim";
+            const aggBtn = document.getElementById('btnTriggerAggressive');
+            if (aggBtn) aggBtn.setAttribute('disabled', 'disabled');
+            const brakeBtn = document.getElementById('btnTriggerHarshBrake');
+            if (brakeBtn) brakeBtn.setAttribute('disabled', 'disabled');
         } else {
-            // Start
-            btn.innerHTML = "<i class='bi bi-pause-circle-fill me-1'></i> Pause Sim";
-            document.getElementById('btnTriggerAggressive').removeAttribute('disabled');
-            document.getElementById('btnTriggerHarshBrake').removeAttribute('disabled');
-            
-            document.getElementById('telemetryFeed').innerHTML = "";
+            // Ensure path exists
+            if (!simulatedPath || simulatedPath.length === 0) {
+                generateSimulatedPathCoordinates(simStart, simEnd);
+            }
+            if (currentStepIndex >= simulatedPath.length) {
+                currentStepIndex = 0;
+            }
 
-            activeSimulationInterval = setInterval(streamTelemetryStep, 1500); // send GPS logs every 1.5s
+            // Start
+            if (btn) btn.innerHTML = "<i class='bi bi-pause-circle-fill me-1'></i> Pause Sim";
+            const aggBtn = document.getElementById('btnTriggerAggressive');
+            if (aggBtn) aggBtn.removeAttribute('disabled');
+            const brakeBtn = document.getElementById('btnTriggerHarshBrake');
+            if (brakeBtn) brakeBtn.removeAttribute('disabled');
+            
+            const feed = document.getElementById('telemetryFeed');
+            if (feed) feed.innerHTML = "";
+
+            streamTelemetryStep(); // Immediately execute step 1!
+            activeSimulationInterval = setInterval(streamTelemetryStep, 1200); // send GPS logs every 1.2s
         }
     }
 

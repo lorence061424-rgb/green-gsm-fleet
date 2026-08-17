@@ -259,6 +259,84 @@
     </div>
 </div>
 
+<!-- SECTION 1.5: Live Fleet Telemetry & Real-Time GPS Tracking Dashboard -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card premium-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <h5 class="fw-bold mb-1"><i class="bi bi-compass-fill text-info me-2"></i> Live Fleet Telemetry & Real-Time GPS Tracking Map</h5>
+                    <p class="small text-muted mb-0">Live Metro Manila GPS telemetry broadcast, speed tracking, and automated driver safety incident simulator.</p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-sm btn-outline-danger rounded-3" id="btnTriggerAggressiveMain" onclick="triggerAggressiveAction();">
+                        <i class="bi bi-lightning-charge-fill me-1"></i> Trigger Speeding Alert
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning rounded-3" id="btnTriggerHarshBrakeMain" onclick="triggerHarshBrakeAction();">
+                        <i class="bi bi-x-circle-fill me-1"></i> Trigger Harsh Brake
+                    </button>
+                    <button class="btn btn-sm btn-primary rounded-3 px-3 fw-bold shadow-sm" id="btnSimulateControlMain" onclick="startGpsStreaming();">
+                        <i class="bi bi-play-circle-fill me-1"></i> Run Telemetry Sim
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <!-- Leaflet GPS Map Container (Rendered on Page Load) -->
+                <div class="col-lg-7">
+                    <div class="card border-0 rounded-4 overflow-hidden shadow-sm" style="height: 320px; position: relative;">
+                        <div id="liveGpsMapMain" style="width: 100%; height: 320px; min-height: 320px; z-index: 1;"></div>
+                        <div class="position-absolute top-0 end-0 m-2 bg-dark bg-opacity-80 text-white px-3 py-1 rounded-pill small shadow-sm" style="z-index: 10; font-size: 11px; backdrop-filter: blur(4px);">
+                            <span class="spinner-grow spinner-grow-sm text-success me-1" role="status"></span>
+                            <span class="fw-bold text-success">LIVE METRO MANILA GPS</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Telemetry Monitors & Live Incident Feed -->
+                <div class="col-lg-5">
+                    <div class="card border-0 rounded-4 p-3 shadow-sm bg-light mb-3">
+                        <div class="row text-center">
+                            <div class="col-4 border-end">
+                                <small class="text-muted d-block" style="font-size: 11px;">CURRENT SPEED</small>
+                                <h4 class="fw-bold mb-0 text-primary" id="simSpeed">0 <span class="fs-6 fw-normal">km/h</span></h4>
+                            </div>
+                            <div class="col-4 border-end">
+                                <small class="text-muted d-block" style="font-size: 11px;">IDLE DURATION</small>
+                                <h4 class="fw-bold mb-0 text-warning" id="simIdle">0s</h4>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted d-block" style="font-size: 11px;">SAFETY RATING</small>
+                                <h4 class="fw-bold mb-0 text-success" id="simSafetyScore">100%</h4>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                <span>Route Completion Progress</span>
+                                <span id="simRealtimeFuel" class="fw-bold text-success">0.00 kWh</span>
+                            </div>
+                            <div class="progress rounded-pill" style="height: 10px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" id="simProgressBar" style="width: 0%;"></div>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted mt-1" style="font-size: 11px;">
+                                <span id="simStartHub">Manila Hub</span>
+                                <span id="simEndHub">Makati Hub</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 rounded-4 p-3 shadow-sm" style="height: 140px; overflow-y: auto;">
+                        <h6 class="fw-bold mb-2 text-danger small"><i class="bi bi-broadcast me-1"></i> Driver Behavior Incident Stream</h6>
+                        <div id="telemetryFeed" style="font-size: 12px;">
+                            <span class="text-muted text-center d-block py-3">Click 'Run Telemetry Sim' to stream live GPS logs.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- SECTION 2: Driver Performance Leaderboard & Real-Time Incident Stream -->
 <div class="row g-4 mb-4">
     <!-- Driver Safety Leaderboard -->
@@ -920,8 +998,12 @@
     let aggressiveSpeedTrigger = false;
     let harshBrakeTrigger = false;
 
+    document.addEventListener("DOMContentLoaded", function() {
+        initLeafletGpsMap('Manila Hub (Port Area)', 'Makati Hub (Ayala Ave)');
+    });
+
     function initLeafletGpsMap(startName, endName) {
-        const mapContainer = document.getElementById('liveGpsMap');
+        const mapContainer = document.getElementById('liveGpsMapMain') || document.getElementById('liveGpsMap');
         if (!mapContainer) return;
 
         const startLatLng = getLatLng(startName) || [14.5995, 120.9842];
@@ -936,7 +1018,7 @@
         mapContainer._leaflet_id = null;
 
         try {
-            leafletMap = L.map('liveGpsMap', { zoomControl: true }).setView(startLatLng, 13);
+            leafletMap = L.map(mapContainer.id, { zoomControl: true }).setView(startLatLng, 13);
             
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,

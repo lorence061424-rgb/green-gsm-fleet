@@ -301,11 +301,8 @@
             <a href="{{ route('dashboard') }}" class="sidebar-nav-link {{ Route::is('dashboard') ? 'active' : '' }}">
                 <i class="bi bi-grid-1x2-fill"></i> Dashboard
             </a>
-            <a href="{{ route('vehicles.index') }}" class="sidebar-nav-link {{ Route::is('vehicles.*') ? 'active' : '' }}">
+            <a href="{{ route('vehicles.index') }}" class="sidebar-nav-link {{ Route::is('vehicles.*') || Route::is('maintenance.*') ? 'active' : '' }}">
                 <i class="bi bi-truck"></i> Fleet and Vehicle Management
-            </a>
-            <a href="{{ route('maintenance.index') }}" class="sidebar-nav-link {{ Route::is('maintenance.*') ? 'active' : '' }}">
-                <i class="bi bi-wrench-adjustable"></i> Preventive Maintenance (PMS)
             </a>
             <a href="{{ route('reservations.index') }}" class="sidebar-nav-link {{ Route::is('reservations.*') ? 'active' : '' }}">
                 <i class="bi bi-calendar-event"></i> Vehicle Reservation and Dispatch
@@ -342,11 +339,8 @@
                 <a href="{{ route('dashboard') }}" class="sidebar-nav-link {{ Route::is('dashboard') ? 'active' : '' }}">
                     <i class="bi bi-grid-1x2-fill"></i> Dashboard
                 </a>
-                <a href="{{ route('vehicles.index') }}" class="sidebar-nav-link {{ Route::is('vehicles.*') ? 'active' : '' }}">
+                <a href="{{ route('vehicles.index') }}" class="sidebar-nav-link {{ Route::is('vehicles.*') || Route::is('maintenance.*') ? 'active' : '' }}">
                     <i class="bi bi-truck"></i> Fleet and Vehicle Management
-                </a>
-                <a href="{{ route('maintenance.index') }}" class="sidebar-nav-link {{ Route::is('maintenance.*') ? 'active' : '' }}">
-                    <i class="bi bi-wrench-adjustable"></i> Preventive Maintenance (PMS)
                 </a>
                 <a href="{{ route('reservations.index') }}" class="sidebar-nav-link {{ Route::is('reservations.*') ? 'active' : '' }}">
                     <i class="bi bi-calendar-event"></i> Vehicle Reservation and Dispatch

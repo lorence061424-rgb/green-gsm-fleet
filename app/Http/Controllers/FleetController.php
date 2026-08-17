@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Vehicle;
 use App\Models\Driver;
 use App\Models\User;
+use App\Models\MaintenanceRecord;
 use Illuminate\Http\Request;
 
 class FleetController extends Controller
@@ -13,7 +14,9 @@ class FleetController extends Controller
     {
         $vehicles = Vehicle::with('trips')->get();
         $drivers = Driver::with('user')->get();
-        return view('vehicles.index', compact('vehicles', 'drivers'));
+        $maintenanceRecords = MaintenanceRecord::with('vehicle')->latest()->get();
+
+        return view('vehicles.index', compact('vehicles', 'drivers', 'maintenanceRecords'));
     }
 
     public function storeVehicle(Request $request)

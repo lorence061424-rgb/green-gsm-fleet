@@ -49,6 +49,16 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-muted border-0" id="pms-tab" data-bs-toggle="tab" data-bs-target="#pms-pane" type="button" role="tab" aria-controls="pms-pane" aria-selected="false">
+                <i class="bi bi-wrench-adjustable me-1"></i> Preventive Maintenance Services (PMS)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-muted border-0" id="battery-tab" data-bs-toggle="tab" data-bs-target="#battery-pane" type="button" role="tab" aria-controls="battery-pane" aria-selected="false">
+                <i class="bi bi-battery-charging me-1"></i> EV Battery Health & Telematics
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link fw-bold text-muted border-0" id="drivers-tab" data-bs-toggle="tab" data-bs-target="#drivers-pane" type="button" role="tab" aria-controls="drivers-pane" aria-selected="false">
                 <i class="bi bi-people me-1"></i> Driver Directory (Synced from Team 9)
             </button>
@@ -177,6 +187,103 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- PMS Maintenance Tab -->
+        <div class="tab-pane fade" id="pms-pane" role="tabpanel" aria-labelledby="pms-tab" tabindex="0">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-wrench-adjustable text-primary me-2"></i> Vehicle Maintenance & Tune-up History</h6>
+                <button class="btn btn-sm btn-primary rounded-3" data-bs-toggle="modal" data-bs-target="#schedulePMSModal">
+                    <i class="bi bi-plus-circle me-1"></i> Schedule Maintenance Service
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr class="text-muted" style="font-size: 13px;">
+                            <th>VINFAST EV UNIT</th>
+                            <th>SERVICE TYPE</th>
+                            <th>SCHEDULED DATE</th>
+                            <th>COST (PHP)</th>
+                            <th>SERVICING STATUS</th>
+                            <th>SUPPLY CHAIN PR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($maintenanceRecords as $pms)
+                            <tr>
+                                <td>
+                                    <strong class="d-block text-dark small">{{ $pms->vehicle->make ?? 'VinFast' }} {{ $pms->vehicle->model ?? 'EV' }}</strong>
+                                    <small class="text-muted" style="font-size: 11px;">Plate: {{ $pms->vehicle->license_plate ?? 'N/A' }}</small>
+                                </td>
+                                <td><span class="badge bg-secondary">{{ $pms->service_type }}</span></td>
+                                <td>{{ $pms->scheduled_date }}</td>
+                                <td class="fw-bold text-dark">₱{{ number_format($pms->cost ?? 1250, 2) }}</td>
+                                <td>
+                                    <span class="badge rounded-pill {{ $pms->status === 'completed' ? 'bg-success' : ($pms->status === 'scheduled' ? 'bg-warning text-dark' : 'bg-primary') }}">
+                                        {{ ucfirst($pms->status) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info text-dark" style="font-size: 11px;"><i class="bi bi-cart-check me-1"></i> Team 6 PR Issued</span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td><strong class="d-block text-dark small">VinFast VF 8 (NCS-8812)</strong></td>
+                                <td><span class="badge bg-secondary">Brake Pad & Battery Diagnostic</span></td>
+                                <td>2026-08-20</td>
+                                <td class="fw-bold text-dark">₱3,450.00</td>
+                                <td><span class="badge rounded-pill bg-warning text-dark">Scheduled</span></td>
+                                <td><span class="badge bg-info text-dark" style="font-size: 11px;"><i class="bi bi-cart-check me-1"></i> Team 6 PR Issued</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong class="d-block text-dark small">VinFast Nerio Green (EV-2026-01)</strong></td>
+                                <td><span class="badge bg-secondary">Tire Rotation & Coolant Flushing</span></td>
+                                <td>2026-08-14</td>
+                                <td class="fw-bold text-dark">₱1,800.00</td>
+                                <td><span class="badge rounded-pill bg-success">Completed</span></td>
+                                <td><span class="badge bg-info text-dark" style="font-size: 11px;"><i class="bi bi-cart-check me-1"></i> Team 6 PR Issued</span></td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- EV Battery Health Tab -->
+        <div class="tab-pane fade" id="battery-pane" role="tabpanel" aria-labelledby="battery-tab" tabindex="0">
+            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-battery-charging text-success me-2"></i> Battery Telematics & State-of-Health (SoH) Diagnostics</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card border rounded-3 p-3 bg-light text-center">
+                        <small class="text-muted d-block" style="font-size: 11px;">AVG BATTERY HEALTH</small>
+                        <h3 class="fw-bold text-success my-1">98.4%</h3>
+                        <small class="text-success" style="font-size: 10px;">Zero Degradation Alerts</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border rounded-3 p-3 bg-light text-center">
+                        <small class="text-muted d-block" style="font-size: 11px;">AVG CELL TEMP</small>
+                        <h3 class="fw-bold text-primary my-1">29.5°C</h3>
+                        <small class="text-primary" style="font-size: 10px;">Optimal Thermal Range</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border rounded-3 p-3 bg-light text-center">
+                        <small class="text-muted d-block" style="font-size: 11px;">DC FAST CHARGE CHARGES</small>
+                        <h3 class="fw-bold text-warning my-1">342</h3>
+                        <small class="text-muted" style="font-size: 10px;">VinFast High-Power Stations</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border rounded-3 p-3 bg-light text-center">
+                        <small class="text-muted d-block" style="font-size: 11px;">REGENERATIVE RECOVERY</small>
+                        <h3 class="fw-bold text-info my-1">18.2%</h3>
+                        <small class="text-info" style="font-size: 10px;">Energy Reclaimed in Transit</small>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -342,6 +449,48 @@ function exportVehiclesToCSV() {
                 <div class="modal-footer border-0 p-3 bg-light">
                     <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary rounded-3"><i class="bi bi-cloud-upload me-1"></i> Import Fleet CSV</button>
+                </div>
+            </form>
+<!-- Schedule Maintenance Modal -->
+<div class="modal fade" id="schedulePMSModal" tabindex="-1" aria-labelledby="schedulePMSModalLabel" aria-hidden="true">
+    <div class="modal-dialog rounded-4 overflow-hidden">
+        <div class="modal-content border-0">
+            <form action="{{ route('maintenance.store') }}" method="POST">
+                @csrf
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fw-bold" id="schedulePMSModalLabel"><i class="bi bi-wrench-adjustable me-2"></i> Schedule Vehicle Maintenance</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 500;">Select VinFast EV Unit</label>
+                        <select name="vehicle_id" class="form-select rounded-3" required>
+                            @foreach($vehicles as $v)
+                                <option value="{{ $v->id }}">{{ $v->make }} {{ $v->model }} ({{ $v->license_plate }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 500;">Service Type</label>
+                        <select name="service_type" class="form-select rounded-3" required>
+                            <option value="Engine Tune-up">Battery Health & System Tune-up</option>
+                            <option value="Tire Rotation">Tire Rotation & Alignment</option>
+                            <option value="Brake Inspection">Brake Inspection & Fluid Check</option>
+                            <option value="General PMS">General PMS Inspection</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 500;">Scheduled Date</label>
+                        <input type="date" name="scheduled_date" value="{{ date('Y-m-d', strtotime('+3 days')) }}" class="form-control rounded-3" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" style="font-weight: 500;">Estimated Cost (PHP)</label>
+                        <input type="number" name="cost" value="1500" step="0.01" class="form-control rounded-3" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 bg-light">
+                    <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-3"><i class="bi bi-check-circle me-1"></i> Schedule Service</button>
                 </div>
             </form>
         </div>

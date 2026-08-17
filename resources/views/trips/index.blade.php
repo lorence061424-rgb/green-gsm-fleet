@@ -814,35 +814,43 @@
                     document.getElementById('previewFuel').innerText = bestRoute.estimated_fuel + " kWh";
                     document.getElementById('previewDuration').innerText = bestRoute.duration_minutes + " mins";
                     
-                    const congestionElement = document.getElementById('previewCongestion');
-                    congestionElement.innerText = bestRoute.congestion;
-                    if (bestRoute.congestion === 'Heavy') {
-                        congestionElement.className = "fw-bold text-danger";
-                    } else if (bestRoute.congestion === 'Moderate') {
-                        congestionElement.className = "fw-bold text-warning";
-                    } else {
-                        congestionElement.className = "fw-bold text-success";
+                    const congestionElement = document.getElementById('previewTraffic') || document.getElementById('previewCongestion');
+                    if (congestionElement) {
+                        congestionElement.innerText = bestRoute.congestion || 'Normal';
+                        if (bestRoute.congestion === 'Heavy') {
+                            congestionElement.className = "fw-bold text-danger";
+                        } else if (bestRoute.congestion === 'Moderate') {
+                            congestionElement.className = "fw-bold text-warning";
+                        } else {
+                            congestionElement.className = "fw-bold text-success";
+                        }
                     }
 
                     // Eco badge
                     const ecoBadge = document.getElementById('ecoBadge');
-                    if (bestRoute.is_eco) {
-                        ecoBadge.classList.remove('d-none');
-                    } else {
-                        ecoBadge.classList.add('d-none');
+                    if (ecoBadge) {
+                        if (bestRoute.is_eco) {
+                            ecoBadge.classList.remove('d-none');
+                        } else {
+                            ecoBadge.classList.add('d-none');
+                        }
                     }
 
                     // Suggestions text
-                    const suggestionsPanel = document.getElementById('routingSuggestions');
-                    suggestionsPanel.innerHTML = `<strong>Route Selected:</strong> ${bestRoute.name}<br>`;
-                    if (bestRoute.congestion === 'Heavy') {
-                        suggestionsPanel.innerHTML += `<span class="text-danger"><i class="bi bi-info-circle"></i> High idling risk. AI estimates 15% battery energy spike due to traffic.</span>`;
-                    } else {
-                        suggestionsPanel.innerHTML += `<span class="text-success"><i class="bi bi-check-circle"></i> Clear road. Drivers can cruise at 70 km/h for optimal EV efficiency.</span>`;
+                    const suggestionsPanel = document.getElementById('previewRecommendation') || document.getElementById('routingSuggestions');
+                    if (suggestionsPanel) {
+                        if (bestRoute.congestion === 'Heavy') {
+                            suggestionsPanel.innerHTML = `<i class="bi bi-info-circle"></i> High idling risk. AI estimates 15% battery energy spike due to traffic.`;
+                        } else {
+                            suggestionsPanel.innerHTML = `<i class="bi bi-check-circle-fill"></i> Clear road. Drivers can cruise at 70 km/h for optimal EV efficiency.`;
+                        }
                     }
 
-                    document.getElementById('routePreviewCard').classList.remove('d-none');
-                    document.getElementById('btnSubmitTrip').removeAttribute('disabled');
+                    const card = document.getElementById('routePreviewCard');
+                    if (card) card.classList.remove('d-none');
+
+                    const btn = document.getElementById('btnSubmitTrip');
+                    if (btn) btn.removeAttribute('disabled');
                 }
             })
             .catch(err => console.error(err));
@@ -1156,40 +1164,63 @@
         document.getElementById('simProgressBar').style.width = pct + "%";
 
         // Call backend API to record logs dynamically
-        fetch(`/trips/${simTripId}/simulate-gps`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({
-                lat: point.lat,
-                lng: point.lng,
-                speed: speed,
-                idle_seconds: idleSec,
-                is_harsh_braking: isHarsh
+        if (simTripId && simTripId !== 999) {
+            fetch(`/trips/${simTripId}/simulate-gps`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    lat: point.lat,
+                    lng: point.lng,
+                    speed: speed,
+                    idle_seconds: idleSec,
+                    is_harsh_braking: isHarsh
+                })
             })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                safetyScoreTracker = data.current_safety_score;
-                document.getElementById('simSafetyScore').innerText = safetyScoreTracker + "%";
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    safetyScoreTracker = data.current_safety_score;
+                    document.getElementById('simSafetyScore').innerText = safetyScoreTracker + "%";
 
-                if (speed > 80) {
-                    addSimFeedEvent(`Speed Violation: ${speed} km/h recorded. Safety score decreased to ${safetyScoreTracker}%.`, "danger");
-                } else if (isHarsh) {
-                    addSimFeedEvent(`Safety Trigger: Harsh Braking detected. Safety score decreased to ${safetyScoreTracker}%.`, "warning");
-                } else if (speed === 0) {
-                    addSimFeedEvent(`Idle State: Vehicle idling at traffic intersection. Fuel burning.`, "warning");
+                    if (speed > 80) {
+                        addSimFeedEvent(`Speed Violation: ${speed} km/h recorded. Safety score: ${safetyScoreTracker}%.`, "danger");
+                    } else if (isHarsh) {
+                        addSimFeedEvent(`Safety Trigger: Harsh Braking detected. Safety score: ${safetyScoreTracker}%.`, "warning");
+                    } else if (speed === 0) {
+                        addSimFeedEvent(`Idle State: VinFast EV idling at traffic intersection.`, "warning");
+                    } else {
+                        addSimFeedEvent(`GPS broadcast: Lat ${point.lat.toFixed(4)}, Lng ${point.lng.toFixed(4)}. Cruising smoothly.`, "secondary");
+                    }
                 } else {
-                    addSimFeedEvent(`GPS broadcast: Lat ${point.lat.toFixed(4)}, Lng ${point.lng.toFixed(4)}. Cruising smoothly.`, "secondary");
+                    logDemoStepFeed(speed, isHarsh, idleSec, point);
                 }
-            }
-        })
-        .catch(err => console.error(err));
+            })
+            .catch(() => {
+                logDemoStepFeed(speed, isHarsh, idleSec, point);
+            });
+        } else {
+            logDemoStepFeed(speed, isHarsh, idleSec, point);
+        }
 
         currentStepIndex++;
+    }
+
+    function logDemoStepFeed(speed, isHarsh, idleSec, point) {
+        if (speed > 80) {
+            safetyScoreTracker = Math.max(60, safetyScoreTracker - 5);
+            addSimFeedEvent(`Speed Violation: ${speed} km/h recorded. Safety score: ${safetyScoreTracker}%.`, "danger");
+        } else if (isHarsh) {
+            safetyScoreTracker = Math.max(60, safetyScoreTracker - 3);
+            addSimFeedEvent(`Harsh Braking Event: Sudden deceleration recorded.`, "warning");
+        } else if (speed === 0) {
+            addSimFeedEvent(`Idle State: VinFast EV idling at traffic intersection (+15s).`, "warning");
+        } else {
+            addSimFeedEvent(`GPS broadcast: Lat ${point.lat.toFixed(4)}, Lng ${point.lng.toFixed(4)} | Speed ${speed} km/h`, "secondary");
+        }
+        document.getElementById('simSafetyScore').innerText = safetyScoreTracker + "%";
     }
 
     function showCompleteFormModal() {

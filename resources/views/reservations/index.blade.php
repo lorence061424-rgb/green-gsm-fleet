@@ -183,32 +183,101 @@
                                 @endif
                             </td>
                             <td class="text-end">
-                                @if($res->status == 'pending')
-                                <form action="{{ route('reservations.update-status', $res->id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <input type="hidden" name="status" value="approved">
-                                    <button type="submit" class="btn btn-sm btn-outline-success rounded-3 me-1">
-                                        <i class="bi bi-check-lg"></i> Approve
-                                    </button>
-                                </form>
-                                <form action="{{ route('reservations.update-status', $res->id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <input type="hidden" name="status" value="rejected">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-3">
-                                        <i class="bi bi-x-lg"></i> Reject
-                                    </button>
-                                </form>
-                                @elseif($res->status == 'approved')
-                                <form action="{{ route('reservations.update-status', $res->id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <input type="hidden" name="status" value="completed">
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary rounded-3">
-                                        Mark Completed
-                                    </button>
-                                </form>
-                                @else
-                                <span class="text-muted small">No actions</span>
-                                @endif
+                                 @if($res->status == 'pending')
+                                     <!-- Trigger Approval Confirmation Modal -->
+                                     <button type="button" class="btn btn-sm btn-outline-success rounded-3 me-1" data-bs-toggle="modal" data-bs-target="#confirmApproveModal_{{ $res->id }}">
+                                         <i class="bi bi-check-lg"></i> Approve
+                                     </button>
+
+                                     <!-- Trigger Rejection Confirmation Modal -->
+                                     <button type="button" class="btn btn-sm btn-outline-danger rounded-3" data-bs-toggle="modal" data-bs-target="#confirmRejectModal_{{ $res->id }}">
+                                         <i class="bi bi-x-lg"></i> Reject
+                                     </button>
+
+                                     <!-- Modal: Confirm Approval -->
+                                     <div class="modal fade text-start" id="confirmApproveModal_{{ $res->id }}" tabindex="-1" aria-hidden="true">
+                                         <div class="modal-dialog modal-dialog-centered">
+                                             <div class="modal-content rounded-4 border-0 shadow">
+                                                 <div class="modal-header bg-success text-white">
+                                                     <h6 class="modal-title fw-bold"><i class="bi bi-check-circle-fill me-2"></i> Confirm Reservation Approval (#{{ $res->id }})</h6>
+                                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                 </div>
+                                                 <form action="{{ route('reservations.update-status', $res->id) }}" method="POST" onsubmit="return confirm('🟢 Final Confirmation:\nAre you sure you want to approve this vehicle reservation request?');">
+                                                     @csrf
+                                                     <input type="hidden" name="status" value="approved">
+                                                     <div class="modal-body p-4">
+                                                         <div class="alert alert-success bg-success bg-opacity-10 border-success border-opacity-25 text-dark rounded-3 mb-3 small">
+                                                             <i class="bi bi-info-circle-fill text-success me-1"></i> You are authorizing this VinFast EV vehicle reservation dispatch.
+                                                         </div>
+                                                         <div class="card bg-light border-0 p-3 mb-3 small text-dark">
+                                                             <div class="row g-2">
+                                                                 <div class="col-6"><strong>Requester:</strong> {{ $res->requestedBy->name ?? 'Staff User' }}</div>
+                                                                 <div class="col-6"><strong>Vehicle:</strong> {{ $res->vehicle->license_plate ?? 'N/A' }} ({{ $res->vehicle->make ?? '' }} {{ $res->vehicle->model ?? '' }})</div>
+                                                                 <div class="col-6"><strong>Date:</strong> {{ \Carbon\Carbon::parse($res->reservation_date)->format('M d, Y') }}</div>
+                                                                 <div class="col-6"><strong>Time:</strong> {{ $res->start_time }} - {{ $res->end_time }}</div>
+                                                                 <div class="col-12"><strong>Purpose:</strong> {{ $res->purpose }}</div>
+                                                             </div>
+                                                         </div>
+                                                         <div class="mb-3">
+                                                             <label class="form-label small fw-bold">Approval Notes / Dispatch Instructions (Optional)</label>
+                                                             <textarea name="approval_notes" class="form-control rounded-3" rows="2" placeholder="e.g., Authorized for official transit. Vehicle fully charged."></textarea>
+                                                         </div>
+                                                     </div>
+                                                     <div class="modal-footer bg-light border-0">
+                                                         <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
+                                                         <button type="submit" class="btn btn-success rounded-3 fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Confirm & Approve Reservation</button>
+                                                     </div>
+                                                 </form>
+                                             </div>
+                                         </div>
+                                     </div>
+
+                                     <!-- Modal: Confirm Rejection -->
+                                     <div class="modal fade text-start" id="confirmRejectModal_{{ $res->id }}" tabindex="-1" aria-hidden="true">
+                                         <div class="modal-dialog modal-dialog-centered">
+                                             <div class="modal-content rounded-4 border-0 shadow">
+                                                 <div class="modal-header bg-danger text-white">
+                                                     <h6 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i> Confirm Reservation Rejection (#{{ $res->id }})</h6>
+                                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                 </div>
+                                                 <form action="{{ route('reservations.update-status', $res->id) }}" method="POST" onsubmit="return confirm('⚠️ Final Confirmation:\nAre you sure you want to REJECT this vehicle reservation request?');">
+                                                     @csrf
+                                                     <input type="hidden" name="status" value="rejected">
+                                                     <div class="modal-body p-4">
+                                                         <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-25 text-dark rounded-3 mb-3 small">
+                                                             <i class="bi bi-exclamation-triangle-fill text-danger me-1"></i> Rejecting this request will cancel the reservation and notify the requester.
+                                                         </div>
+                                                         <div class="card bg-light border-0 p-3 mb-3 small text-dark">
+                                                             <div class="row g-2">
+                                                                 <div class="col-6"><strong>Requester:</strong> {{ $res->requestedBy->name ?? 'Staff User' }}</div>
+                                                                 <div class="col-6"><strong>Vehicle:</strong> {{ $res->vehicle->license_plate ?? 'N/A' }}</div>
+                                                                 <div class="col-12"><strong>Purpose:</strong> {{ $res->purpose }}</div>
+                                                             </div>
+                                                         </div>
+                                                         <div class="mb-3">
+                                                             <label class="form-label small fw-bold text-danger">Reason for Rejection (Required)</label>
+                                                             <textarea name="rejection_reason" class="form-control rounded-3 border-danger-subtle" rows="2" required placeholder="e.g., Vehicle scheduled for Preventive Maintenance Service (PMS)."></textarea>
+                                                         </div>
+                                                     </div>
+                                                     <div class="modal-footer bg-light border-0">
+                                                         <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
+                                                         <button type="submit" class="btn btn-danger rounded-3 fw-bold"><i class="bi bi-x-circle-fill me-1"></i> Confirm & Reject Request</button>
+                                                     </div>
+                                                 </form>
+                                             </div>
+                                         </div>
+                                     </div>
+                                 @elseif($res->status == 'approved')
+                                 <form action="{{ route('reservations.update-status', $res->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Confirm marking Reservation #{{ $res->id }} as Completed?');">
+                                     @csrf
+                                     <input type="hidden" name="status" value="completed">
+                                     <button type="submit" class="btn btn-sm btn-outline-secondary rounded-3">
+                                         Mark Completed
+                                     </button>
+                                 </form>
+                                 @else
+                                 <span class="text-muted small">No actions</span>
+                                 @endif
                             </td>
                         </tr>
                         @empty

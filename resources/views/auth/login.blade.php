@@ -276,7 +276,20 @@
                     </div>
                 </div>
 
-                <!-- Flash Messages -->
+                <!-- Validation Error Flash Messages -->
+                @if ($errors->any())
+                    <div class="alert alert-danger border-0 rounded-3 small mb-3 bg-danger bg-opacity-25 text-white shadow-sm" role="alert">
+                        <div class="d-flex align-items-center mb-1 fw-bold text-danger">
+                            <i class="bi bi-shield-x me-2 fs-5"></i> Password Policy Violation
+                        </div>
+                        <ul class="mb-0 ps-3 small" style="font-size: 12px;">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show border-0 rounded-3 small mb-3 bg-success bg-opacity-25 text-white fw-medium shadow-sm" role="alert">
                         <i class="bi bi-check-circle-fill text-success me-2"></i> {{ session('success') }}
@@ -301,17 +314,28 @@
                         </div>
                     </div>
 
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <label class="form-label small fw-bold text-white mb-0">Password</label>
-                            <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-30" style="font-size: 11px;">Default: password</span>
+                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-30" style="font-size: 11px;"><i class="bi bi-key-fill me-1"></i> Default: Password@123</span>
                         </div>
-                        <div class="input-group">
+                        <div class="input-group mb-2">
                             <span class="input-group-text border-end-0 text-white"><i class="bi bi-lock text-success"></i></span>
-                            <input type="password" id="passwordInput" name="password" class="form-control border-start-0 border-end-0 text-white fw-medium" value="password" required>
+                            <input type="password" id="passwordInput" name="password" class="form-control border-start-0 border-end-0 text-white fw-medium" value="Password@123" required>
                             <button class="btn btn-outline-secondary border border-start-0 text-white" type="button" id="togglePassword">
                                 <i class="bi bi-eye text-white" id="eyeIcon"></i>
                             </button>
+                        </div>
+                        <!-- Strict Password Complexity Rule Checklist -->
+                        <div class="p-2 rounded-3 border border-secondary border-opacity-30 bg-dark bg-opacity-50" style="font-size: 11px;">
+                            <span class="d-block text-white-50 fw-bold mb-1"><i class="bi bi-shield-lock-fill text-warning me-1"></i> Enterprise Password Complexity Rule:</span>
+                            <div class="d-flex flex-wrap gap-2 text-white-50">
+                                <span><i class="bi bi-check-circle-fill text-success"></i> 8+ Chars</span>
+                                <span><i class="bi bi-check-circle-fill text-success"></i> 1 Capital [A-Z]</span>
+                                <span><i class="bi bi-check-circle-fill text-success"></i> 1 Lowercase [a-z]</span>
+                                <span><i class="bi bi-check-circle-fill text-success"></i> 1 Number [0-9]</span>
+                                <span><i class="bi bi-check-circle-fill text-success"></i> 1 Special (@$!%*#?)</span>
+                            </div>
                         </div>
                     </div>
 

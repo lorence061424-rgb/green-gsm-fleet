@@ -21,7 +21,18 @@ class AuthController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'regex:/[A-Z]/',
+                'regex:/[a-z]/',
+                'regex:/[0-9]/',
+                'regex:/[@$!%*#?&~^()_+\-=\[\]{};\':"\\\\|,.<>\/?]/',
+            ],
+        ], [
+            'password.min' => 'Security Error: Password must be at least 8 characters long.',
+            'password.regex' => 'Security Error: Password fails complexity rules. Must include at least 1 Capital Letter (A-Z), 1 Lowercase Letter (a-z), 1 Digit (0-9), and 1 Special Character (e.g., @$!%*#?).',
         ]);
 
         $roleMap = [

@@ -20,14 +20,14 @@ class DatabaseSeeder extends Seeder
         $admin = User::create([
             'name' => 'Green GSM Admin',
             'email' => 'admin@greengsm.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('Password@123'),
             'role' => 'admin',
         ]);
 
         $dispatcher = User::create([
             'name' => 'John Dispatcher',
             'email' => 'dispatcher@greengsm.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('Password@123'),
             'role' => 'dispatcher',
         ]);
 
@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
             $user = User::create([
                 'name' => $name,
                 'email' => $email,
-                'password' => Hash::make('password'),
+                'password' => Hash::make('Password@123'),
                 'role' => 'driver',
             ]);
 

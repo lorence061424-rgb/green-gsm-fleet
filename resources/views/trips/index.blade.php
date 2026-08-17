@@ -633,7 +633,7 @@
                     <!-- Interactive Leaflet Live GPS Map -->
                     <div class="col-12">
                         <div class="card border-0 rounded-4 overflow-hidden shadow-sm" style="height: 230px; position: relative;">
-                            <div id="liveGpsMap" style="width: 100%; height: 100%; z-index: 1; min-height: 230px;"></div>
+                            <div id="liveGpsMap" style="width: 100%; height: 230px !important; min-height: 230px !important; z-index: 1; display: block;"></div>
                             <div class="position-absolute top-0 end-0 m-2 bg-dark bg-opacity-80 text-white px-3 py-1 rounded-pill small shadow-sm" style="z-index: 10; font-size: 11px; backdrop-filter: blur(4px);">
                                 <span class="spinner-grow spinner-grow-sm text-success me-1" role="status"></span>
                                 <span class="fw-bold text-success">LIVE METRO MANILA GPS</span>
@@ -894,29 +894,27 @@
         const mapContainer = document.getElementById('liveGpsMap');
         if (!mapContainer) return;
 
-        const startLatLng = hubCoords[startName] || [14.5995, 120.9842];
-        const endLatLng = hubCoords[endName] || [14.5547, 121.0244];
+        const startLatLng = getLatLng(startName) || [14.5995, 120.9842];
+        const endLatLng = getLatLng(endName) || [14.5547, 121.0244];
 
-        if (!leafletMap) {
-            leafletMap = L.map('liveGpsMap', { zoomControl: false }).setView(startLatLng, 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; OpenStreetMap &bull; Green GSM Telemetry'
-            }).addTo(leafletMap);
-        } else {
-            leafletMap.setView(startLatLng, 13);
+        if (leafletMap) {
+            try { leafletMap.remove(); } catch(e) {}
+            leafletMap = null;
         }
 
-        // Clear existing markers & lines if present
-        if (carMarker) leafletMap.removeLayer(carMarker);
-        if (polylineTrail) leafletMap.removeLayer(polylineTrail);
+        leafletMap = L.map('liveGpsMap', { zoomControl: true }).setView(startLatLng, 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap &bull; Green GSM Telemetry'
+        }).addTo(leafletMap);
 
         // Start & Destination Hub Markers
         L.circleMarker(startLatLng, { color: '#10B981', radius: 8, fillColor: '#10B981', fillOpacity: 0.9 }).addTo(leafletMap).bindPopup("<b>Start Hub:</b> " + startName);
         L.circleMarker(endLatLng, { color: '#EF4444', radius: 8, fillColor: '#EF4444', fillOpacity: 0.9 }).addTo(leafletMap).bindPopup("<b>Destination:</b> " + endName);
 
         // Polyline Trail
-        polylineTrail = L.polyline([startLatLng], { color: '#10B981', weight: 4, opacity: 0.85, dashArray: '6, 6' }).addTo(leafletMap);
+        polylineTrail = L.polyline([startLatLng, endLatLng], { color: '#10B981', weight: 4, opacity: 0.85, dashArray: '6, 6' }).addTo(leafletMap);
 
         // Custom Leaflet EV Icon
         const carIcon = L.divIcon({
@@ -928,7 +926,13 @@
 
         carMarker = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMap).bindPopup("<b>VinFast EV Live Position</b>");
 
-        setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 350);
+        [100, 300, 500, 800].forEach(delay => {
+            setTimeout(() => {
+                if (leafletMap) {
+                    leafletMap.invalidateSize();
+                }
+            }, delay);
+        });
     }
 
     function launchTelemetrySimulator(tripId, start, end, type, distance, predictedFuel) {
@@ -989,6 +993,11 @@
             } catch (err) {
                 console.log("Bootstrap modal auto fallback:", err);
             }
+
+            // Immediately trigger map load & invalidate size
+            setTimeout(() => {
+                initLeafletGpsMap(simStart, simEnd);
+            }, 150);
 
             simModalElement.addEventListener('shown.bs.modal', function () {
                 initLeafletGpsMap(simStart, simEnd);

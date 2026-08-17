@@ -711,7 +711,7 @@
                     <!-- Interactive Leaflet Live GPS Map -->
                     <div class="col-12">
                         <div class="card border-0 rounded-4 overflow-hidden shadow-sm" style="height: 230px; position: relative;">
-                            <div id="liveGpsMap" style="width: 100%; height: 230px !important; min-height: 230px !important; z-index: 1; display: block;"></div>
+                            <div id="liveGpsMapModal" style="width: 100%; height: 230px !important; min-height: 230px !important; z-index: 1; display: block;"></div>
                             <div class="position-absolute top-0 end-0 m-2 bg-dark bg-opacity-80 text-white px-3 py-1 rounded-pill small shadow-sm" style="z-index: 10; font-size: 11px; backdrop-filter: blur(4px);">
                                 <span class="spinner-grow spinner-grow-sm text-success me-1" role="status"></span>
                                 <span class="fw-bold text-success">LIVE METRO MANILA GPS</span>
@@ -726,32 +726,32 @@
                             <div class="row text-center mb-3">
                                 <div class="col-4 border-end">
                                     <small class="text-muted d-block" style="font-size: 11px;">Current Speed</small>
-                                    <h4 class="fw-bold mb-0 text-primary" id="simSpeed">0 <span class="fs-6 fw-normal">km/h</span></h4>
+                                    <h4 class="fw-bold mb-0 text-primary" id="simSpeedM">0 <span class="fs-6 fw-normal">km/h</span></h4>
                                 </div>
                                 <div class="col-4 border-end">
                                     <small class="text-muted d-block" style="font-size: 11px;">Idle Duration</small>
-                                    <h4 class="fw-bold mb-0 text-warning" id="simIdle">0s</h4>
+                                    <h4 class="fw-bold mb-0 text-warning" id="simIdleM">0s</h4>
                                 </div>
                                 <div class="col-4">
                                     <small class="text-muted d-block" style="font-size: 11px;">Safety Rating</small>
-                                    <h4 class="fw-bold mb-0 text-success" id="simSafetyScore">100%</h4>
+                                    <h4 class="fw-bold mb-0 text-success" id="simSafetyScoreM">100%</h4>
                                 </div>
                             </div>
 
                             <label class="form-label text-muted" style="font-size: 12px; font-weight: 500;">Route Completion Progress</label>
                             <div class="progress mb-2 rounded-pill" style="height: 12px;">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%" id="simProgressBar"></div>
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%" id="simProgressBarM"></div>
                             </div>
                             <div class="d-flex justify-content-between text-muted" style="font-size: 11px;">
-                                <span id="simStartHub">Start</span>
-                                <span id="simEndHub">End</span>
+                                <span id="simStartHubM">Start</span>
+                                <span id="simEndHubM">End</span>
                             </div>
                         </div>
 
                         <!-- Safety events and Alerts logs -->
                         <div class="card border-0 rounded-4 p-3 shadow-sm" style="height: 180px; overflow-y: auto;">
                             <h6 class="fw-bold mb-2 text-danger"><i class="bi bi-exclamation-triangle me-1"></i> Harsh Events & Driver Behavior Feed</h6>
-                            <div class="list-group list-group-flush" id="telemetryFeed" style="font-size: 12.5px;">
+                            <div class="list-group list-group-flush" id="telemetryFeedM" style="font-size: 12.5px;">
                                 <span class="text-muted text-center py-4">Waiting for telemetry logs to stream...</span>
                             </div>
                         </div>
@@ -763,11 +763,11 @@
                             <h6 class="fw-bold mb-3"><i class="bi bi-cpu me-1"></i> AI Consumption Estimator</h6>
                             <div class="mb-3">
                                 <small class="text-white-50 d-block" style="font-size: 11px;">AI Predicted Fuel</small>
-                                <h3 class="fw-bold text-info" id="simPredictedFuel">0.0 Liters</h3>
+                                <h3 class="fw-bold text-info" id="simPredictedFuelM">0.0 kWh</h3>
                             </div>
                             <div class="mb-3">
                                 <small class="text-white-50 d-block" style="font-size: 11px;">Estimated Actual Consumption</small>
-                                <h3 class="fw-bold text-warning" id="simRealtimeFuel">0.0 Liters</h3>
+                                <h3 class="fw-bold text-warning" id="simRealtimeFuelM">0.0 kWh</h3>
                             </div>
                             <div class="border-top border-secondary pt-3 mt-3">
                                 <h6 class="fw-bold" style="font-size: 13px;">Safety Recommendations:</h6>
@@ -950,10 +950,15 @@
     let simPredictedFuel = 0.0;
     let simVehicleType = "";
 
-    // Leaflet Live GPS Map Objects
+    // Leaflet Live GPS Map Objects (Main Page)
     let leafletMap = null;
     let carMarker = null;
     let polylineTrail = null;
+
+    // Leaflet Live GPS Map Objects (Modal)
+    let leafletMapModal = null;
+    let carMarkerModal = null;
+    let polylineTrailModal = null;
 
     const hubCoords = {
         'Manila Hub (Port Area)': [14.5995, 120.9842],
@@ -1076,6 +1081,57 @@
         }
     }
 
+    // Dedicated map initializer for the MODAL container (liveGpsMapModal)
+    function initModalMap(startName, endName) {
+        const mapContainer = document.getElementById('liveGpsMapModal');
+        if (!mapContainer) { console.error('Modal map container #liveGpsMapModal not found'); return; }
+
+        const startLatLng = getLatLng(startName) || [14.5995, 120.9842];
+        const endLatLng = getLatLng(endName) || [14.5547, 121.0244];
+
+        // Destroy previous modal map instance
+        if (leafletMapModal) {
+            try { leafletMapModal.remove(); } catch(e) {}
+            leafletMapModal = null;
+        }
+        mapContainer._leaflet_id = null;
+
+        try {
+            leafletMapModal = L.map('liveGpsMapModal', { zoomControl: true }).setView(startLatLng, 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap &bull; Green GSM Modal GPS'
+            }).addTo(leafletMapModal);
+
+            // Start & Destination Hub Markers
+            L.circleMarker(startLatLng, { color: '#10B981', radius: 8, fillColor: '#10B981', fillOpacity: 0.9 }).addTo(leafletMapModal).bindPopup("<b>Start Hub:</b> " + startName);
+            L.circleMarker(endLatLng, { color: '#EF4444', radius: 8, fillColor: '#EF4444', fillOpacity: 0.9 }).addTo(leafletMapModal).bindPopup("<b>Destination:</b> " + endName);
+
+            // Polyline Trail
+            polylineTrailModal = L.polyline([startLatLng, endLatLng], { color: '#10B981', weight: 4, opacity: 0.85, dashArray: '6, 6' }).addTo(leafletMapModal);
+
+            // Custom Leaflet EV Icon
+            const carIcon = L.divIcon({
+                className: 'custom-ev-marker-modal',
+                html: `<div style="background:#064E3B; border:2px solid #10B981; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 12px rgba(16,185,129,0.8);"><i class="bi bi-ev-front-fill text-white fs-6"></i></div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
+
+            carMarkerModal = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMapModal).bindPopup("<b>VinFast EV Live Position</b>");
+
+            // Force multiple invalidateSize calls to ensure tiles load inside modal
+            [100, 300, 500, 800, 1200, 2000].forEach(delay => {
+                setTimeout(() => {
+                    if (leafletMapModal) leafletMapModal.invalidateSize();
+                }, delay);
+            });
+        } catch(err) {
+            console.error("Modal Leaflet map initialization error:", err);
+        }
+    }
+
     function launchTelemetrySimulator(tripId, start, end, type, distance, predictedFuel) {
         simTripId = tripId || 999;
         simStart = start || 'Manila Hub (Port Area)';
@@ -1091,33 +1147,69 @@
         safetyScoreTracker = 100;
         aggressiveSpeedTrigger = false;
         harshBrakeTrigger = false;
+        if (activeSimulationInterval) {
+            clearInterval(activeSimulationInterval);
+            activeSimulationInterval = null;
+        }
 
-        const startElem = document.getElementById('simStartHub');
-        if (startElem) startElem.innerText = simStart;
+        // Update BOTH main-page and modal elements
+        const idsToUpdate = {
+            'simStartHub': simStart, 'simStartHubM': simStart,
+            'simEndHub': simEnd, 'simEndHubM': simEnd
+        };
+        Object.entries(idsToUpdate).forEach(([id, val]) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = val;
+        });
 
-        const endElem = document.getElementById('simEndHub');
-        if (endElem) endElem.innerText = simEnd;
+        // Reset progress bars
+        ['simProgressBar', 'simProgressBarM'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.width = "0%";
+        });
 
-        const pBar = document.getElementById('simProgressBar');
-        if (pBar) pBar.style.width = "0%";
+        // Reset predicted fuel
+        ['simPredictedFuel', 'simPredictedFuelM'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = simPredictedFuel.toFixed(2) + " kWh";
+        });
 
-        const pFuel = document.getElementById('simPredictedFuel');
-        if (pFuel) pFuel.innerText = simPredictedFuel.toFixed(2) + " kWh";
+        // Reset realtime fuel
+        ['simRealtimeFuel', 'simRealtimeFuelM'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = "0.00 kWh";
+        });
 
-        const rFuel = document.getElementById('simRealtimeFuel');
-        if (rFuel) rFuel.innerText = "0.00 kWh";
+        // Reset speed
+        ['simSpeed', 'simSpeedM'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = "0 <span class='fs-6 fw-normal'>km/h</span>";
+        });
 
-        const speedElem = document.getElementById('simSpeed');
-        if (speedElem) speedElem.innerHTML = "0 <span class='fs-6 fw-normal'>km/h</span>";
+        // Reset idle
+        ['simIdle', 'simIdleM'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = "0s";
+        });
 
-        const idleElem = document.getElementById('simIdle');
-        if (idleElem) idleElem.innerText = "0s";
+        // Reset safety score
+        ['simSafetyScore', 'simSafetyScoreM'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = "100%";
+        });
 
-        const scoreElem = document.getElementById('simSafetyScore');
-        if (scoreElem) scoreElem.innerText = "100%";
+        // Reset feed
+        ['telemetryFeed', 'telemetryFeedM'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = "<span class='text-muted text-center py-4'>Ready to run simulation stream.</span>";
+        });
 
-        const feedElem = document.getElementById('telemetryFeed');
-        if (feedElem) feedElem.innerHTML = "<span class='text-muted text-center py-4'>Ready to run simulation stream.</span>";
+        // Reset modal run button
+        const btnModal = document.getElementById('btnSimulateControl');
+        if (btnModal) {
+            btnModal.innerHTML = "<i class='bi bi-play-circle-fill me-1'></i> Run Telemetry Sim";
+            btnModal.removeAttribute('disabled');
+        }
 
         // Generate coordinate path
         generateSimulatedPathCoordinates(simStart, simEnd);
@@ -1128,21 +1220,19 @@
             if (simModalElement.parentNode !== document.body) {
                 document.body.appendChild(simModalElement);
             }
+
+            // Listen for modal shown event to init modal map AFTER it's visible
+            simModalElement.addEventListener('shown.bs.modal', function onModalShown() {
+                simModalElement.removeEventListener('shown.bs.modal', onModalShown);
+                initModalMap(simStart, simEnd);
+            });
+
             try {
                 const simModal = bootstrap.Modal.getOrCreateInstance(simModalElement);
                 simModal.show();
             } catch (err) {
                 console.log("Bootstrap modal auto fallback:", err);
             }
-
-            // Immediately trigger map load & invalidate size
-            setTimeout(() => {
-                initLeafletGpsMap(simStart, simEnd);
-            }, 150);
-
-            simModalElement.addEventListener('shown.bs.modal', function () {
-                initLeafletGpsMap(simStart, simEnd);
-            }, { once: true });
         }
     }
 
@@ -1164,15 +1254,18 @@
 
     function startGpsStreaming() {
         const btn = document.getElementById('btnSimulateControl');
+        const btnMain = document.getElementById('btnSimulateControlMain');
         if (activeSimulationInterval) {
             // Pause
             clearInterval(activeSimulationInterval);
             activeSimulationInterval = null;
-            if (btn) btn.innerHTML = "<i class='bi bi-play-circle-fill me-1'></i> Resume Sim";
-            const aggBtn = document.getElementById('btnTriggerAggressive');
-            if (aggBtn) aggBtn.setAttribute('disabled', 'disabled');
-            const brakeBtn = document.getElementById('btnTriggerHarshBrake');
-            if (brakeBtn) brakeBtn.setAttribute('disabled', 'disabled');
+            [btn, btnMain].forEach(b => { if (b) b.innerHTML = "<i class='bi bi-play-circle-fill me-1'></i> Resume Sim"; });
+            ['btnTriggerAggressive', 'btnTriggerAggressiveMain'].forEach(id => {
+                const el = document.getElementById(id); if (el) el.setAttribute('disabled', 'disabled');
+            });
+            ['btnTriggerHarshBrake', 'btnTriggerHarshBrakeMain'].forEach(id => {
+                const el = document.getElementById(id); if (el) el.setAttribute('disabled', 'disabled');
+            });
         } else {
             // Ensure path exists
             if (!simulatedPath || simulatedPath.length === 0) {
@@ -1183,14 +1276,18 @@
             }
 
             // Start
-            if (btn) btn.innerHTML = "<i class='bi bi-pause-circle-fill me-1'></i> Pause Sim";
-            const aggBtn = document.getElementById('btnTriggerAggressive');
-            if (aggBtn) aggBtn.removeAttribute('disabled');
-            const brakeBtn = document.getElementById('btnTriggerHarshBrake');
-            if (brakeBtn) brakeBtn.removeAttribute('disabled');
-            
-            const feed = document.getElementById('telemetryFeed');
-            if (feed) feed.innerHTML = "";
+            [btn, btnMain].forEach(b => { if (b) b.innerHTML = "<i class='bi bi-pause-circle-fill me-1'></i> Pause Sim"; });
+            ['btnTriggerAggressive', 'btnTriggerAggressiveMain'].forEach(id => {
+                const el = document.getElementById(id); if (el) el.removeAttribute('disabled');
+            });
+            ['btnTriggerHarshBrake', 'btnTriggerHarshBrakeMain'].forEach(id => {
+                const el = document.getElementById(id); if (el) el.removeAttribute('disabled');
+            });
+
+            // Clear both feeds
+            ['telemetryFeed', 'telemetryFeedM'].forEach(id => {
+                const el = document.getElementById(id); if (el) el.innerHTML = "";
+            });
 
             streamTelemetryStep(); // Immediately execute step 1!
             activeSimulationInterval = setInterval(streamTelemetryStep, 1200); // send GPS logs every 1.2s
@@ -1208,7 +1305,6 @@
     }
 
     function addSimFeedEvent(message, statusClass) {
-        const feed = document.getElementById('telemetryFeed');
         const timeString = new Date().toLocaleTimeString();
         const icon = statusClass === 'danger' ? 'bi-exclamation-triangle-fill' : (statusClass === 'warning' ? 'bi-x-octagon' : 'bi-info-circle');
         const item = `
@@ -1217,7 +1313,11 @@
                 <small class="text-muted">${timeString}</small>
             </div>
         `;
-        feed.insertAdjacentHTML('afterbegin', item);
+        // Update BOTH main-page and modal feeds
+        ['telemetryFeed', 'telemetryFeedM'].forEach(id => {
+            const feed = document.getElementById(id);
+            if (feed) feed.insertAdjacentHTML('afterbegin', item);
+        });
     }
 
     function streamTelemetryStep() {
@@ -1225,28 +1325,32 @@
             // Finished path
             clearInterval(activeSimulationInterval);
             activeSimulationInterval = null;
-            document.getElementById('btnSimulateControl').setAttribute('disabled', 'disabled');
-            
+
+            // Disable both sim buttons
+            ['btnSimulateControl', 'btnSimulateControlMain'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.setAttribute('disabled', 'disabled');
+            });
+
             addSimFeedEvent("Simulated ride path completed. Preparing ride summary reports.", "success");
-            
+
             // Redirect to final completes
             setTimeout(showCompleteFormModal, 1500);
             return;
         }
 
         const point = simulatedPath[currentStepIndex];
-        
-        // Update Leaflet Map Marker Position & Polyline Breadcrumb Trail
-        if (carMarker) {
-            carMarker.setLatLng([point.lat, point.lng]);
-        }
-        if (polylineTrail) {
-            polylineTrail.addLatLng([point.lat, point.lng]);
-        }
-        if (leafletMap) {
-            leafletMap.panTo([point.lat, point.lng], { animate: true, duration: 0.8 });
-        }
-        
+
+        // Update MAIN PAGE Leaflet Map Marker Position & Polyline
+        if (carMarker) carMarker.setLatLng([point.lat, point.lng]);
+        if (polylineTrail) polylineTrail.addLatLng([point.lat, point.lng]);
+        if (leafletMap) leafletMap.panTo([point.lat, point.lng], { animate: true, duration: 0.8 });
+
+        // Update MODAL Leaflet Map Marker Position & Polyline
+        if (carMarkerModal) carMarkerModal.setLatLng([point.lat, point.lng]);
+        if (polylineTrailModal) polylineTrailModal.addLatLng([point.lat, point.lng]);
+        if (leafletMapModal) leafletMapModal.panTo([point.lat, point.lng], { animate: true, duration: 0.8 });
+
         // Randomize speed based on triggers
         let speed = 40 + Math.floor(Math.random() * 20); // standard
         let idleSec = 0;
@@ -1254,7 +1358,7 @@
 
         if (aggressiveSpeedTrigger) {
             speed = 95 + Math.floor(Math.random() * 15); // speeding
-            aggressiveSpeedTrigger = false; 
+            aggressiveSpeedTrigger = false;
         } else if (harshBrakeTrigger) {
             speed = 10; // braking
             isHarsh = true;
@@ -1268,9 +1372,8 @@
 
         currentVehicleSpeed = speed;
 
-        // Cumulative fuel estimation calculation on UI
-        // physical factor estimate
-        let baseBurnRate = 0.08; 
+        // Cumulative fuel estimation
+        let baseBurnRate = 0.08;
         let speedDragMultiplier = 1.0;
         if (speed > 90) speedDragMultiplier = 1.25;
         if (speed === 0) {
@@ -1279,14 +1382,26 @@
             computedTripFuel += ((simDistance / simulatedPath.length) * baseBurnRate) * speedDragMultiplier;
         }
 
-        // Display updates
-        document.getElementById('simSpeed').innerHTML = `${speed} <span class="fs-6 fw-normal">km/h</span>`;
-        document.getElementById('simIdle').innerText = `${totalIdleSeconds}s`;
-        document.getElementById('simRealtimeFuel').innerText = computedTripFuel.toFixed(2) + " kWh";
+        // Display updates on BOTH main-page and modal
+        ['simSpeed', 'simSpeedM'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = `${speed} <span class="fs-6 fw-normal">km/h</span>`;
+        });
+        ['simIdle', 'simIdleM'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = `${totalIdleSeconds}s`;
+        });
+        ['simRealtimeFuel', 'simRealtimeFuelM'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = computedTripFuel.toFixed(2) + " kWh";
+        });
 
-        // Progress update
+        // Progress update on both
         const pct = Math.round((currentStepIndex / (simulatedPath.length - 1)) * 100);
-        document.getElementById('simProgressBar').style.width = pct + "%";
+        ['simProgressBar', 'simProgressBarM'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.width = pct + "%";
+        });
 
         // Call backend API to record logs dynamically
         if (simTripId && simTripId !== 999) {
@@ -1308,7 +1423,7 @@
             .then(data => {
                 if (data.status === 'success') {
                     safetyScoreTracker = data.current_safety_score;
-                    document.getElementById('simSafetyScore').innerText = safetyScoreTracker + "%";
+                    updateSafetyScoreBoth(safetyScoreTracker);
 
                     if (speed > 80) {
                         addSimFeedEvent(`Speed Violation: ${speed} km/h recorded. Safety score: ${safetyScoreTracker}%.`, "danger");
@@ -1333,6 +1448,14 @@
         currentStepIndex++;
     }
 
+    // Helper to update safety score on both main-page and modal
+    function updateSafetyScoreBoth(score) {
+        ['simSafetyScore', 'simSafetyScoreM'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = score + "%";
+        });
+    }
+
     function logDemoStepFeed(speed, isHarsh, idleSec, point) {
         if (speed > 80) {
             safetyScoreTracker = Math.max(60, safetyScoreTracker - 5);
@@ -1345,7 +1468,7 @@
         } else {
             addSimFeedEvent(`GPS broadcast: Lat ${point.lat.toFixed(4)}, Lng ${point.lng.toFixed(4)} | Speed ${speed} km/h`, "secondary");
         }
-        document.getElementById('simSafetyScore').innerText = safetyScoreTracker + "%";
+        updateSafetyScoreBoth(safetyScoreTracker);
     }
 
     function showCompleteFormModal() {

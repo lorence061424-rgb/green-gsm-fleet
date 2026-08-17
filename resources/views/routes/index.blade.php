@@ -255,14 +255,27 @@
     let currentRoutesData = [];
 
     document.addEventListener("DOMContentLoaded", function() {
-        map = L.map('routeVisualizerMap', { zoomControl: false }).setView([14.5995, 120.9842], 12);
+        map = L.map('routeVisualizerMap', { zoomControl: true }).setView([14.5995, 120.9842], 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; OpenStreetMap &bull; Green GSM Eco-Routing'
         }).addTo(map);
+
+        // Auto calculate on load
+        calculateOptimizedRoutes();
+
+        // Listen for location dropdown changes to auto-update map & options
+        const startElem = document.getElementById('routeStart');
+        const endElem = document.getElementById('routeEnd');
+        const typeElem = document.getElementById('routeVehicleType');
+
+        if (startElem) startElem.addEventListener('change', calculateOptimizedRoutes);
+        if (endElem) endElem.addEventListener('change', calculateOptimizedRoutes);
+        if (typeElem) typeElem.addEventListener('change', calculateOptimizedRoutes);
     });
 
     function getLatLng(name) {
+        if (!name) return [14.5995, 120.9842];
         if (hubCoords[name]) return hubCoords[name];
         for (let key in hubCoords) {
             if (name.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(name.toLowerCase())) {
@@ -273,11 +286,12 @@
     }
 
     function calculateOptimizedRoutes(e) {
-        e.preventDefault();
+        if (e && e.preventDefault) e.preventDefault();
         const start = document.getElementById('routeStart').value;
         const end = document.getElementById('routeEnd').value;
         const type = document.getElementById('routeVehicleType').value;
 
+        if (!start || !end) return;
         if (start === end) {
             alert('Please select different Origin and Destination hubs!');
             return;

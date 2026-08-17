@@ -1000,6 +1000,28 @@
 
     document.addEventListener("DOMContentLoaded", function() {
         initLeafletGpsMap('Manila Hub (Port Area)', 'Makati Hub (Ayala Ave)');
+
+        const startSelect = document.getElementById('start_location');
+        const endSelect = document.getElementById('end_location');
+
+        if (startSelect && endSelect) {
+            startSelect.addEventListener('change', function() {
+                const s = startSelect.value;
+                const e = endSelect.value || 'Makati';
+                if (s && e) {
+                    initLeafletGpsMap(s, e);
+                    generateSimulatedPathCoordinates(s, e);
+                }
+            });
+            endSelect.addEventListener('change', function() {
+                const s = startSelect.value || 'Manila';
+                const e = endSelect.value;
+                if (s && e) {
+                    initLeafletGpsMap(s, e);
+                    generateSimulatedPathCoordinates(s, e);
+                }
+            });
+        }
     });
 
     function initLeafletGpsMap(startName, endName) {

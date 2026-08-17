@@ -79,7 +79,7 @@ class TripController extends Controller
                 $best = $routeData['routes'][0];
                 $validated['distance_km'] = $best['distance_km'];
                 $validated['estimated_duration_minutes'] = $best['duration_minutes'];
-                $validated['estimated_fuel_liters'] = $best['estimated_fuel'];
+                $validated['estimated_fuel_liters'] = $best['predicted_kwh'] ?? $best['estimated_fuel'] ?? 2.5;
             } else {
                 $validated['distance_km'] = 15.0;
                 $validated['estimated_duration_minutes'] = 30;

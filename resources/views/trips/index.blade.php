@@ -7,7 +7,7 @@
         <p class="page-header-subtitle">Auto-dispatch available VinFast EV units, plan optimized eco-routes, and monitor live trips.</p>
     </div>
     <div class="col-auto d-flex gap-2 flex-wrap">
-        <button class="btn btn-danger rounded-3 fw-bold shadow-sm" onclick="launchTelemetrySimulator(999, 'Manila Hub (Port Area)', 'Makati Hub (Ayala Ave)', 'Sedan', 9.5, 3.8);">
+        <button class="btn btn-danger rounded-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#telemetrySimulatorModal" onclick="launchTelemetrySimulator(999, 'Manila Hub (Port Area)', 'Makati Hub (Ayala Ave)', 'Sedan', 9.5, 3.8);">
             <i class="bi bi-radar me-1"></i> Live Telemetry Simulator
         </button>
         <button class="btn btn-outline-success rounded-3" onclick="exportTripsToCSV();">
@@ -234,7 +234,7 @@
                                         </button>
                                     </form>
                                 @elseif($trip->status === 'active')
-                                    <button class="btn btn-sm btn-danger rounded-3 px-3 animate-pulse" onclick="launchTelemetrySimulator({{ $trip->id }}, '{{ addslashes($trip->start_location) }}', '{{ addslashes($trip->end_location) }}', '{{ addslashes($trip->vehicle->type ?? 'Sedan') }}', {{ $trip->distance_km ?? 10 }}, {{ $trip->estimated_fuel_liters ?? 2 }});">
+                                    <button class="btn btn-sm btn-danger rounded-3 px-3 animate-pulse" data-bs-toggle="modal" data-bs-target="#telemetrySimulatorModal" onclick="launchTelemetrySimulator({{ $trip->id }}, '{{ addslashes($trip->start_location) }}', '{{ addslashes($trip->end_location) }}', '{{ addslashes($trip->vehicle->type ?? 'Sedan') }}', {{ $trip->distance_km ?? 10 }}, {{ $trip->estimated_fuel_liters ?? 2 }});">
                                         <i class="bi bi-radar me-1"></i> Live Simulator
                                     </button>
                                 @elseif($trip->status === 'completed')
@@ -932,12 +932,12 @@
     }
 
     function launchTelemetrySimulator(tripId, start, end, type, distance, predictedFuel) {
-        simTripId = tripId;
-        simStart = start;
-        simEnd = end;
-        simDistance = distance;
-        simPredictedFuel = predictedFuel;
-        simVehicleType = type;
+        simTripId = tripId || 999;
+        simStart = start || 'Manila Hub (Port Area)';
+        simEnd = end || 'Makati Hub (Ayala Ave)';
+        simDistance = parseFloat(distance) || 9.5;
+        simPredictedFuel = parseFloat(predictedFuel) || 3.8;
+        simVehicleType = type || 'Sedan';
 
         // Reset variables
         currentStepIndex = 0;
@@ -947,30 +947,53 @@
         aggressiveSpeedTrigger = false;
         harshBrakeTrigger = false;
 
-        document.getElementById('simStartHub').innerText = start;
-        document.getElementById('simEndHub').innerText = end;
-        document.getElementById('simProgressBar').style.width = "0%";
-        document.getElementById('simPredictedFuel').innerText = predictedFuel.toFixed(2) + " kWh";
-        document.getElementById('simRealtimeFuel').innerText = "0.00 kWh";
-        document.getElementById('simSpeed').innerHTML = "0 <span class='fs-6 fw-normal'>km/h</span>";
-        document.getElementById('simIdle').innerText = "0s";
-        document.getElementById('simSafetyScore').innerText = "100%";
-        document.getElementById('telemetryFeed').innerHTML = "<span class='text-muted text-center py-4'>Ready to run simulation stream.</span>";
+        const startElem = document.getElementById('simStartHub');
+        if (startElem) startElem.innerText = simStart;
+
+        const endElem = document.getElementById('simEndHub');
+        if (endElem) endElem.innerText = simEnd;
+
+        const pBar = document.getElementById('simProgressBar');
+        if (pBar) pBar.style.width = "0%";
+
+        const pFuel = document.getElementById('simPredictedFuel');
+        if (pFuel) pFuel.innerText = simPredictedFuel.toFixed(2) + " kWh";
+
+        const rFuel = document.getElementById('simRealtimeFuel');
+        if (rFuel) rFuel.innerText = "0.00 kWh";
+
+        const speedElem = document.getElementById('simSpeed');
+        if (speedElem) speedElem.innerHTML = "0 <span class='fs-6 fw-normal'>km/h</span>";
+
+        const idleElem = document.getElementById('simIdle');
+        if (idleElem) idleElem.innerText = "0s";
+
+        const scoreElem = document.getElementById('simSafetyScore');
+        if (scoreElem) scoreElem.innerText = "100%";
+
+        const feedElem = document.getElementById('telemetryFeed');
+        if (feedElem) feedElem.innerHTML = "<span class='text-muted text-center py-4'>Ready to run simulation stream.</span>";
 
         // Generate coordinate path
-        generateSimulatedPathCoordinates(start, end);
+        generateSimulatedPathCoordinates(simStart, simEnd);
 
         // Move modal directly to document.body to prevent any stacking context issues
         const simModalElement = document.getElementById('telemetrySimulatorModal');
-        if (simModalElement && simModalElement.parentNode !== document.body) {
-            document.body.appendChild(simModalElement);
-        }
-        const simModal = bootstrap.Modal.getOrCreateInstance(simModalElement);
-        simModal.show();
+        if (simModalElement) {
+            if (simModalElement.parentNode !== document.body) {
+                document.body.appendChild(simModalElement);
+            }
+            try {
+                const simModal = bootstrap.Modal.getOrCreateInstance(simModalElement);
+                simModal.show();
+            } catch (err) {
+                console.log("Bootstrap modal auto fallback:", err);
+            }
 
-        simModalElement.addEventListener('shown.bs.modal', function () {
-            initLeafletGpsMap(start, end);
-        }, { once: true });
+            simModalElement.addEventListener('shown.bs.modal', function () {
+                initLeafletGpsMap(simStart, simEnd);
+            }, { once: true });
+        }
     }
 
     function generateSimulatedPathCoordinates(startName, endName) {

@@ -871,11 +871,33 @@
 
     const hubCoords = {
         'Manila Hub (Port Area)': [14.5995, 120.9842],
+        'Manila': [14.5995, 120.9842],
         'Makati Hub (Ayala Ave)': [14.5547, 121.0244],
+        'Makati': [14.5547, 121.0244],
         'BGC Taguig Hub (9th Ave)': [14.5515, 121.0510],
+        'BGC': [14.5515, 121.0510],
         'Pasay Hub (MOA Complex)': [14.5352, 120.9820],
-        'Quezon City Hub (Cubao)': [14.6178, 121.0572]
+        'Pasay': [14.5352, 120.9820],
+        'Quezon City Hub (Cubao)': [14.6178, 121.0572],
+        'Quezon City': [14.6178, 121.0572],
+        'NAIA Terminal 3 Hub': [14.5186, 121.0125],
+        'NAIA': [14.5186, 121.0125],
+        'Alabang Hub (Filinvest)': [14.4170, 121.0410],
+        'Alabang': [14.4170, 121.0410],
+        'Ortigas Hub (Ortigas Center)': [14.5869, 121.0614],
+        'Ortigas': [14.5869, 121.0614]
     };
+
+    function getLatLng(name) {
+        if (!name) return [14.5995, 120.9842];
+        if (hubCoords[name]) return hubCoords[name];
+        for (let key in hubCoords) {
+            if (name.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(name.toLowerCase())) {
+                return hubCoords[key];
+            }
+        }
+        return [14.5995, 120.9842];
+    }
 
     // Simulated path arrays (simple latitude/longitude interpolation arrays)
     let simulatedPath = [];
@@ -1007,8 +1029,8 @@
 
     function generateSimulatedPathCoordinates(startName, endName) {
         simulatedPath = [];
-        const startLatLng = hubCoords[startName] || [14.5995, 120.9842];
-        const endLatLng = hubCoords[endName] || [14.5547, 121.0244];
+        const startLatLng = getLatLng(startName);
+        const endLatLng = getLatLng(endName);
         
         const points = 14; // 14 real-time GPS updates
 

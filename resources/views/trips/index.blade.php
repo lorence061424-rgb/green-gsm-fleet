@@ -19,6 +19,25 @@
     </div>
 </div>
 
+<!-- Inter-System Integration Connections Badge Banner -->
+<div class="alert alert-dark bg-dark text-white border-0 rounded-4 p-3 mb-4 shadow-sm">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-diagram-3-fill text-success fs-4 me-2"></i>
+            <div>
+                <span class="fw-bold d-block text-white small">INTER-SYSTEM INTEGRATION PIPELINE (TEAM 7 &bull; DTPM)</span>
+                <span class="text-white fw-medium" style="font-size: 11px;">Connected to peer enterprise systems for telematics safety scores, mileage payroll exports, wallet credits, and live GPS map playback.</span>
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <span class="badge bg-info text-dark fw-bold px-3 py-2"><i class="bi bi-shield-check me-1"></i> Team 3: HRMS Telematics Scorecard</span>
+            <span class="badge bg-success text-white fw-bold px-3 py-2"><i class="bi bi-cash me-1"></i> Team 4: Payroll Mileage Export</span>
+            <span class="badge bg-warning text-dark fw-bold px-3 py-2"><i class="bi bi-wallet2 me-1"></i> Team 9: Ops Driver Wallet Credit</span>
+            <span class="badge bg-danger text-white fw-bold px-3 py-2"><i class="bi bi-geo-alt me-1"></i> Team 10: Live Passenger GPS Stream</span>
+        </div>
+    </div>
+</div>
+
 <!-- DTPM Top Metric Cards -->
 <div class="row g-3 mb-4">
     <div class="col-md-3">

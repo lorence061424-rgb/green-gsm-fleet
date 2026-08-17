@@ -20,6 +20,23 @@
     </div>
 </div>
 
+<!-- Inter-System Integration Connections Badge Banner -->
+<div class="alert alert-dark bg-dark text-white border-0 rounded-4 p-3 mb-4 shadow-sm">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-diagram-3-fill text-success fs-4 me-2"></i>
+            <div>
+                <span class="fw-bold d-block text-white small">INTER-SYSTEM INTEGRATION PIPELINE (TEAM 7 &bull; TCAO)</span>
+                <span class="text-white fw-medium" style="font-size: 11px;">Connected to peer enterprise systems for total fleet cost per km (₱/km) consolidation and eco-driver bonuses.</span>
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <span class="badge bg-info text-dark fw-bold px-3 py-2"><i class="bi bi-calculator me-1"></i> Team 5: Financials General Ledger</span>
+            <span class="badge bg-success text-white fw-bold px-3 py-2"><i class="bi bi-award me-1"></i> Team 4: Payroll Driver Eco Bonuses</span>
+        </div>
+    </div>
+</div>
+
 <!-- TCAO KPI Summary Cards -->
 <div class="row g-3 mb-4">
     <div class="col-md-3">

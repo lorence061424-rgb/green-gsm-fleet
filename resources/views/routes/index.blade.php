@@ -19,6 +19,23 @@
     </div>
 </div>
 
+<!-- Inter-System Integration Connections Badge Banner -->
+<div class="alert alert-dark bg-dark text-white border-0 rounded-4 p-3 mb-4 shadow-sm">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-diagram-3-fill text-success fs-4 me-2"></i>
+            <div>
+                <span class="fw-bold d-block text-white small">INTER-SYSTEM INTEGRATION PIPELINE (TEAM 7 &bull; RPO)</span>
+                <span class="text-white fw-medium" style="font-size: 11px;">Connected to peer enterprise systems for customer fare estimation, eco-routing, and hub transit paths.</span>
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <span class="badge bg-warning text-dark fw-bold px-3 py-2"><i class="bi bi-geo me-1"></i> Team 10: Passenger Fare & Route Estimation</span>
+            <span class="badge bg-success text-white fw-bold px-3 py-2"><i class="bi bi-buildings me-1"></i> Team 8: Facilities Hub Transit Paths</span>
+        </div>
+    </div>
+</div>
+
 <div class="row g-4 mb-4">
     <!-- Left Panel: Interactive Route Planner -->
     <div class="col-lg-5">

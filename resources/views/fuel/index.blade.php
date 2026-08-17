@@ -15,10 +15,27 @@
         </button>
         <button class="btn btn-outline-dark rounded-3" onclick="window.print();">
             <i class="bi bi-printer me-1"></i> Print / PDF
-        </button>
         <button class="btn btn-premium d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#logFuelModal">
             <i class="bi bi-plus-circle me-1"></i> Log EV Charging (kWh)
         </button>
+    </div>
+</div>
+
+<!-- Inter-System Integration Connections Badge Banner -->
+<div class="alert alert-dark bg-dark text-white border-0 rounded-4 p-3 mb-4 shadow-sm">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-diagram-3-fill text-success fs-4 me-2"></i>
+            <div>
+                <span class="fw-bold d-block text-white small">INTER-SYSTEM INTEGRATION PIPELINE (TEAM 7 &bull; FMS)</span>
+                <span class="text-white fw-medium" style="font-size: 11px;">Connected to peer enterprise systems for EV charging expense exports, station bay reservations, and driver energy logs.</span>
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <span class="badge bg-info text-dark fw-bold px-3 py-2"><i class="bi bi-cash-coin me-1"></i> Team 5: Financials Charging AP/GL</span>
+            <span class="badge bg-success text-white fw-bold px-3 py-2"><i class="bi bi-ev-station me-1"></i> Team 8: Facilities Charging Bays</span>
+            <span class="badge bg-warning text-dark fw-bold px-3 py-2"><i class="bi bi-person-badge me-1"></i> Team 9: Ops Driver Energy Logs</span>
+        </div>
     </div>
 </div>
 

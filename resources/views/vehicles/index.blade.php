@@ -22,6 +22,24 @@
     </div>
 </div>
 
+<!-- Inter-System Integration Connections Badge Banner -->
+<div class="alert alert-dark bg-dark text-white border-0 rounded-4 p-3 mb-4 shadow-sm">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-diagram-3-fill text-success fs-4 me-2"></i>
+            <div>
+                <span class="fw-bold d-block text-white small">INTER-SYSTEM INTEGRATION PIPELINE (TEAM 7 &bull; FVM)</span>
+                <span class="text-white fw-medium" style="font-size: 11px;">Connected to peer enterprise systems for driver registration, procurement, and facility compliance.</span>
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <span class="badge bg-info text-dark fw-bold px-3 py-2"><i class="bi bi-person-plus me-1"></i> Team 1: HRMS Driver Roster</span>
+            <span class="badge bg-warning text-dark fw-bold px-3 py-2"><i class="bi bi-cart-check me-1"></i> Team 6: Supply Chain Parts PR</span>
+            <span class="badge bg-success text-white fw-bold px-3 py-2"><i class="bi bi-building me-1"></i> Team 8: Facilities Contracts</span>
+        </div>
+    </div>
+</div>
+
 <!-- Registry Tabs -->
 <div class="card premium-card p-4">
     <ul class="nav nav-tabs border-bottom mb-4" id="registryTabs" role="tablist">

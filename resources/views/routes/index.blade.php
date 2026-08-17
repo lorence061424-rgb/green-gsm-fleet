@@ -197,13 +197,37 @@
 @section('scripts')
 <script>
     const hubCoords = {
+        'Manila': [14.5995, 120.9842],
+        'Manila Hub': [14.5995, 120.9842],
         'Manila Hub (Port Area)': [14.5995, 120.9842],
+        
+        'Makati': [14.5547, 121.0244],
+        'Makati Hub': [14.5547, 121.0244],
         'Makati Hub (Ayala Ave)': [14.5547, 121.0244],
+        
+        'BGC': [14.5492, 121.0558],
+        'BGC Hub': [14.5492, 121.0558],
         'BGC Hub (Market Market)': [14.5492, 121.0558],
-        'Quezon City Hub (Cubao)': [14.6178, 121.0572],
-        'Pasay Hub (MOA Complex)': [14.5352, 120.9823],
+        'Taguig': [14.5492, 121.0558],
+
+        'Quezon City': [14.6760, 121.0437],
+        'Quezon City Hub': [14.6760, 121.0437],
+        'Quezon City Hub (Cubao)': [14.6760, 121.0437],
+
+        'Pasay': [14.5378, 120.9993],
+        'Pasay Hub': [14.5378, 120.9993],
+        'Pasay Hub (MOA Complex)': [14.5378, 120.9993],
+
+        'NAIA': [14.5204, 121.0134],
+        'NAIA Hub': [14.5204, 121.0134],
         'NAIA Terminal 3 Hub': [14.5204, 121.0134],
+
+        'Alabang': [14.4172, 121.0408],
+        'Alabang Hub': [14.4172, 121.0408],
         'Alabang Hub (Filinvest)': [14.4172, 121.0408],
+
+        'Ortigas': [14.5869, 121.0614],
+        'Ortigas Hub': [14.5869, 121.0614],
         'Ortigas Hub (Ortigas Center)': [14.5869, 121.0614]
     };
 
@@ -211,6 +235,7 @@
     let startMarker = null;
     let endMarker = null;
     let polyline = null;
+    let currentRoutesData = [];
 
     document.addEventListener("DOMContentLoaded", function() {
         map = L.map('routeVisualizerMap', { zoomControl: false }).setView([14.5995, 120.9842], 12);
@@ -219,6 +244,16 @@
             attribution: '&copy; OpenStreetMap &bull; Green GSM Eco-Routing'
         }).addTo(map);
     });
+
+    function getLatLng(name) {
+        if (hubCoords[name]) return hubCoords[name];
+        for (let key in hubCoords) {
+            if (name.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(name.toLowerCase())) {
+                return hubCoords[key];
+            }
+        }
+        return [14.5995, 120.9842];
+    }
 
     function calculateOptimizedRoutes(e) {
         e.preventDefault();
@@ -241,15 +276,19 @@
         })
         .then(res => res.json())
         .then(data => {
-            renderRouteVisualizer(start, end);
+            currentRoutesData = data.routes;
             renderRouteOptionsList(data.routes);
+            renderRouteVisualizer(start, end, 0);
         })
         .catch(err => console.error(err));
     }
 
-    function renderRouteVisualizer(startName, endName) {
-        const startLatLng = hubCoords[startName] || [14.5995, 120.9842];
-        const endLatLng = hubCoords[endName] || [14.5547, 121.0244];
+    function renderRouteVisualizer(startName, endName, routeIdx = 0) {
+        const startLatLng = getLatLng(startName);
+        const endLatLng = getLatLng(endName);
+
+        const routeColors = ['#10B981', '#0284C7', '#F59E0B'];
+        const strokeColor = routeColors[routeIdx] || '#10B981';
 
         if (startMarker) map.removeLayer(startMarker);
         if (endMarker) map.removeLayer(endMarker);
@@ -266,27 +305,44 @@
             .then(osrmData => {
                 if (osrmData.routes && osrmData.routes.length > 0) {
                     const routeCoordinates = osrmData.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-                    polyline = L.polyline(routeCoordinates, { color: '#10B981', weight: 6, opacity: 0.9 }).addTo(map);
+                    polyline = L.polyline(routeCoordinates, { color: strokeColor, weight: 6, opacity: 0.9 }).addTo(map);
                     map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
                 } else {
-                    polyline = L.polyline([startLatLng, endLatLng], { color: '#10B981', weight: 6, opacity: 0.9, dashArray: '6, 6' }).addTo(map);
+                    polyline = L.polyline([startLatLng, endLatLng], { color: strokeColor, weight: 6, opacity: 0.9, dashArray: '6, 6' }).addTo(map);
                     map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
                 }
             })
             .catch(() => {
-                polyline = L.polyline([startLatLng, endLatLng], { color: '#10B981', weight: 6, opacity: 0.9, dashArray: '6, 6' }).addTo(map);
+                polyline = L.polyline([startLatLng, endLatLng], { color: strokeColor, weight: 6, opacity: 0.9, dashArray: '6, 6' }).addTo(map);
                 map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
             });
     }
 
+    function selectRouteOption(idx) {
+        const start = document.getElementById('routeStart').value;
+        const end = document.getElementById('routeEnd').value;
+
+        document.querySelectorAll('.route-option-card').forEach((card, i) => {
+            if (i === idx) {
+                card.classList.add('border-primary', 'shadow-sm');
+                card.classList.remove('border-secondary-subtle');
+            } else {
+                card.classList.remove('border-primary', 'shadow-sm');
+            }
+        });
+
+        renderRouteVisualizer(start, end, idx);
+    }
+
     function renderRouteOptionsList(routes) {
         const container = document.getElementById('routeResultsContainer');
-        container.innerHTML = `<h6 class="fw-bold mb-3 text-dark">Optimized Eco-Route Comparison Options:</h6>`;
+        container.innerHTML = `<h6 class="fw-bold mb-3 text-dark">Optimized Eco-Route Comparison Options (Click any route to view on map):</h6>`;
 
         routes.forEach((r, idx) => {
             const isBest = idx === 0;
+            const borderStyle = isBest ? 'border-success bg-success bg-opacity-10' : 'bg-light';
             container.innerHTML += `
-                <div class="card border rounded-3 p-3 mb-3 ${isBest ? 'border-success bg-success bg-opacity-10' : 'bg-light'}">
+                <div class="card border rounded-3 p-3 mb-3 route-option-card ${borderStyle}" onclick="selectRouteOption(${idx});" style="cursor: pointer;">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="fw-bold text-dark fs-6">${r.name}</span>
                         <span class="badge ${isBest ? 'bg-success text-white' : 'bg-secondary text-white'} px-3 py-1 rounded-pill">${r.tag || 'Eco-Path'}</span>

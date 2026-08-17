@@ -7,6 +7,9 @@
         <p class="page-header-subtitle">Auto-dispatch available VinFast EV units, plan optimized eco-routes, and monitor live trips.</p>
     </div>
     <div class="col-auto d-flex gap-2 flex-wrap">
+        <button class="btn btn-danger rounded-3 fw-bold shadow-sm" onclick="launchTelemetrySimulator(999, 'Manila Hub (Port Area)', 'Makati Hub (Ayala Ave)', 'Sedan', 9.5, 3.8);">
+            <i class="bi bi-radar me-1"></i> Live Telemetry Simulator
+        </button>
         <button class="btn btn-outline-success rounded-3" onclick="exportTripsToCSV();">
             <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
         </button>
@@ -231,7 +234,7 @@
                                         </button>
                                     </form>
                                 @elseif($trip->status === 'active')
-                                    <button class="btn btn-sm btn-danger rounded-3 px-3 animate-pulse" onclick="launchTelemetrySimulator({{ $trip->id }}, '{{ $trip->start_location }}', '{{ $trip->end_location }}', {{ json_encode($trip->vehicle->type ?? 'Sedan') }}, {{ $trip->distance_km }}, {{ $trip->estimated_fuel_liters }});">
+                                    <button class="btn btn-sm btn-danger rounded-3 px-3 animate-pulse" onclick="launchTelemetrySimulator({{ $trip->id }}, '{{ addslashes($trip->start_location) }}', '{{ addslashes($trip->end_location) }}', '{{ addslashes($trip->vehicle->type ?? 'Sedan') }}', {{ $trip->distance_km ?? 10 }}, {{ $trip->estimated_fuel_liters ?? 2 }});">
                                         <i class="bi bi-radar me-1"></i> Live Simulator
                                     </button>
                                 @elseif($trip->status === 'completed')

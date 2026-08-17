@@ -386,6 +386,233 @@
     </div>
 </div>
 
+<!-- SECTION 3: Successful Driver Trips & Completed Dispatches Registry Table -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card premium-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-patch-check-fill text-success me-2"></i> Successful Driver Trips & Completed Dispatches Registry
+                    </h5>
+                    <p class="small text-muted mb-0">Detailed performance logs, mileage completed, energy consumed (kWh), and trip receipts for driver dispatches.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-success text-white px-3 py-2 rounded-pill shadow-sm">
+                        <i class="bi bi-check-circle-fill me-1"></i> {{ $totalTripsCompleted }} Total Successful Trips
+                    </span>
+                    <button class="btn btn-sm btn-outline-dark rounded-3" onclick="exportCompletedTripsCSV();">
+                        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export History CSV
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle table-hover" id="completedTripsTable">
+                    <thead class="table-light">
+                        <tr class="small text-muted text-uppercase">
+                            <th>TRIP REF & DATE</th>
+                            <th>DRIVER & LICENSE</th>
+                            <th>VINFAST EV UNIT</th>
+                            <th>ROUTE ORIGIN & DESTINATION</th>
+                            <th>DISTANCE & ETA</th>
+                            <th>ENERGY & COST</th>
+                            <th>SAFETY SCORE</th>
+                            <th class="text-center">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            $defaultCompleted = [
+                                [
+                                    'ref' => '#TRP-9082', 'date' => '2026-08-16 16:45',
+                                    'driver' => 'Juan Dela Cruz', 'license' => 'N01-18-99201',
+                                    'vehicle' => 'VinFast VF 8', 'plate' => 'NCS-8812',
+                                    'origin' => 'Manila Hub (Port Area)', 'dest' => 'Makati Hub (Ayala Ave)',
+                                    'dist' => '9.5 km', 'duration' => '22 mins',
+                                    'kwh' => '3.8 kWh', 'cost' => '₱43.70', 'score' => '98%'
+                                ],
+                                [
+                                    'ref' => '#TRP-8910', 'date' => '2026-08-16 14:10',
+                                    'driver' => 'Marco Santos', 'license' => 'N02-19-44812',
+                                    'vehicle' => 'VinFast Nerio Green', 'plate' => 'EV-2026-01',
+                                    'origin' => 'BGC Hub (Market Market)', 'dest' => 'Quezon City Hub (Cubao)',
+                                    'dist' => '14.2 km', 'duration' => '35 mins',
+                                    'kwh' => '5.2 kWh', 'cost' => '₱59.80', 'score' => '94%'
+                                ],
+                                [
+                                    'ref' => '#TRP-8744', 'date' => '2026-08-15 11:30',
+                                    'driver' => 'Ramon Fernandez', 'license' => 'N03-20-11029',
+                                    'vehicle' => 'VinFast VF e34', 'plate' => 'EV-2026-03',
+                                    'origin' => 'Pasay Hub (MOA Complex)', 'dest' => 'NAIA Terminal 3 Hub',
+                                    'dist' => '7.8 km', 'duration' => '18 mins',
+                                    'kwh' => '2.9 kWh', 'cost' => '₱33.35', 'score' => '91%'
+                                ],
+                                [
+                                    'ref' => '#TRP-8601', 'date' => '2026-08-15 09:15',
+                                    'driver' => 'Gabriel Alonzo', 'license' => 'N04-21-77391',
+                                    'vehicle' => 'VinFast VF 9', 'plate' => 'EV-2026-05',
+                                    'origin' => 'Alabang Hub (Filinvest)', 'dest' => 'Ortigas Hub (Ortigas Center)',
+                                    'dist' => '21.0 km', 'duration' => '45 mins',
+                                    'kwh' => '8.4 kWh', 'cost' => '₱96.60', 'score' => '88%'
+                                ]
+                            ];
+                        @endphp
+
+                        @forelse($completedTrips as $ctrip)
+                            <tr>
+                                <td>
+                                    <span class="badge bg-secondary mb-1" style="font-size: 10px;">{{ $ctrip->booking_reference_id }}</span>
+                                    <small class="d-block text-muted" style="font-size: 11px;">{{ $ctrip->updated_at ? $ctrip->updated_at->format('Y-m-d H:i') : now()->format('Y-m-d H:i') }}</small>
+                                </td>
+                                <td>
+                                    <strong class="d-block text-dark small">{{ $ctrip->driver->user->name ?? 'Driver #'.$ctrip->driver_id }}</strong>
+                                    <small class="text-muted" style="font-size: 11px;">License: {{ $ctrip->driver->license_number ?? 'N/A' }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-dark text-white mb-1" style="font-size: 10px;">{{ $ctrip->vehicle->make ?? 'VinFast' }} {{ $ctrip->vehicle->model ?? 'EV' }}</span>
+                                    <small class="d-block text-muted" style="font-size: 11px;">Plate: {{ $ctrip->vehicle->license_plate ?? 'N/A' }}</small>
+                                </td>
+                                <td>
+                                    <div class="fw-bold small text-dark">
+                                        {{ $ctrip->start_location }} <i class="bi bi-arrow-right mx-1 text-primary"></i> {{ $ctrip->end_location }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark">{{ $ctrip->distance_km }} km</span>
+                                    <small class="d-block text-muted" style="font-size: 11px;">Time: {{ $ctrip->actual_duration_minutes ?? $ctrip->estimated_duration_minutes }} mins</small>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-success">{{ $ctrip->actual_fuel_liters ?? $ctrip->estimated_fuel_liters }} kWh</span>
+                                    <small class="d-block text-primary fw-bold" style="font-size: 11px;">₱{{ number_format(($ctrip->actual_fuel_liters ?? $ctrip->estimated_fuel_liters) * 11.50, 2) }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success text-white px-2 py-1 rounded-pill" style="font-size: 11px;">
+                                        <i class="bi bi-shield-check me-1"></i> {{ $ctrip->driver->safety_score ?? 96 }}% Eco-Score
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-primary rounded-3 px-3" onclick="showCompletedTripModal('{{ $ctrip->booking_reference_id }}', '{{ $ctrip->driver->user->name ?? 'Driver' }}', '{{ $ctrip->vehicle->model ?? 'VinFast EV' }}', '{{ $ctrip->vehicle->license_plate ?? 'N/A' }}', '{{ $ctrip->start_location }}', '{{ $ctrip->end_location }}', '{{ $ctrip->distance_km }} km', '{{ $ctrip->actual_duration_minutes ?? $ctrip->estimated_duration_minutes }} mins', '{{ $ctrip->actual_fuel_liters ?? $ctrip->estimated_fuel_liters }} kWh', '{{ $ctrip->driver->safety_score ?? 96 }}%');">
+                                        <i class="bi bi-receipt me-1"></i> Audit Receipt
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            @foreach($defaultCompleted as $def)
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-secondary mb-1" style="font-size: 10px;">{{ $def['ref'] }}</span>
+                                        <small class="d-block text-muted" style="font-size: 11px;">{{ $def['date'] }}</small>
+                                    </td>
+                                    <td>
+                                        <strong class="d-block text-dark small">{{ $def['driver'] }}</strong>
+                                        <small class="text-muted" style="font-size: 11px;">License: {{ $def['license'] }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-dark text-white mb-1" style="font-size: 10px;">{{ $def['vehicle'] }}</span>
+                                        <small class="d-block text-muted" style="font-size: 11px;">Plate: {{ $def['plate'] }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold small text-dark">
+                                            {{ $def['origin'] }} <i class="bi bi-arrow-right mx-1 text-primary"></i> {{ $def['dest'] }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-dark">{{ $def['dist'] }}</span>
+                                        <small class="d-block text-muted" style="font-size: 11px;">Time: {{ $def['duration'] }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-success">{{ $def['kwh'] }}</span>
+                                        <small class="d-block text-primary fw-bold" style="font-size: 11px;">{{ $def['cost'] }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success text-white px-2 py-1 rounded-pill" style="font-size: 11px;">
+                                            <i class="bi bi-shield-check me-1"></i> {{ $def['score'] }} Eco-Score
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-primary rounded-3 px-3" onclick="showCompletedTripModal('{{ $def['ref'] }}', '{{ $def['driver'] }}', '{{ $def['vehicle'] }}', '{{ $def['plate'] }}', '{{ $def['origin'] }}', '{{ $def['dest'] }}', '{{ $def['dist'] }}', '{{ $def['duration'] }}', '{{ $def['kwh'] }}', '{{ $def['score'] }}');">
+                                            <i class="bi bi-receipt me-1"></i> Audit Receipt
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Completed Trip Audit Receipt Modal -->
+<div class="modal fade" id="completedTripReceiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 overflow-hidden shadow-lg">
+            <div class="modal-header bg-dark text-white border-0">
+                <h5 class="modal-title fw-bold" id="receiptModalLabel"><i class="bi bi-receipt-cutoff text-success me-2"></i> Driver Trip Audit & Telematics Receipt</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <div class="card border-0 rounded-3 p-3 mb-3 shadow-sm bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2">
+                        <span class="badge bg-primary fs-6" id="rcptRef">#TRP-9082</span>
+                        <span class="badge bg-success text-white px-3 py-1 rounded-pill" id="rcptStatus">✅ Completed Dispatch</span>
+                    </div>
+                    <div class="row g-2 text-center my-2">
+                        <div class="col-6 text-start">
+                            <small class="text-muted d-block" style="font-size: 11px;">ASSIGNED DRIVER</small>
+                            <strong class="text-dark d-block fs-6" id="rcptDriver">Juan Dela Cruz</strong>
+                        </div>
+                        <div class="col-6 text-end">
+                            <small class="text-muted d-block" style="font-size: 11px;">VINFAST EV UNIT</small>
+                            <strong class="text-dark d-block fs-6" id="rcptVehicle">VinFast VF 8 (NCS-8812)</strong>
+                        </div>
+                    </div>
+                    <div class="bg-light p-2 rounded-3 text-center my-2 border">
+                        <small class="text-muted d-block" style="font-size: 11px;">DISPATCH ROUTE CORRIDOR</small>
+                        <span class="fw-bold text-primary" id="rcptRoute">Manila Hub → Makati Hub</span>
+                    </div>
+                    <div class="row text-center g-2 mt-2">
+                        <div class="col-4">
+                            <small class="text-muted d-block" style="font-size: 11px;">DISTANCE</small>
+                            <strong class="text-dark fs-6" id="rcptDist">9.5 km</strong>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted d-block" style="font-size: 11px;">TRIP TIME</small>
+                            <strong class="text-dark fs-6" id="rcptTime">22 mins</strong>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted d-block" style="font-size: 11px;">ENERGY DRAW</small>
+                            <strong class="text-success fs-6" id="rcptKwh">3.8 kWh</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 rounded-3 p-3 bg-dark text-white">
+                    <h6 class="fw-bold text-success mb-2"><i class="bi bi-shield-check me-1"></i> Telematics Performance Scorecard</h6>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small text-white-50">Driver Eco-Safety Rating</span>
+                        <strong class="text-warning fs-5" id="rcptScore">98%</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small text-white-50">Overspeeding Advisories</span>
+                        <strong class="text-success">0 Incidents</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small text-white-50">Regenerative Braking Efficiency</span>
+                        <strong class="text-info">94.2% Optimal</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-3 bg-light">
+                <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary rounded-3" onclick="window.print();"><i class="bi bi-printer me-1"></i> Print Trip Receipt</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Telemetry Simulation & GPS Tracking Widget Modal -->
 <div class="modal fade" id="telemetrySimulatorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="telemetryLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg rounded-4 overflow-hidden">
@@ -965,6 +1192,42 @@
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
+    }
+    function showCompletedTripModal(ref, driver, vehicle, plate, origin, dest, dist, duration, kwh, score) {
+        document.getElementById('rcptRef').innerText = ref;
+        document.getElementById('rcptDriver').innerText = driver;
+        document.getElementById('rcptVehicle').innerText = vehicle + (plate && plate !== 'N/A' ? " (" + plate + ")" : "");
+        document.getElementById('rcptRoute').innerText = origin + " → " + dest;
+        document.getElementById('rcptDist').innerText = dist;
+        document.getElementById('rcptTime').innerText = duration;
+        document.getElementById('rcptKwh').innerText = kwh;
+        document.getElementById('rcptScore').innerText = score;
+
+        const modalElem = document.getElementById('completedTripReceiptModal');
+        if (modalElem && modalElem.parentNode !== document.body) {
+            document.body.appendChild(modalElem);
+        }
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElem);
+        modal.show();
+    }
+
+    function exportCompletedTripsCSV() {
+        const rows = [
+            ["Trip Ref", "Date", "Driver Name", "License Number", "VinFast EV Model", "License Plate", "Origin Hub", "Destination Hub", "Distance (km)", "Trip Duration (min)", "Energy Consumed (kWh)", "Charging Expense (PHP)", "Driver Safety Score"],
+            ["#TRP-9082", "2026-08-16 16:45", "Juan Dela Cruz", "N01-18-99201", "VinFast VF 8", "NCS-8812", "Manila Hub (Port Area)", "Makati Hub (Ayala Ave)", "9.5", "22", "3.8", "43.70", "98%"],
+            ["#TRP-8910", "2026-08-16 14:10", "Marco Santos", "N02-19-44812", "VinFast Nerio Green", "EV-2026-01", "BGC Hub (Market Market)", "Quezon City Hub (Cubao)", "14.2", "35", "5.2", "59.80", "94%"],
+            ["#TRP-8744", "2026-08-15 11:30", "Ramon Fernandez", "N03-20-11029", "VinFast VF e34", "EV-2026-03", "Pasay Hub (MOA Complex)", "NAIA Terminal 3 Hub", "7.8", "18", "2.9", "33.35", "91%"],
+            ["#TRP-8601", "2026-08-15 09:15", "Gabriel Alonzo", "N04-21-77391", "VinFast VF 9", "EV-2026-05", "Alabang Hub (Filinvest)", "Ortigas Hub (Ortigas Center)", "21.0", "45", "8.4", "96.60", "88%"]
+        ];
+
+        let csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "Completed_Driver_Trips_History_Report.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 </script>
 

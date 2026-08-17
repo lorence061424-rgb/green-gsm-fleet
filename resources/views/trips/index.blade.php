@@ -83,10 +83,10 @@
 </div>
 
 <div class="row g-4 mb-4">
-    <!-- Left Panel: Trip Planner Form -->
+    <!-- Left Panel: Trip Execution & Launch Form -->
     <div class="col-md-5">
         <div class="card premium-card p-4 h-100">
-            <h5 class="fw-bold mb-3"><i class="bi bi-compass-fill text-primary me-2"></i> Dispatch & Schedule Trip</h5>
+            <h5 class="fw-bold mb-3"><i class="bi bi-play-circle-fill text-primary me-2"></i> Execute & Launch Telematics Trip</h5>
             
             <form action="{{ route('trips.store') }}" method="POST" id="tripForm">
                 @csrf

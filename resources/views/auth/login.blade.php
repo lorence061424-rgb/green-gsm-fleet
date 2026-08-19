@@ -375,7 +375,7 @@
     <script>
     function fillRole(email) {
         document.getElementById('emailInput').value = email;
-        document.getElementById('passwordInput').value = 'password';
+        document.getElementById('passwordInput').value = 'Password@123';
     }
 
     // Toggle password visibility

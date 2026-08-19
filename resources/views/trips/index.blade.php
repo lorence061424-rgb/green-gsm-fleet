@@ -984,15 +984,15 @@
         'Ortigas': [14.5869, 121.0614]
     };
 
-    function getLatLng(name) {
-        if (!name) return [14.5995, 120.9842];
+    function getLatLng(name, fallback) {
+        if (!name) return fallback || [14.5995, 120.9842];
         if (hubCoords[name]) return hubCoords[name];
         for (let key in hubCoords) {
             if (name.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(name.toLowerCase())) {
                 return hubCoords[key];
             }
         }
-        return [14.5995, 120.9842];
+        return fallback || [14.5995, 120.9842];
     }
 
     // Simulated path arrays (simple latitude/longitude interpolation arrays)
@@ -1271,16 +1271,21 @@
 
     function generateSimulatedPathCoordinates(startName, endName) {
         simulatedPath = [];
-        const startLatLng = getLatLng(startName);
-        const endLatLng = getLatLng(endName);
+        let startLatLng = getLatLng(startName, [14.5995, 120.9842]);
+        let endLatLng = getLatLng(endName, [14.5547, 121.0244]);
+
+        // Guarantee start and destination coordinates are distinct points across Metro Manila
+        if (Math.abs(startLatLng[0] - endLatLng[0]) < 0.002 && Math.abs(startLatLng[1] - endLatLng[1]) < 0.002) {
+            endLatLng = [14.5547, 121.0244]; // Fallback destination: Makati Hub (Ayala Ave)
+        }
         
-        const points = 18; // 18 real-time GPS updates
+        const points = 20;
 
         for (let i = 0; i <= points; i++) {
             let f = i / points;
             simulatedPath.push({
-                lat: startLatLng[0] + (endLatLng[0] - startLatLng[0]) * f + (Math.random() - 0.5) * 0.0015,
-                lng: startLatLng[1] + (endLatLng[1] - startLatLng[1]) * f + (Math.random() - 0.5) * 0.0015
+                lat: startLatLng[0] + (endLatLng[0] - startLatLng[0]) * f + (Math.random() - 0.5) * 0.0012,
+                lng: startLatLng[1] + (endLatLng[1] - startLatLng[1]) * f + (Math.random() - 0.5) * 0.0012
             });
         }
     }

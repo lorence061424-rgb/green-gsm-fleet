@@ -1140,8 +1140,8 @@
             L.circleMarker(startLatLng, { color: '#10B981', radius: 8, fillColor: '#10B981', fillOpacity: 0.9 }).addTo(leafletMapModal).bindPopup("<b>Start Hub:</b> " + startName);
             L.circleMarker(endLatLng, { color: '#EF4444', radius: 8, fillColor: '#EF4444', fillOpacity: 0.9 }).addTo(leafletMapModal).bindPopup("<b>Destination:</b> " + endName);
 
-            // Polyline Trail
-            polylineTrailModal = L.polyline([startLatLng, endLatLng], { color: '#10B981', weight: 4, opacity: 0.85, dashArray: '6, 6' }).addTo(leafletMapModal);
+            // Polyline Trail (Progressive breadcrumbs)
+            polylineTrailModal = L.polyline([startLatLng], { color: '#10B981', weight: 5, opacity: 0.9 }).addTo(leafletMapModal);
 
             // Custom Leaflet EV Icon with Pulsing Radar Effect
             const carIcon = L.divIcon({
@@ -1158,10 +1158,18 @@
 
             carMarkerModal = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMapModal).bindPopup("<b>VinFast EV Live Position</b>");
 
+            // Fit map camera to frame entire route
+            try {
+                leafletMapModal.fitBounds([startLatLng, endLatLng], { padding: [30, 30] });
+            } catch(e) {}
+
             // Recalculate tile sizes once modal transition settles
             [100, 250, 500, 800, 1200].forEach(delay => {
                 setTimeout(() => {
-                    if (leafletMapModal) leafletMapModal.invalidateSize();
+                    if (leafletMapModal) {
+                        leafletMapModal.invalidateSize();
+                        leafletMapModal.fitBounds([startLatLng, endLatLng], { padding: [30, 30] });
+                    }
                 }, delay);
             });
         } catch(err) {
@@ -1379,7 +1387,6 @@
         try {
             if (carMarker) carMarker.setLatLng([point.lat, point.lng]);
             if (polylineTrail) polylineTrail.addLatLng([point.lat, point.lng]);
-            if (leafletMap) leafletMap.setView([point.lat, point.lng], 14, { animate: true });
         } catch (e) {
             console.warn("Main map animation frame bypassed:", e);
         }
@@ -1388,7 +1395,6 @@
         try {
             if (carMarkerModal) carMarkerModal.setLatLng([point.lat, point.lng]);
             if (polylineTrailModal) polylineTrailModal.addLatLng([point.lat, point.lng]);
-            if (leafletMapModal) leafletMapModal.setView([point.lat, point.lng], 14, { animate: true });
         } catch (e) {
             console.warn("Modal map animation frame bypassed:", e);
         }

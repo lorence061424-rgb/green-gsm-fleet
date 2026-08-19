@@ -1,6 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    @keyframes pulse-ring {
+        0% { transform: scale(0.7); opacity: 0.9; }
+        50% { transform: scale(1.3); opacity: 0.4; }
+        100% { transform: scale(1.6); opacity: 0; }
+    }
+</style>
 <div class="row align-items-center mb-4">
     <div class="col">
         <h2 class="page-header-title">Driver and Trip Performance Monitoring</h2>
@@ -1136,12 +1143,17 @@
             // Polyline Trail
             polylineTrailModal = L.polyline([startLatLng, endLatLng], { color: '#10B981', weight: 4, opacity: 0.85, dashArray: '6, 6' }).addTo(leafletMapModal);
 
-            // Custom Leaflet EV Icon
+            // Custom Leaflet EV Icon with Pulsing Radar Effect
             const carIcon = L.divIcon({
                 className: 'custom-ev-marker-modal',
-                html: `<div style="background:#064E3B; border:2px solid #10B981; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 12px rgba(16,185,129,0.8);"><i class="bi bi-ev-front-fill text-white fs-6"></i></div>`,
-                iconSize: [32, 32],
-                iconAnchor: [16, 16]
+                html: `<div style="position:relative; width:36px; height:36px;">
+                    <div style="position:absolute; top:-4px; left:-4px; width:44px; height:44px; background:rgba(16,185,129,0.35); border-radius:50%; animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;"></div>
+                    <div style="background:#064E3B; border:2px solid #10B981; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 16px rgba(16,185,129,0.9); position:relative; z-index:2;">
+                        <i class="bi bi-ev-front-fill text-white fs-6"></i>
+                    </div>
+                </div>`,
+                iconSize: [36, 36],
+                iconAnchor: [18, 18]
             });
 
             carMarkerModal = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMapModal).bindPopup("<b>VinFast EV Live Position</b>");
@@ -1367,7 +1379,7 @@
         try {
             if (carMarker) carMarker.setLatLng([point.lat, point.lng]);
             if (polylineTrail) polylineTrail.addLatLng([point.lat, point.lng]);
-            if (leafletMap) leafletMap.panTo([point.lat, point.lng], { animate: true, duration: 0.8 });
+            if (leafletMap) leafletMap.setView([point.lat, point.lng], 14, { animate: true });
         } catch (e) {
             console.warn("Main map animation frame bypassed:", e);
         }
@@ -1376,7 +1388,7 @@
         try {
             if (carMarkerModal) carMarkerModal.setLatLng([point.lat, point.lng]);
             if (polylineTrailModal) polylineTrailModal.addLatLng([point.lat, point.lng]);
-            if (leafletMapModal) leafletMapModal.panTo([point.lat, point.lng], { animate: true, duration: 0.8 });
+            if (leafletMapModal) leafletMapModal.setView([point.lat, point.lng], 14, { animate: true });
         } catch (e) {
             console.warn("Modal map animation frame bypassed:", e);
         }

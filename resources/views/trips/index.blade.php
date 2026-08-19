@@ -1009,19 +1009,19 @@
         simDistance = 9.5;
         simPredictedFuel = 3.8;
 
+        // Move modal to body to prevent container context clipping
+        const simModalElement = document.getElementById('telemetrySimulatorModal');
+        if (simModalElement && simModalElement.parentNode !== document.body) {
+            document.body.appendChild(simModalElement);
+        }
+
         initLeafletGpsMap(simStart, simEnd);
         generateSimulatedPathCoordinates(simStart, simEnd);
 
-        // Global Bootstrap modal listener to initialize map tiles when shown
-        const simModalElement = document.getElementById('telemetrySimulatorModal');
+        // Global Bootstrap modal listener to initialize map tiles ONCE modal is fully visible
         if (simModalElement) {
             simModalElement.addEventListener('shown.bs.modal', function () {
                 initModalMap(simStart || 'Manila Hub (Port Area)', simEnd || 'Makati Hub (Ayala Ave)');
-                [50, 150, 300, 500, 1000].forEach(delay => {
-                    setTimeout(() => {
-                        if (leafletMapModal) leafletMapModal.invalidateSize();
-                    }, delay);
-                });
             });
         }
 
@@ -1109,11 +1109,14 @@
         const mapContainer = document.getElementById('liveGpsMapModal');
         if (!mapContainer) return;
 
+        // Ensure container is styled and visible before Leaflet initialization
         mapContainer.style.height = '230px';
+        mapContainer.style.minHeight = '230px';
+
         const startLatLng = getLatLng(startName) || [14.5995, 120.9842];
         const endLatLng = getLatLng(endName) || [14.5547, 121.0244];
 
-        // Destroy previous modal map instance
+        // Destroy previous modal map instance if exists
         if (leafletMapModal) {
             try { leafletMapModal.remove(); } catch(e) {}
             leafletMapModal = null;
@@ -1145,8 +1148,8 @@
 
             carMarkerModal = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMapModal).bindPopup("<b>VinFast EV Live Position</b>");
 
-            // Force multiple invalidateSize calls to ensure tiles load inside modal
-            [50, 150, 300, 500, 800, 1200, 2000].forEach(delay => {
+            // Recalculate tile sizes once modal transition settles
+            [100, 250, 500, 800, 1200].forEach(delay => {
                 setTimeout(() => {
                     if (leafletMapModal) leafletMapModal.invalidateSize();
                 }, delay);
@@ -1238,9 +1241,14 @@
             }
         });
 
-        // Generate coordinate path & init modal map immediately
+        // Generate coordinate path for simulation
         generateSimulatedPathCoordinates(simStart, simEnd);
-        initModalMap(simStart, simEnd);
+
+        // If modal is already shown (e.g., calling from within modal), initialize modal map directly
+        const modalEl = document.getElementById('telemetrySimulatorModal');
+        if (modalEl && modalEl.classList.contains('show')) {
+            initModalMap(simStart, simEnd);
+        }
     }
 
     function generateSimulatedPathCoordinates(startName, endName) {
@@ -1357,15 +1365,23 @@
 
         const point = simulatedPath[currentStepIndex];
 
-        // Update MAIN PAGE Leaflet Map Marker Position & Polyline
-        if (carMarker) carMarker.setLatLng([point.lat, point.lng]);
-        if (polylineTrail) polylineTrail.addLatLng([point.lat, point.lng]);
-        if (leafletMap) leafletMap.panTo([point.lat, point.lng], { animate: true, duration: 0.8 });
+        // Update MAIN PAGE Leaflet Map Marker Position & Polyline safely
+        try {
+            if (carMarker) carMarker.setLatLng([point.lat, point.lng]);
+            if (polylineTrail) polylineTrail.addLatLng([point.lat, point.lng]);
+            if (leafletMap) leafletMap.panTo([point.lat, point.lng], { animate: true, duration: 0.8 });
+        } catch (e) {
+            console.warn("Main map animation frame bypassed:", e);
+        }
 
-        // Update MODAL Leaflet Map Marker Position & Polyline
-        if (carMarkerModal) carMarkerModal.setLatLng([point.lat, point.lng]);
-        if (polylineTrailModal) polylineTrailModal.addLatLng([point.lat, point.lng]);
-        if (leafletMapModal) leafletMapModal.panTo([point.lat, point.lng], { animate: true, duration: 0.8 });
+        // Update MODAL Leaflet Map Marker Position & Polyline safely
+        try {
+            if (carMarkerModal) carMarkerModal.setLatLng([point.lat, point.lng]);
+            if (polylineTrailModal) polylineTrailModal.addLatLng([point.lat, point.lng]);
+            if (leafletMapModal) leafletMapModal.panTo([point.lat, point.lng], { animate: true, duration: 0.8 });
+        } catch (e) {
+            console.warn("Modal map animation frame bypassed:", e);
+        }
 
         // Randomize speed based on triggers
         let speed = 40 + Math.floor(Math.random() * 20); // standard
@@ -1460,6 +1476,8 @@
         } else {
             logDemoStepFeed(speed, isHarsh, idleSec, point);
         }
+
+    }
 
     // Helper to update safety score on both main-page and modal
     function updateSafetyScoreBoth(score) {

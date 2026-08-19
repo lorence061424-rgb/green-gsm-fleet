@@ -834,16 +834,21 @@
 @section('scripts')
 <script>
     // Toggle manual and auto assignment forms
-    document.getElementById('autoAssignSwitch').addEventListener('change', function() {
-        const manualFields = document.getElementById('manualAssignmentFields');
-        if (this.checked) {
-            manualFields.classList.add('d-none');
-            document.querySelectorAll('#manualAssignmentFields select').forEach(select => select.removeAttribute('required'));
-        } else {
-            manualFields.classList.remove('d-none');
-            document.querySelectorAll('#manualAssignmentFields select').forEach(select => select.setAttribute('required', 'required'));
-        }
-    });
+    const autoSwitch = document.getElementById('autoAssignSwitch');
+    if (autoSwitch) {
+        autoSwitch.addEventListener('change', function() {
+            const manualFields = document.getElementById('manualAssignmentFields');
+            if (manualFields) {
+                if (this.checked) {
+                    manualFields.classList.add('d-none');
+                    document.querySelectorAll('#manualAssignmentFields select').forEach(select => select.removeAttribute('required'));
+                } else {
+                    manualFields.classList.remove('d-none');
+                    document.querySelectorAll('#manualAssignmentFields select').forEach(select => select.setAttribute('required', 'required'));
+                }
+            }
+        });
+    }
 
     // Handle AJAX preview of routes and fuel prediction
     const startSelect = document.getElementById('start_location');
@@ -851,6 +856,7 @@
     const typeSelect = document.getElementById('vehicle_type');
 
     function checkRoutePreview() {
+        if (!startSelect || !endSelect || !typeSelect) return;
         const start = startSelect.value;
         const end = endSelect.value;
         const type = typeSelect.value;
@@ -863,10 +869,10 @@
             }
 
             // Immediately enable Dispatch button & set fallback metrics
-            document.getElementById('distance_km').value = "14.5";
-            document.getElementById('estimated_duration_minutes').value = "28";
-            document.getElementById('estimated_fuel_liters').value = "2.4";
-            document.getElementById('btnSubmitTrip').removeAttribute('disabled');
+            const dKm = document.getElementById('distance_km'); if (dKm) dKm.value = "14.5";
+            const eDur = document.getElementById('estimated_duration_minutes'); if (eDur) eDur.value = "28";
+            const eFuel = document.getElementById('estimated_fuel_liters'); if (eFuel) eFuel.value = "2.4";
+            const btnSub = document.getElementById('btnSubmitTrip'); if (btnSub) btnSub.removeAttribute('disabled');
 
             // Perform fetch call to get preview path and AI estimation
             fetch("{{ route('trips.plan-preview') }}", {
@@ -880,17 +886,15 @@
             .then(res => res.json())
             .then(data => {
                 if (data.routes && data.routes.length > 0) {
-                    const bestRoute = data.routes[0]; // sorted by fuel usage
+                    const bestRoute = data.routes[0];
 
-                    // Update form values
-                    document.getElementById('distance_km').value = bestRoute.distance_km;
-                    document.getElementById('estimated_duration_minutes').value = bestRoute.duration_minutes;
-                    document.getElementById('estimated_fuel_liters').value = bestRoute.estimated_fuel;
+                    if (dKm) dKm.value = bestRoute.distance_km;
+                    if (eDur) eDur.value = bestRoute.duration_minutes;
+                    if (eFuel) eFuel.value = bestRoute.estimated_fuel;
 
-                    // Display Preview Details
-                    document.getElementById('previewDistance').innerText = bestRoute.distance_km + " km";
-                    document.getElementById('previewFuel').innerText = bestRoute.estimated_fuel + " kWh";
-                    document.getElementById('previewDuration').innerText = bestRoute.duration_minutes + " mins";
+                    const pDist = document.getElementById('previewDistance'); if (pDist) pDist.innerText = bestRoute.distance_km + " km";
+                    const pFuel = document.getElementById('previewFuel'); if (pFuel) pFuel.innerText = bestRoute.estimated_fuel + " kWh";
+                    const pDur = document.getElementById('previewDuration'); if (pDur) pDur.innerText = bestRoute.duration_minutes + " mins";
                     
                     const congestionElement = document.getElementById('previewTraffic') || document.getElementById('previewCongestion');
                     if (congestionElement) {
@@ -904,17 +908,12 @@
                         }
                     }
 
-                    // Eco badge
                     const ecoBadge = document.getElementById('ecoBadge');
                     if (ecoBadge) {
-                        if (bestRoute.is_eco) {
-                            ecoBadge.classList.remove('d-none');
-                        } else {
-                            ecoBadge.classList.add('d-none');
-                        }
+                        if (bestRoute.is_eco) ecoBadge.classList.remove('d-none');
+                        else ecoBadge.classList.add('d-none');
                     }
 
-                    // Suggestions text
                     const suggestionsPanel = document.getElementById('previewRecommendation') || document.getElementById('routingSuggestions');
                     if (suggestionsPanel) {
                         if (bestRoute.congestion === 'Heavy') {
@@ -927,17 +926,16 @@
                     const card = document.getElementById('routePreviewCard');
                     if (card) card.classList.remove('d-none');
 
-                    const btn = document.getElementById('btnSubmitTrip');
-                    if (btn) btn.removeAttribute('disabled');
+                    if (btnSub) btnSub.removeAttribute('disabled');
                 }
             })
             .catch(err => console.error(err));
         }
     }
 
-    startSelect.addEventListener('change', checkRoutePreview);
-    endSelect.addEventListener('change', checkRoutePreview);
-    typeSelect.addEventListener('change', checkRoutePreview);
+    if (startSelect) startSelect.addEventListener('change', checkRoutePreview);
+    if (endSelect) endSelect.addEventListener('change', checkRoutePreview);
+    if (typeSelect) typeSelect.addEventListener('change', checkRoutePreview);
 
 
     // ==========================================

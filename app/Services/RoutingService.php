@@ -55,7 +55,7 @@ class RoutingService
      * Generate routes/alternatives between start and destination hubs, 
      * simulating traffic and recommending the most fuel-efficient option.
      */
-    public function planRoute(string $start, string $end, string $vehicleType): array
+    public function planRoute(string $start, string $end, string $vehicleType, string $fuelType = 'gasoline'): array
     {
         $startCoords = $this->resolveHubCoords($start);
         $endCoords = $this->resolveHubCoords($end);
@@ -68,29 +68,44 @@ class RoutingService
         $distance = $this->haversineDistance($lat1, $lng1, $lat2, $lng2);
         $fuelPredictor = new FuelPredictionService();
 
+        // Rate per unit and label based on fuel type
+        $ratePerUnit = match (strtolower($fuelType)) {
+            'gasoline', 'gas', 'unleaded' => 64.50, // ₱64.50 per Liter Gas
+            'diesel' => 58.00, // ₱58.00 per Liter Diesel
+            'electric', 'ev' => 11.50, // ₱11.50 per kWh EV
+            default => 64.50,
+        };
+
+        $fuelUnit = match (strtolower($fuelType)) {
+            'gasoline', 'gas', 'unleaded' => 'Liters (Gas)',
+            'diesel' => 'Liters (Diesel)',
+            'electric', 'ev' => 'kWh (EV)',
+            default => 'Liters (Gas)',
+        };
+
         // 1. Direct Eco Route
         $speed1 = 48.5;
-        $kwh1 = $fuelPredictor->predict($distance, $speed1, $vehicleType);
-        $cost1 = round($kwh1 * 11.50, 2);
+        $kwh1 = $fuelPredictor->predict($distance, $speed1, $vehicleType, $fuelType);
+        $cost1 = round($kwh1 * $ratePerUnit, 2);
         $duration1 = round(($distance / $speed1) * 60);
 
         // 2. Highway / Express Route
         $dist2 = round($distance * 1.15, 1);
         $speed2 = 68.0;
-        $kwh2 = $fuelPredictor->predict($dist2, $speed2, $vehicleType);
-        $cost2 = round($kwh2 * 11.50, 2);
+        $kwh2 = $fuelPredictor->predict($dist2, $speed2, $vehicleType, $fuelType);
+        $cost2 = round($kwh2 * $ratePerUnit, 2);
         $duration2 = round(($dist2 / $speed2) * 60);
 
         // 3. City Bypass Route
         $dist3 = round($distance * 1.25, 1);
         $speed3 = 35.0;
-        $kwh3 = $fuelPredictor->predict($dist3, $speed3, $vehicleType);
-        $cost3 = round($kwh3 * 11.50, 2);
+        $kwh3 = $fuelPredictor->predict($dist3, $speed3, $vehicleType, $fuelType);
+        $cost3 = round($kwh3 * $ratePerUnit, 2);
         $duration3 = round(($dist3 / $speed3) * 60);
 
         $routesList = [
             [
-                'name' => 'Zero-Emission Eco-Route (Recommended)',
+                'name' => 'Eco-Optimized Route (Recommended)',
                 'tag' => 'Recommended Eco-Path 🌿',
                 'distance_km' => $distance,
                 'avg_speed_kmh' => $speed1,
@@ -98,8 +113,10 @@ class RoutingService
                 'traffic_condition' => '🟢 Low Congestion (Flowing @ 48 km/h)',
                 'predicted_kwh' => $kwh1,
                 'estimated_fuel' => $kwh1,
+                'fuel_unit' => $fuelUnit,
+                'fuel_type' => ucfirst($fuelType),
                 'charging_cost_php' => number_format($cost1, 2),
-                'description' => "Optimized for $vehicleType regenerative braking. Bypasses heavy intersections.",
+                'description' => "Optimized for $vehicleType ($fuelUnit). Bypasses heavy intersections.",
                 'is_eco' => true,
                 'path' => [
                     ['lat' => $lat1, 'lng' => $lng1],
@@ -115,6 +132,8 @@ class RoutingService
                 'traffic_condition' => '🟡 Moderate Highway Flow (Speed: 68 km/h)',
                 'predicted_kwh' => $kwh2,
                 'estimated_fuel' => $kwh2,
+                'fuel_unit' => $fuelUnit,
+                'fuel_type' => ucfirst($fuelType),
                 'charging_cost_php' => number_format($cost2, 2),
                 'description' => 'Higher average speed via Skyway corridor. Saves up to 8 minutes travel time.',
                 'is_eco' => false,
@@ -132,8 +151,10 @@ class RoutingService
                 'traffic_condition' => '🔴 Heavy Urban Traffic (+12 min delay)',
                 'predicted_kwh' => $kwh3,
                 'estimated_fuel' => $kwh3,
+                'fuel_unit' => $fuelUnit,
+                'fuel_type' => ucfirst($fuelType),
                 'charging_cost_php' => number_format($cost3, 2),
-                'description' => 'Follows main surface avenues (Taft/EDSA). High stop-and-go energy consumption.',
+                'description' => 'Follows main surface avenues (Taft/EDSA). High stop-and-go fuel consumption.',
                 'is_eco' => false,
                 'path' => [
                     ['lat' => $lat1, 'lng' => $lng1],

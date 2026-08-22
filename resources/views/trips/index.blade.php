@@ -139,14 +139,24 @@
                     </select>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label" style="font-weight: 500;">VinFast EV Category (AI Energy Estimation)</label>
-                    <select name="vehicle_type" id="vehicle_type" class="form-select rounded-3" required>
-                        <option value="Sedan" selected>Nerio Green (EV Sedan)</option>
-                        <option value="SUV">VinFast VF 8 / VF 9 (EV SUV)</option>
-                        <option value="Crossover">VinFast VF e34 (EV Crossover)</option>
-                        <option value="Hatchback">VinFast VF 5 (EV Compact)</option>
-                    </select>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-weight: 500;">Vehicle Category</label>
+                        <select name="vehicle_type" id="vehicle_type" class="form-select rounded-3" required>
+                            <option value="Sedan" selected>Taxi Sedan / Nerio</option>
+                            <option value="SUV">SUV / MPV Fleet</option>
+                            <option value="Crossover">Crossover Fleet</option>
+                            <option value="Hatchback">Compact / Hatchback</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-weight: 500;">Fuel / Energy Engine</label>
+                        <select name="fuel_type" id="fuel_type" class="form-select rounded-3" required>
+                            <option value="gasoline" selected>⛽ Gasoline (Gas Liters)</option>
+                            <option value="diesel">🛢️ Diesel (Liters)</option>
+                            <option value="electric">⚡ Electric (EV kWh)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Hidden inputs populated by AJAX route planning preview -->
@@ -861,12 +871,14 @@
     const startSelect = document.getElementById('start_location');
     const endSelect = document.getElementById('end_location');
     const typeSelect = document.getElementById('vehicle_type');
+    const fuelSelect = document.getElementById('fuel_type');
 
     function checkRoutePreview() {
         if (!startSelect || !endSelect || !typeSelect) return;
         const start = startSelect.value;
         const end = endSelect.value;
         const type = typeSelect.value;
+        const fuelType = fuelSelect ? fuelSelect.value : 'gasoline';
 
         if (start && end) {
             if (start === end) {
@@ -888,7 +900,7 @@
                     "Content-Type": "application/json",
                     "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                body: JSON.stringify({ start, end, vehicle_type: type })
+                body: JSON.stringify({ start, end, vehicle_type: type, fuel_type: fuelType })
             })
             .then(res => res.json())
             .then(data => {
@@ -900,7 +912,8 @@
                     if (eFuel) eFuel.value = bestRoute.estimated_fuel;
 
                     const pDist = document.getElementById('previewDistance'); if (pDist) pDist.innerText = bestRoute.distance_km + " km";
-                    const pFuel = document.getElementById('previewFuel'); if (pFuel) pFuel.innerText = bestRoute.estimated_fuel + " kWh";
+                    const unitLabel = bestRoute.fuel_unit || (fuelType === 'electric' ? 'kWh (EV)' : (fuelType === 'diesel' ? 'Liters (Diesel)' : 'Liters (Gas)'));
+                    const pFuel = document.getElementById('previewFuel'); if (pFuel) pFuel.innerText = bestRoute.estimated_fuel + " " + unitLabel;
                     const pDur = document.getElementById('previewDuration'); if (pDur) pDur.innerText = bestRoute.duration_minutes + " mins";
                     
                     const congestionElement = document.getElementById('previewTraffic') || document.getElementById('previewCongestion');
@@ -924,9 +937,9 @@
                     const suggestionsPanel = document.getElementById('previewRecommendation') || document.getElementById('routingSuggestions');
                     if (suggestionsPanel) {
                         if (bestRoute.congestion === 'Heavy') {
-                            suggestionsPanel.innerHTML = `<i class="bi bi-info-circle"></i> High idling risk. AI estimates 15% battery energy spike due to traffic.`;
+                            suggestionsPanel.innerHTML = `<i class="bi bi-info-circle"></i> High idling risk. AI estimates +15% fuel spike due to traffic.`;
                         } else {
-                            suggestionsPanel.innerHTML = `<i class="bi bi-check-circle-fill"></i> Clear road. Drivers can cruise at 70 km/h for optimal EV efficiency.`;
+                            suggestionsPanel.innerHTML = `<i class="bi bi-check-circle-fill"></i> Clear road. Drivers can cruise at optimal speeds for maximum efficiency.`;
                         }
                     }
 
@@ -943,6 +956,7 @@
     if (startSelect) startSelect.addEventListener('change', checkRoutePreview);
     if (endSelect) endSelect.addEventListener('change', checkRoutePreview);
     if (typeSelect) typeSelect.addEventListener('change', checkRoutePreview);
+    if (fuelSelect) fuelSelect.addEventListener('change', checkRoutePreview);
 
 
     // ==========================================

@@ -93,12 +93,13 @@ class FuelPredictionService
     }
 
     /**
-     * Predict EV battery energy usage in Kilowatt-Hours (kWh).
+     * Predict fuel/energy usage based on fuel type: Gasoline (Gas), Diesel, or Electric (EV).
      */
-    public function predict(float $distance, float $avgSpeed, string $vehicleType): float
+    public function predict(float $distance, float $avgSpeed, string $vehicleType, string $fuelType = 'gasoline'): float
     {
         $weights = $this->getWeights();
         $typeMultiplier = $this->getVehicleTypeMultiplier($vehicleType);
+        $fuelTypeMultiplier = $this->getFuelTypeMultiplier($fuelType);
 
         $speedFactor = 1.0;
         if ($avgSpeed > 90) {
@@ -110,22 +111,35 @@ class FuelPredictionService
         $predicted = ($weights['intercept'] + 
                       ($distance * $weights['distance']) + 
                       ($avgSpeed * $weights['speed'])) * 
-                      $typeMultiplier * $speedFactor;
+                      $typeMultiplier * $fuelTypeMultiplier * $speedFactor;
 
         return round(max(0.1, $predicted), 2);
     }
 
     /**
-     * Get multiplier based on VinFast EV model category
+     * Get multiplier based on fuel type: Gasoline (Gas), Diesel, Electric
+     */
+    public function getFuelTypeMultiplier(string $fuelType): float
+    {
+        return match (strtolower($fuelType)) {
+            'gasoline', 'gas', 'unleaded', 'premium' => 0.85, // Gas Liters
+            'diesel' => 0.72, // Diesel Liters
+            'electric', 'ev', 'battery' => 1.0, // Electric kWh
+            default => 0.85, // Default to Gas
+        };
+    }
+
+    /**
+     * Get multiplier based on Hirna vehicle model category
      */
     public function getVehicleTypeMultiplier(string $type): float
     {
         return match ($type) {
-            'VF 5', 'Hatchback', 'Compact' => 0.85,
-            'Nerio Green', 'Sedan' => 1.0,
-            'VF e34', 'Crossover' => 1.1,
-            'VF 8', 'SUV' => 1.35,
-            'VF 9', 'Van', 'Truck' => 1.6,
+            'VF 5', 'Hatchback', 'Compact', 'Taxi Sedan' => 0.85,
+            'Nerio Green', 'Sedan', 'Standard Taxi' => 1.0,
+            'VF e34', 'Crossover', 'Premium Taxi' => 1.1,
+            'VF 8', 'SUV', 'MPV Taxi' => 1.35,
+            'VF 9', 'Van', 'Truck', 'Fleet Bus' => 1.6,
             default => 1.0,
         };
     }

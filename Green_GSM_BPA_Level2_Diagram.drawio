@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<mxfile host="Electron" modified="2026-07-30T13:44:00.000Z" agent="Green GSM Antigravity Agent" version="21.0.0" type="device">
+  <diagram id="bpa-level2-diagram" name="Team 7 BPA Level 2 Architecture">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="&lt;font style=&quot;font-size: 22px; font-weight: bold; color: #10B981;&quot;&gt;GREEN GSM FLEET SYSTEM - BPA LEVEL 2 DATA FLOW DIAGRAM&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 13px; color: #94A3B8;&quot;&gt;Team 7: Fleet &amp; Transportation Management System &amp;bull; Bidirectional Feedback Loops Architecture&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="300" y="30" width="1000" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="mod1" value="&lt;b style=&quot;font-size: 15px; color: #FFFFFF;&quot;&gt;1. Fleet &amp; Vehicle Management (FVM)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#064E3B;strokeColor=#10B981;strokeWidth=3;fontColor=#FFFFFF;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="140" width="260" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="mod2" value="&lt;b style=&quot;font-size: 15px; color: #FFFFFF;&quot;&gt;2. Vehicle Reservation &amp; Dispatch (VRDS)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#064E3B;strokeColor=#10B981;strokeWidth=3;fontColor=#FFFFFF;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="670" y="140" width="260" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="mod3" value="&lt;b style=&quot;font-size: 15px; color: #FFFFFF;&quot;&gt;3. Driver &amp; Trip Performance Monitoring&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#064E3B;strokeColor=#10B981;strokeWidth=3;fontColor=#FFFFFF;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="140" width="260" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="mod6" value="&lt;b style=&quot;font-size: 15px; color: #FFFFFF;&quot;&gt;6. Route Planning &amp; Optimization&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#064E3B;strokeColor=#10B981;strokeWidth=3;fontColor=#FFFFFF;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="560" width="260" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="mod5" value="&lt;b style=&quot;font-size: 15px; color: #FFFFFF;&quot;&gt;5. Transport Cost Analysis (TCAO)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#064E3B;strokeColor=#10B981;strokeWidth=3;fontColor=#FFFFFF;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="670" y="560" width="260" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="mod4" value="&lt;b style=&quot;font-size: 15px; color: #FFFFFF;&quot;&gt;4. Fuel Management System (EV Energy)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#064E3B;strokeColor=#10B981;strokeWidth=3;fontColor=#FFFFFF;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="560" width="260" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_fvm_vrds_out" value="1a. Available Vehicles &amp; Specs" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#10B981;strokeWidth=2.5;fontColor=#334155;fontSize=11;fontStyle=1;exitX=0.25;exitY=0;entryX=0.25;entryY=0;" edge="1" parent="1" source="mod1" target="mod2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_vrds_fvm_back" value="1b. Feedback: Reservation &amp; Dispatch Status" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#06B6D4;strokeWidth=2.5;fontColor=#334155;fontSize=11;fontStyle=1;exitX=0.75;exitY=1;entryX=0.75;entryY=1;" edge="1" parent="1" source="mod2" target="mod1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_vrds_dtpm_out" value="2a. Trip Dispatches &amp; Planned Route" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#10B981;strokeWidth=2.5;fontColor=#334155;fontSize=11;fontStyle=1;exitX=0.25;exitY=0;entryX=0.25;entryY=0;" edge="1" parent="1" source="mod2" target="mod3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_dtpm_vrds_back" value="2b. Feedback: Driver Availability &amp; Completion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#06B6D4;strokeWidth=2.5;fontColor=#334155;fontSize=11;fontStyle=1;exitX=0.75;exitY=1;entryX=0.75;entryY=1;" edge="1" parent="1" source="mod3" target="mod2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_dtpm_fms_out" value="3a. Distance Traveled &amp; Telematics" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#10B981;strokeWidth=2.5;fontColor=#334155;fontSize=11;fontStyle=1;" edge="1" parent="1" source="mod3" target="mod4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_fms_dtpm_back" value="3b. Feedback: Energy Consumption Rate (kWh)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#06B6D4;strokeWidth=2.5;fontColor=#334155;fontSize=11;fontStyle=1;" edge="1" parent="1" source="mod4" target="mod3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_fms_tcao_out" value="4a. Total kWh Energy &amp; Charging Expenses" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#10B981;strokeWidth=2.5;fontColor=#334155;fontSize=11;fontStyle=1;exitX=0.75;exitY=1;entryX=0.75;entryY=1;" edge="1" parent="1" source="mod4" target="mod5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_tcao_fms_back" value="4b. Feedback: Energy Budget &amp; Cost Targets" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#06B6D4;strokeWidth=2.5;fontColor=#334155;fontSize=11;fontStyle=1;exitX=0.25;exitY=0;entryX=0.25;entryY=0;" edge="1" parent="1" source="mod5" target="mod4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_tcao_rpo_out" value="5a. Cost-per-KM &amp; High-Cost Flags" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#10B981;strokeWidth=2.5;fontColor=#334155;fontSize=11;fontStyle=1;exitX=0.75;exitY=1;entryX=0.75;entryY=1;" edge="1" parent="1" source="mod5" target="mod6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_rpo_tcao_back" value="5b. Feedback: Cost-Efficient Eco-Routes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#06B6D4;strokeWidth=2.5;fontColor=#334155;fontSize=11;fontStyle=1;exitX=0.25;exitY=0;entryX=0.25;entryY=0;" edge="1" parent="1" source="mod6" target="mod5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_fvm_rpo_out" value="7a. Vehicle Range Limits &amp; EV Category" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#10B981;strokeWidth=2.5;fontColor=#334155;fontSize=11;fontStyle=1;" edge="1" parent="1" source="mod1" target="mod6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_rpo_fvm_back" value="7b. Feedback: Route Feasibility Score" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#06B6D4;strokeWidth=2.5;fontColor=#334155;fontSize=11;fontStyle=1;" edge="1" parent="1" source="mod6" target="mod1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_rpo_vrds_out" value="6a. Recommended Eco-Routes &amp; kWh" style="edgeStyle=straight;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#F59E0B;strokeWidth=2.5;fontColor=#334155;fontSize=11;fontStyle=1;" edge="1" parent="1" source="mod6" target="mod2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_vrds_rpo_back" value="6b. Feedback: Selected Route &amp; Time" style="edgeStyle=straight;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#8B5CF6;strokeWidth=2.5;fontColor=#334155;fontSize=11;fontStyle=1;" edge="1" parent="1" source="mod2" target="mod6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

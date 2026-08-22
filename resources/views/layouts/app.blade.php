@@ -49,15 +49,15 @@
     <!-- Mobile Navigation Offcanvas Drawer (Only visible on small screens) -->
     <style>
         :root {
-            --primary: #10B981;
-            --primary-hover: #059669;
-            --secondary: #064E3B;
-            --accent: #06B6D4;
-            --background: #F0FDF4;
+            --primary: #CE2029;
+            --primary-hover: #B91C1C;
+            --secondary: #7F1D1D;
+            --accent: #F59E0B;
+            --background: #FFF8F8;
             --card-bg: #FFFFFF;
-            --border-color: #D1FAE5;
-            --text-dark: #064E3B;
-            --text-light: #047857;
+            --border-color: #FEE2E2;
+            --text-dark: #4C0519;
+            --text-light: #991B1B;
             --sidebar-width: 260px;
         }
 
@@ -69,24 +69,24 @@
             letter-spacing: -0.01em;
         }
 
-        /* Desktop Sidebar - Deep Mint Green */
+        /* Desktop Sidebar - Hirna Crimson Gradient */
         .sidebar {
             width: var(--sidebar-width);
             height: 100vh;
-            background: linear-gradient(180deg, #064E3B 0%, #022C22 100%);
+            background: linear-gradient(180deg, #CE2029 0%, #7F1D1D 100%);
             position: fixed;
             top: 0;
             left: 0;
             z-index: 100;
             padding-top: 1.25rem;
             color: white;
-            box-shadow: 4px 0 24px rgba(6, 78, 59, 0.15);
+            box-shadow: 4px 0 24px rgba(206, 32, 41, 0.25);
             transition: all 0.3s ease;
         }
 
         .sidebar .brand {
-            padding: 0 1.5rem 1.25rem 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 1.25rem 1.25rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             margin-bottom: 1rem;
         }
 
@@ -95,7 +95,7 @@
             align-items: center;
             padding: 0.75rem 1.25rem;
             margin: 0.15rem 0.85rem;
-            color: #A7F3D0;
+            color: #FFDDA1;
             text-decoration: none;
             font-weight: 500;
             font-size: 0.925rem;
@@ -105,14 +105,15 @@
 
         .sidebar-nav-link:hover {
             color: #FFFFFF;
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.15);
             transform: translateX(2px);
         }
 
         .sidebar-nav-link.active {
-            color: #FFFFFF;
-            background: var(--primary);
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+            color: #7F1D1D;
+            background: #F59E0B;
+            font-weight: 700;
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.5);
         }
 
         .sidebar-nav-link i {
@@ -293,10 +294,10 @@
     <!-- Desktop Sidebar Navigation -->
     <div class="sidebar">
         <div class="brand d-flex align-items-center">
-            <i class="bi bi-shield-shaded text-success me-2 fs-3"></i>
+            <img src="{{ asset('images/hirna_logo.jpg') }}" alt="Hirna Logo" style="width: 42px; height: 42px; object-fit: cover; border-radius: 8px; border: 2px solid #F59E0B;" class="me-2 shadow-sm">
             <div>
-                <span class="fs-6 fw-bold d-block text-white" style="letter-spacing: 0.5px;">GREEN GSM</span>
-                <small class="text-success-subtle fw-bold" style="font-size: 10px; letter-spacing: 1px;">FLEET & TRANSPORTATION</small>
+                <span class="fs-5 fw-bold d-block text-white" style="letter-spacing: 0.5px;">HIRNA</span>
+                <small class="fw-bold" style="font-size: 10px; letter-spacing: 1px; color: #FBBF24;">MOBILITY SOLUTIONS</small>
             </div>
         </div>
 
@@ -326,13 +327,13 @@
     </div>
 
     <!-- Mobile Offcanvas Sidebar Drawer (For Mobile & Tablet screens) -->
-    <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel" style="max-width: 280px; background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%) !important;">
-        <div class="offcanvas-header border-bottom border-secondary">
+    <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel" style="max-width: 280px; background: linear-gradient(180deg, #CE2029 0%, #7F1D1D 100%) !important;">
+        <div class="offcanvas-header border-bottom border-danger">
             <div class="d-flex align-items-center">
-                <i class="bi bi-shield-shaded text-success me-2 fs-3"></i>
+                <img src="{{ asset('images/hirna_logo.jpg') }}" alt="Hirna Logo" style="width: 36px; height: 36px; object-fit: cover; border-radius: 8px; border: 2px solid #F59E0B;" class="me-2">
                 <div>
-                    <span class="fs-6 fw-bold d-block text-white" style="letter-spacing: 0.5px;">GREEN GSM</span>
-                    <small class="text-success-subtle fw-bold" style="font-size: 10px; letter-spacing: 1px;">FLEET & TRANSPORTATION</small>
+                    <span class="fs-6 fw-bold d-block text-white" style="letter-spacing: 0.5px;">HIRNA</span>
+                    <small class="fw-bold" style="font-size: 10px; letter-spacing: 1px; color: #FBBF24;">MOBILITY SOLUTIONS</small>
                 </div>
             </div>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -370,15 +371,15 @@
         <!-- Mobile Top Header Bar (Shown only on mobile/tablets) -->
         <div class="mobile-header-bar">
             <div class="d-flex align-items-center">
-                <button class="btn btn-success text-white me-3 border-0 shadow-sm rounded-3 px-2 py-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" style="background: #10B981 !important; z-index: 10;">
+                <button class="btn btn-danger text-white me-3 border-0 shadow-sm rounded-3 px-2 py-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" style="background: #CE2029 !important; z-index: 10;">
                     <i class="bi bi-list fs-2 text-white fw-bold"></i>
                 </button>
                 <div>
-                    <span class="fw-bold d-block text-white" style="font-size: 14px;">GREEN GSM FLEET</span>
-                    <span class="badge bg-success" style="font-size: 9px;">100% Electric EV</span>
+                    <span class="fw-bold d-block text-white" style="font-size: 14px;">HIRNA MOBILITY</span>
+                    <span class="badge bg-warning text-dark" style="font-size: 9px;">Taxi & Fleet Portal</span>
                 </div>
             </div>
-            <a href="tel:0277778080" class="btn btn-sm btn-success rounded-pill px-3 fw-medium text-decoration-none">
+            <a href="tel:0277778080" class="btn btn-sm btn-light rounded-pill px-3 fw-medium text-decoration-none text-danger">
                 <i class="bi bi-telephone-fill me-1"></i> (02) 7777-8080
             </a>
         </div>
@@ -386,8 +387,8 @@
         <!-- Enterprise Top Navigation Bar -->
         <div class="top-navbar">
             <div class="d-flex align-items-center">
-                <span class="loader-pulse me-2"></span>
-                <span class="small fw-semibold text-muted">Green GSM 100% Electric Fleet (VinFast EVs) &bull; Hotline: (02) 7777-8080</span>
+                <span class="loader-pulse me-2" style="background-color: #CE2029;"></span>
+                <span class="small fw-semibold text-muted">Hirna Mobility Solutions &bull; Fleet Management & Transport Cost Analysis Portal</span>
             </div>
             <div class="d-flex align-items-center gap-3 ms-auto">
                 @php

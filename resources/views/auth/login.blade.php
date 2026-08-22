@@ -14,16 +14,16 @@
     
     <style>
         :root {
-            --primary: #10B981;
-            --primary-hover: #059669;
-            --accent: #0284C7;
-            --dark-bg: #0B132B;
-            --card-bg: rgba(15, 23, 42, 0.75);
+            --primary: #CE2029;
+            --primary-hover: #B91C1C;
+            --accent: #F59E0B;
+            --dark-bg: #4C0519;
+            --card-bg: rgba(76, 5, 25, 0.85);
         }
 
         body {
             font-family: 'Outfit', sans-serif;
-            background: radial-gradient(circle at 15% 20%, #0F382C 0%, #0B132B 50%, #030712 100%);
+            background: radial-gradient(circle at 15% 20%, #7F1D1D 0%, #4C0519 50%, #0F172A 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -41,7 +41,7 @@
             left: -10%;
             width: 450px;
             height: 450px;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, rgba(0,0,0,0) 70%);
+            background: radial-gradient(circle, rgba(206, 32, 41, 0.35) 0%, rgba(0,0,0,0) 70%);
             border-radius: 50%;
             filter: blur(60px);
             z-index: 0;
@@ -54,7 +54,7 @@
             right: -10%;
             width: 500px;
             height: 500px;
-            background: radial-gradient(circle, rgba(2, 132, 199, 0.25) 0%, rgba(0,0,0,0) 70%);
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.3) 0%, rgba(0,0,0,0) 70%);
             border-radius: 50%;
             filter: blur(60px);
             z-index: 0;
@@ -64,24 +64,24 @@
         .login-wrapper {
             width: 100%;
             max-width: 960px;
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(30, 41, 59, 0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.3);
             border-radius: 24px;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), 0 0 40px rgba(16, 185, 129, 0.15);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(206, 32, 41, 0.25);
             overflow: hidden;
             z-index: 1;
         }
 
         /* Left Hero Showcase Section */
         .hero-section {
-            background: linear-gradient(145deg, rgba(6, 78, 59, 0.6) 0%, rgba(15, 23, 42, 0.9) 100%);
+            background: linear-gradient(145deg, rgba(206, 32, 41, 0.75) 0%, rgba(127, 29, 29, 0.95) 100%);
             padding: 3.5rem 3rem;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            border-right: 1px solid rgba(255, 255, 255, 0.12);
             position: relative;
         }
 
@@ -89,9 +89,9 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: #34D399;
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #FDE047;
             padding: 0.4rem 1rem;
             border-radius: 50px;
             font-size: 0.825rem;
@@ -101,8 +101,8 @@
         }
 
         .stat-box {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 14px;
             padding: 1.1rem;
             transition: transform 0.2s ease;
@@ -116,6 +116,7 @@
         /* Form Input Section */
         .form-section {
             padding: 3.5rem 3rem;
+            background: rgba(15, 23, 42, 0.85);
         }
 
         .form-control {
@@ -129,8 +130,8 @@
         }
 
         .form-control:focus {
-            border-color: #10B981 !important;
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2) !important;
+            border-color: #CE2029 !important;
+            box-shadow: 0 0 0 4px rgba(206, 32, 41, 0.2) !important;
         }
 
         .input-group-text {
@@ -141,31 +142,31 @@
         }
 
         .btn-submit {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            background: linear-gradient(135deg, #CE2029 0%, #B91C1C 100%);
             color: white;
+            border: 1px solid #F59E0B;
             border-radius: 12px;
             padding: 0.85rem 1.5rem;
             font-weight: 600;
             font-size: 1rem;
-            border: none;
             width: 100%;
-            transition: all 0.25 ease;
-            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px rgba(206, 32, 41, 0.4);
         }
 
         .btn-submit:hover {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-            box-shadow: 0 12px 28px rgba(16, 185, 129, 0.5);
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: #4C0519;
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
         }
 
         /* Role Quick Selection Pills */
         .role-pill {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #CBD5E1;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #F8FAFC;
             padding: 0.45rem 0.85rem;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 0.8rem;
             font-weight: 500;
             cursor: pointer;
@@ -173,9 +174,9 @@
         }
 
         .role-pill:hover {
-            background: rgba(16, 185, 129, 0.2);
-            border-color: #10B981;
-            color: #FFFFFF;
+            background: #CE2029;
+            border-color: #F59E0B;
+            color: white;
             transform: translateY(-1px);
         }
 
@@ -200,38 +201,46 @@
             <!-- Left Panel: Enterprise Branding & Live Specs -->
             <div class="col-lg-6 hero-section">
                 <div>
-                    <div class="hero-badge mb-4">
-                        <span class="spinner-grow spinner-grow-sm text-success" role="status"></span>
-                        100% ALL-ELECTRIC VINFAST FLEET
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{{ asset('images/hirna_logo.jpg') }}" alt="Hirna Logo" style="width: 52px; height: 52px; object-fit: cover; border-radius: 12px; border: 2px solid #F59E0B;" class="me-3 shadow">
+                        <div>
+                            <span class="fs-4 fw-bold text-white d-block" style="letter-spacing: 0.5px;">HIRNA MOBILITY</span>
+                            <small class="fw-bold text-warning" style="font-size: 11px; letter-spacing: 1px;">SOLUTIONS INC.</small>
+                        </div>
+                    </div>
+
+                    <div class="hero-badge mb-3">
+                        <span class="spinner-grow spinner-grow-sm text-warning" role="status"></span>
+                        OFFICIAL TNC & FLEET MANAGEMENT SYSTEM
                     </div>
                     
                     <h2 class="fw-extrabold text-white display-6 mb-3" style="letter-spacing: -0.03em;">
-                        Green GSM Fleet Management
+                        Fleet & Transportation Portal
                     </h2>
                     
-                    <p class="text-slate-300 leading-relaxed mb-4" style="font-size: 0.95rem; color: #94A3B8;">
-                        Enterprise transportation telemetry, zero-emission route planning, AI fuel/kWh prediction, and transport cost optimization for Metro Manila operations.
+                    <p class="text-slate-300 leading-relaxed mb-4" style="font-size: 0.95rem; color: #F1F5F9;">
+                        Client-based fleet management system with AI-based Gasoline (Gas), Diesel, and Electric fuel consumption prediction, live Leaflet GPS telematics, and transport cost analytics for Hirna Mobility Solutions Inc.
                     </p>
 
-                    <!-- EV Specifications Grid -->
+                    <!-- Fleet Specifications Grid -->
                     <div class="row g-3 mt-2">
                         <div class="col-6">
                             <div class="stat-box">
-                                <div class="d-flex align-items-center text-success mb-1">
-                                    <i class="bi bi-ev-front fs-5 me-2"></i>
-                                    <span class="fw-bold small text-white">VinFast EVs</span>
+                                <div class="d-flex align-items-center text-warning mb-1">
+                                    <i class="bi bi-fuel-pump-fill fs-5 me-2"></i>
+                                    <span class="fw-bold small text-white">Fuel Prediction</span>
                                 </div>
-                                <small class="text-muted" style="font-size: 11px;">Nerio Green, VF 8, VF e34</small>
+                                <small class="text-white-50" style="font-size: 11px;">Gasoline (Gas), Diesel & EV</small>
                             </div>
                         </div>
 
                         <div class="col-6">
                             <div class="stat-box">
-                                <div class="d-flex align-items-center text-info mb-1">
+                                <div class="d-flex align-items-center text-warning mb-1">
                                     <i class="bi bi-cpu fs-5 me-2"></i>
-                                    <span class="fw-bold small text-white">AI Engine</span>
+                                    <span class="fw-bold small text-white">AI Predictive Engine</span>
                                 </div>
-                                <small class="text-muted" style="font-size: 11px;">Gradient Descent kWh ML</small>
+                                <small class="text-white-50" style="font-size: 11px;">Machine Learning ML Model</small>
                             </div>
                         </div>
 
@@ -239,19 +248,19 @@
                             <div class="stat-box">
                                 <div class="d-flex align-items-center text-warning mb-1">
                                     <i class="bi bi-shield-check fs-5 me-2"></i>
-                                    <span class="fw-bold small text-white">Digital Tracking</span>
+                                    <span class="fw-bold small text-white">Telematics GPS</span>
                                 </div>
-                                <small class="text-muted" style="font-size: 11px;">AI Cameras & Safety Score</small>
+                                <small class="text-white-50" style="font-size: 11px;">Eco-Safety & Driver Radar</small>
                             </div>
                         </div>
 
                         <div class="col-6">
                             <div class="stat-box">
-                                <div class="d-flex align-items-center text-primary mb-1">
-                                    <i class="bi bi-telephone-fill fs-5 me-2"></i>
-                                    <span class="fw-bold small text-white">Hotline Support</span>
+                                <div class="d-flex align-items-center text-warning mb-1">
+                                    <i class="bi bi-graph-up-arrow fs-5 me-2"></i>
+                                    <span class="fw-bold small text-white">Cost Analytics</span>
                                 </div>
-                                <small class="text-muted" style="font-size: 11px;">(02) 7777-8080</small>
+                                <small class="text-white-50" style="font-size: 11px;">Cost-Per-KM & Audit Logs</small>
                             </div>
                         </div>
                     </div>
@@ -259,9 +268,9 @@
 
                 <!-- Footer branding -->
                 <div class="pt-4 border-top border-secondary border-opacity-25 mt-4">
-                    <div class="d-flex align-items-center justify-content-between text-muted small">
-                        <span>Team 7 Scope &bull; Capstone 2026</span>
-                        <span class="badge bg-success bg-opacity-20 text-success">Metro Manila Fleet Active</span>
+                    <div class="d-flex align-items-center justify-content-between text-white-50 small">
+                        <span>Hirna Capstone Research &bull; 2026</span>
+                        <span class="badge bg-warning text-dark fw-bold">Hirna Client Active</span>
                     </div>
                 </div>
             </div>
@@ -271,7 +280,7 @@
                 
                 <div class="mb-4">
                     <div class="d-flex align-items-center mb-2">
-                        <i class="bi bi-shield-shaded text-success fs-2 me-2"></i>
+                        <img src="{{ asset('images/hirna_logo.jpg') }}" alt="Hirna Logo" style="width: 38px; height: 38px; object-fit: cover; border-radius: 8px; border: 2px solid #F59E0B;" class="me-2">
                         <span class="fs-3 fw-bold text-white">Sign In to Portal</span>
                     </div>
                 </div>

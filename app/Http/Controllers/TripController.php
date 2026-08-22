@@ -50,9 +50,11 @@ class TripController extends Controller
             'start' => 'required|string',
             'end' => 'required|string',
             'vehicle_type' => 'required|string',
+            'fuel_type' => 'nullable|string',
         ]);
 
-        $routeDetails = $this->routingService->planRoute($validated['start'], $validated['end'], $validated['vehicle_type']);
+        $fuelType = $request->get('fuel_type', 'gasoline');
+        $routeDetails = $this->routingService->planRoute($validated['start'], $validated['end'], $validated['vehicle_type'], $fuelType);
         return response()->json($routeDetails);
     }
 

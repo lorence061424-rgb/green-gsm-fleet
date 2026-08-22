@@ -268,12 +268,12 @@
                 align-items: center;
                 justify-content: space-between;
                 width: 100%;
-                background: linear-gradient(180deg, #064E3B 0%, #022C22 100%);
+                background: linear-gradient(135deg, #CE2029 0%, #7F1D1D 100%);
                 padding: 0.85rem 1.25rem;
-                border-radius: 12px;
+                border-radius: 14px;
                 margin-bottom: 1.25rem;
                 color: white;
-                box-shadow: 0 4px 12px rgba(6, 78, 59, 0.2);
+                box-shadow: 0 6px 20px rgba(206, 32, 41, 0.35);
             }
 
             .page-header-title {
@@ -327,38 +327,38 @@
     </div>
 
     <!-- Mobile Offcanvas Sidebar Drawer (For Mobile & Tablet screens) -->
-    <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel" style="max-width: 280px; background: linear-gradient(180deg, #CE2029 0%, #7F1D1D 100%) !important;">
-        <div class="offcanvas-header border-bottom border-danger">
+    <div class="offcanvas offcanvas-start text-white" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel" style="max-width: 290px; background: linear-gradient(180deg, #CE2029 0%, #7F1D1D 100%) !important; z-index: 1060;">
+        <div class="offcanvas-header border-bottom border-white border-opacity-10 py-3">
             <div class="d-flex align-items-center">
-                <img src="{{ asset('images/hirna_logo.jpg') }}" alt="Hirna Logo" style="width: 36px; height: 36px; object-fit: cover; border-radius: 8px; border: 2px solid #F59E0B;" class="me-2">
+                <img src="{{ asset('images/hirna_logo.jpg') }}" alt="Hirna Logo" style="width: 38px; height: 38px; object-fit: cover; border-radius: 8px; border: 2px solid #F59E0B;" class="me-2 shadow-sm">
                 <div>
-                    <span class="fs-6 fw-bold d-block text-white" style="letter-spacing: 0.5px;">HIRNA</span>
-                    <small class="fw-bold" style="font-size: 10px; letter-spacing: 1px; color: #FBBF24;">MOBILITY SOLUTIONS</small>
+                    <span class="fs-6 fw-bold d-block text-white" style="letter-spacing: 0.5px;">HIRNA MOBILITY</span>
+                    <small class="fw-bold text-warning" style="font-size: 10px; letter-spacing: 1px;">FLEET PORTAL</small>
                 </div>
             </div>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body p-0 pt-3">
             <nav>
-                <a href="{{ route('dashboard') }}" class="sidebar-nav-link {{ Route::is('dashboard') ? 'active' : '' }}">
+                <a href="{{ route('dashboard') }}" class="sidebar-nav-link {{ Route::is('dashboard') ? 'active' : '' }}" data-bs-dismiss="offcanvas">
                     <i class="bi bi-grid-1x2-fill"></i> Dashboard
                 </a>
-                <a href="{{ route('vehicles.index') }}" class="sidebar-nav-link {{ Route::is('vehicles.*') || Route::is('maintenance.*') ? 'active' : '' }}">
+                <a href="{{ route('vehicles.index') }}" class="sidebar-nav-link {{ Route::is('vehicles.*') || Route::is('maintenance.*') ? 'active' : '' }}" data-bs-dismiss="offcanvas">
                     <i class="bi bi-truck"></i> Fleet and Vehicle Management
                 </a>
-                <a href="{{ route('reservations.index') }}" class="sidebar-nav-link {{ Route::is('reservations.*') ? 'active' : '' }}">
+                <a href="{{ route('reservations.index') }}" class="sidebar-nav-link {{ Route::is('reservations.*') ? 'active' : '' }}" data-bs-dismiss="offcanvas">
                     <i class="bi bi-calendar-event"></i> Vehicle Reservation and Dispatch
                 </a>
-                <a href="{{ route('trips.index') }}" class="sidebar-nav-link {{ Route::is('trips.*') ? 'active' : '' }}">
+                <a href="{{ route('trips.index') }}" class="sidebar-nav-link {{ Route::is('trips.*') ? 'active' : '' }}" data-bs-dismiss="offcanvas">
                     <i class="bi bi-geo-alt"></i> Driver and Trip Performance Monitoring
                 </a>
-                <a href="{{ route('fuel.index') }}" class="sidebar-nav-link {{ Route::is('fuel.*') ? 'active' : '' }}">
+                <a href="{{ route('fuel.index') }}" class="sidebar-nav-link {{ Route::is('fuel.*') ? 'active' : '' }}" data-bs-dismiss="offcanvas">
                     <i class="bi bi-fuel-pump"></i> Fuel Management System
                 </a>
-                <a href="{{ route('cost-analysis.index') }}" class="sidebar-nav-link {{ Route::is('cost-analysis.*') ? 'active' : '' }}">
+                <a href="{{ route('cost-analysis.index') }}" class="sidebar-nav-link {{ Route::is('cost-analysis.*') ? 'active' : '' }}" data-bs-dismiss="offcanvas">
                     <i class="bi bi-graph-up-arrow"></i> Transport Cost Analysis
                 </a>
-                <a href="{{ route('routes.index') }}" class="sidebar-nav-link {{ Route::is('routes.*') ? 'active' : '' }}">
+                <a href="{{ route('routes.index') }}" class="sidebar-nav-link {{ Route::is('routes.*') ? 'active' : '' }}" data-bs-dismiss="offcanvas">
                     <i class="bi bi-compass"></i> Route Planning and Optimization
                 </a>
             </nav>
@@ -371,15 +371,15 @@
         <!-- Mobile Top Header Bar (Shown only on mobile/tablets) -->
         <div class="mobile-header-bar">
             <div class="d-flex align-items-center">
-                <button class="btn btn-danger text-white me-3 border-0 shadow-sm rounded-3 px-2 py-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" style="background: #CE2029 !important; z-index: 10;">
-                    <i class="bi bi-list fs-2 text-white fw-bold"></i>
+                <button class="btn btn-light text-danger me-3 border-0 shadow-sm rounded-3 p-0 d-flex align-items-center justify-content-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" style="background: #FFFFFF !important; color: #CE2029 !important; z-index: 10; width: 44px; height: 44px;">
+                    <i class="bi bi-list fs-1 text-danger fw-bold"></i>
                 </button>
                 <div>
                     <span class="fw-bold d-block text-white" style="font-size: 14px;">HIRNA MOBILITY</span>
                     <span class="badge bg-warning text-dark" style="font-size: 9px;">Taxi & Fleet Portal</span>
                 </div>
             </div>
-            <a href="tel:0288884476" class="btn btn-sm btn-light rounded-pill px-3 fw-medium text-decoration-none text-danger">
+            <a href="tel:0288884476" class="btn btn-sm btn-light rounded-pill px-3 fw-bold text-decoration-none text-danger">
                 <i class="bi bi-telephone-fill me-1"></i> (02) 8888-HIRNA
             </a>
         </div>

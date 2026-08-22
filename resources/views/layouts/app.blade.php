@@ -340,25 +340,25 @@
         </div>
         <div class="offcanvas-body p-0 pt-3">
             <nav>
-                <a href="{{ route('dashboard') }}" class="sidebar-nav-link {{ Route::is('dashboard') ? 'active' : '' }}" data-bs-dismiss="offcanvas">
+                <a href="{{ route('dashboard') }}" class="sidebar-nav-link {{ Route::is('dashboard') ? 'active' : '' }}">
                     <i class="bi bi-grid-1x2-fill"></i> Dashboard
                 </a>
-                <a href="{{ route('vehicles.index') }}" class="sidebar-nav-link {{ Route::is('vehicles.*') || Route::is('maintenance.*') ? 'active' : '' }}" data-bs-dismiss="offcanvas">
+                <a href="{{ route('vehicles.index') }}" class="sidebar-nav-link {{ Route::is('vehicles.*') || Route::is('maintenance.*') ? 'active' : '' }}">
                     <i class="bi bi-truck"></i> Fleet and Vehicle Management
                 </a>
-                <a href="{{ route('reservations.index') }}" class="sidebar-nav-link {{ Route::is('reservations.*') ? 'active' : '' }}" data-bs-dismiss="offcanvas">
+                <a href="{{ route('reservations.index') }}" class="sidebar-nav-link {{ Route::is('reservations.*') ? 'active' : '' }}">
                     <i class="bi bi-calendar-event"></i> Vehicle Reservation and Dispatch
                 </a>
-                <a href="{{ route('trips.index') }}" class="sidebar-nav-link {{ Route::is('trips.*') ? 'active' : '' }}" data-bs-dismiss="offcanvas">
+                <a href="{{ route('trips.index') }}" class="sidebar-nav-link {{ Route::is('trips.*') ? 'active' : '' }}">
                     <i class="bi bi-geo-alt"></i> Driver and Trip Performance Monitoring
                 </a>
-                <a href="{{ route('fuel.index') }}" class="sidebar-nav-link {{ Route::is('fuel.*') ? 'active' : '' }}" data-bs-dismiss="offcanvas">
+                <a href="{{ route('fuel.index') }}" class="sidebar-nav-link {{ Route::is('fuel.*') ? 'active' : '' }}">
                     <i class="bi bi-fuel-pump"></i> Fuel Management System
                 </a>
-                <a href="{{ route('cost-analysis.index') }}" class="sidebar-nav-link {{ Route::is('cost-analysis.*') ? 'active' : '' }}" data-bs-dismiss="offcanvas">
+                <a href="{{ route('cost-analysis.index') }}" class="sidebar-nav-link {{ Route::is('cost-analysis.*') ? 'active' : '' }}">
                     <i class="bi bi-graph-up-arrow"></i> Transport Cost Analysis
                 </a>
-                <a href="{{ route('routes.index') }}" class="sidebar-nav-link {{ Route::is('routes.*') ? 'active' : '' }}" data-bs-dismiss="offcanvas">
+                <a href="{{ route('routes.index') }}" class="sidebar-nav-link {{ Route::is('routes.*') ? 'active' : '' }}">
                     <i class="bi bi-compass"></i> Route Planning and Optimization
                 </a>
             </nav>

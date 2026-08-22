@@ -110,6 +110,17 @@ class DatabaseSeeder extends Seeder
                 'fuel_capacity' => 123.0,
                 'current_gps_lat' => null,
                 'current_gps_lng' => null,
+            ],
+            [
+                'license_plate' => 'TRK-8821',
+                'make' => 'Hirna',
+                'model' => 'Traysikel E-Trike (3-Wheeler)',
+                'year' => 2025,
+                'type' => 'Hirna Traysikel',
+                'status' => 'active',
+                'fuel_capacity' => 25.0,
+                'current_gps_lat' => 14.5995,
+                'current_gps_lng' => 120.9842,
             ]
         ];
 

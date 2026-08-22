@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('model');
             $table->string('make');
             $table->integer('year');
-            $table->enum('type', ['Sedan', 'SUV', 'Van', 'Hatchback', 'Truck', 'Crossover']);
+            $table->string('type')->default('Sedan');
             $table->enum('status', ['active', 'maintenance', 'offline'])->default('active');
             $table->decimal('fuel_capacity', 8, 2);
             $table->decimal('current_gps_lat', 10, 8)->nullable();

@@ -45,39 +45,35 @@ class DashboardController extends Controller
         // 6. VinFast EV Fleet Breakdown
         $vinfastFleet = Vehicle::orderBy('id', 'asc')->get();
 
-        // 7. Chart 1: Energy Usage by VinFast EV Category
+        // 7. Chart 1: Energy Usage by Vehicle Category (Dynamic Database Aggregation)
         $fuelByType = FuelLog::join('vehicles', 'fuel_logs.vehicle_id', '=', 'vehicles.id')
             ->select('vehicles.type', DB::raw('COALESCE(SUM(fuel_logs.amount_liters), 0) as total_liters'))
             ->groupBy('vehicles.type')
             ->get();
 
-        if ($fuelByType->isEmpty() || $fuelByType->sum('total_liters') == 0) {
-            $fuelByType = collect([
-                (object)['type' => 'Nerio Green (EV Sedan)', 'total_liters' => 185.5],
-                (object)['type' => 'VF 8 (Cyan EV SUV)', 'total_liters' => 294.0],
-                (object)['type' => 'VF e34 (Cyan EV Crossover)', 'total_liters' => 142.8],
-                (object)['type' => 'VF 5 (Compact EV)', 'total_liters' => 96.2],
-            ]);
+        if ($fuelByType->isEmpty()) {
+            $fuelByType = Vehicle::select('type', DB::raw('0 as total_liters'))
+                ->groupBy('type')
+                ->get();
         }
 
-        // 8. Chart 2: Charging Cost History (Last 7 Days)
-        $costHistory = FuelLog::select('date', DB::raw('COALESCE(SUM(cost), 0) as daily_cost'), DB::raw('COALESCE(SUM(amount_liters), 0) as daily_liters'))
-            ->groupBy('date')
-            ->orderBy('date', 'asc')
+        // 8. Chart 2: Daily Fuel & Energy Expense History (Dynamic Database Aggregation)
+        $costHistory = FuelLog::select(
+                DB::raw('DATE(date) as log_date'), 
+                DB::raw('COALESCE(SUM(cost), 0) as daily_cost'), 
+                DB::raw('COALESCE(SUM(amount_liters), 0) as daily_liters')
+            )
+            ->groupBy(DB::raw('DATE(date)'))
+            ->orderBy('log_date', 'asc')
             ->limit(10)
-            ->get();
-
-        if ($costHistory->isEmpty() || $costHistory->sum('daily_cost') == 0) {
-            $costHistory = collect([
-                (object)['date' => now()->subDays(6)->format('M d'), 'daily_cost' => 450.00, 'daily_liters' => 39.1],
-                (object)['date' => now()->subDays(5)->format('M d'), 'daily_cost' => 620.50, 'daily_liters' => 53.9],
-                (object)['date' => now()->subDays(4)->format('M d'), 'daily_cost' => 890.00, 'daily_liters' => 77.3],
-                (object)['date' => now()->subDays(3)->format('M d'), 'daily_cost' => 740.25, 'daily_liters' => 64.3],
-                (object)['date' => now()->subDays(2)->format('M d'), 'daily_cost' => 1120.00, 'daily_liters' => 97.4],
-                (object)['date' => now()->subDays(1)->format('M d'), 'daily_cost' => 950.80, 'daily_liters' => 82.6],
-                (object)['date' => now()->format('M d'), 'daily_cost' => 1340.50, 'daily_liters' => 116.5],
-            ]);
-        }
+            ->get()
+            ->map(function($item) {
+                return (object)[
+                    'date' => \Carbon\Carbon::parse($item->log_date)->format('M d'),
+                    'daily_cost' => (float)$item->daily_cost,
+                    'daily_liters' => (float)$item->daily_liters,
+                ];
+            });
 
         // 9. Maintenance Alerts
         $pendingMaintenance = MaintenanceRecord::where('status', 'scheduled')

@@ -371,8 +371,12 @@
         <!-- Mobile Top Header Bar (Shown only on mobile/tablets) -->
         <div class="mobile-header-bar">
             <div class="d-flex align-items-center">
-                <button class="btn btn-light text-danger me-3 border-0 shadow-sm rounded-3 p-0 d-flex align-items-center justify-content-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" style="background: #FFFFFF !important; color: #CE2029 !important; z-index: 10; width: 44px; height: 44px;">
-                    <i class="bi bi-list fs-1 text-danger fw-bold"></i>
+                <button class="btn me-3 border-0 shadow-sm rounded-3 d-flex align-items-center justify-content-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" style="background: #FFFFFF !important; border: 2px solid #F59E0B !important; width: 46px; height: 46px; z-index: 10;">
+                    <div class="d-flex flex-column justify-content-between" style="width: 22px; height: 16px;">
+                        <span style="display: block; width: 100%; height: 3px; background-color: #CE2029; border-radius: 2px;"></span>
+                        <span style="display: block; width: 100%; height: 3px; background-color: #CE2029; border-radius: 2px;"></span>
+                        <span style="display: block; width: 100%; height: 3px; background-color: #CE2029; border-radius: 2px;"></span>
+                    </div>
                 </button>
                 <div>
                     <span class="fw-bold d-block text-white" style="font-size: 14px;">HIRNA MOBILITY</span>

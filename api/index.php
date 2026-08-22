@@ -29,14 +29,17 @@ $_SERVER['DB_DATABASE'] = $dbFile;
 putenv("DB_CONNECTION=sqlite");
 putenv("DB_DATABASE={$dbFile}");
 
-// Forward serverless request to public/index.php
-require __DIR__ . '/../public/index.php';
-
-// Auto-seed SQLite DB if fresh
+// Run migration and seed BEFORE processing the HTTP request if DB is fresh
 if ($isNewDb) {
     try {
+        require __DIR__ . '/../vendor/autoload.php';
+        $app = require __DIR__ . '/../bootstrap/app.php';
+        $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
         \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--force' => true, '--seed' => true]);
     } catch (\Throwable $e) {
         // Silently pass
     }
 }
+
+// Forward serverless request to public/index.php
+require __DIR__ . '/../public/index.php';

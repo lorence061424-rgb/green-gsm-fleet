@@ -266,13 +266,7 @@
                     </div>
                 </div>
 
-                <!-- Footer branding -->
-                <div class="pt-4 border-top border-secondary border-opacity-25 mt-4">
-                    <div class="d-flex align-items-center justify-content-between text-white-50 small">
-                        <span>Hirna Capstone Research &bull; 2026</span>
-                        <span class="badge bg-warning text-dark fw-bold">Hirna Client Active</span>
-                    </div>
-                </div>
+
             </div>
 
             <!-- Right Panel: Modern Login Form -->
@@ -326,7 +320,6 @@
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <label class="form-label small fw-bold text-white mb-0">Password</label>
-                            <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-30" style="font-size: 11px;"><i class="bi bi-key-fill me-1"></i> Default: Password@123</span>
                         </div>
                         <div class="input-group mb-2">
                             <span class="input-group-text border-end-0 text-white"><i class="bi bi-lock text-warning"></i></span>

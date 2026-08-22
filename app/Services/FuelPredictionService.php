@@ -135,6 +135,7 @@ class FuelPredictionService
     public function getVehicleTypeMultiplier(string $type): float
     {
         return match ($type) {
+            'Tricycle', 'Trike', 'Hirna Traysikel', 'E-Trike' => 0.45, // 3-Wheeler Trike (High Mileage Efficiency)
             'VF 5', 'Hatchback', 'Compact', 'Taxi Sedan' => 0.85,
             'Nerio Green', 'Sedan', 'Standard Taxi' => 1.0,
             'VF e34', 'Crossover', 'Premium Taxi' => 1.1,

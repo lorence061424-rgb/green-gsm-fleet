@@ -109,10 +109,11 @@
                         <div class="mb-3">
                             <label class="form-label" style="font-weight: 500;">Vehicle Category</label>
                             <select id="testVehicleType" class="form-select rounded-3" required>
-                                <option value="Sedan" selected>Taxi Sedan / Nerio</option>
-                                <option value="SUV">SUV / MPV Fleet</option>
-                                <option value="Crossover">Crossover Fleet</option>
-                                <option value="Hatchback">Compact / Hatchback</option>
+                                <option value="Sedan" selected>🚕 Hirna Taxi Sedan / Nerio</option>
+                                <option value="Hirna Traysikel">🛺 Hirna Traysikel / Tricycle (3-Wheeler)</option>
+                                <option value="SUV">🚙 Hirna SUV / MPV Fleet</option>
+                                <option value="Crossover">🚘 Crossover Fleet</option>
+                                <option value="Hatchback">🚗 Compact / Hatchback</option>
                             </select>
                         </div>
                         <div class="mb-3">

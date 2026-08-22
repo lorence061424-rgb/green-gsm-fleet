@@ -35,7 +35,7 @@ run_sub.font.size = Pt(12)
 run_sub.font.bold = True
 run_sub.font.color.rgb = GOLD_COLOR
 
-run_title = title_p.add_run("SYSTEM ARCHITECTURE & MODULE INTEGRATION PROCESS\n(TAGLISH VERSION)")
+run_title = title_p.add_run("COMPLETE ENTERPRISE SYSTEM ARCHITECTURE & MODULE INTEGRATION PROCESS\n(TAGLISH VERSION)")
 run_title.font.name = 'Arial'
 run_title.font.size = Pt(18)
 run_title.font.bold = True
@@ -43,7 +43,7 @@ run_title.font.color.rgb = PRIMARY_COLOR
 
 subtitle_p = doc.add_paragraph()
 subtitle_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-run_sub2 = subtitle_p.add_run("Team 7: Fleet and Transportation Management System with AI-Based Fuel Consumption Prediction and Transport Cost Analysis\n")
+run_sub2 = subtitle_p.add_run("Team 7: Fleet and Transportation Management System (Complete Integration with Teams 1 to 10 & HR 1–4)\n")
 run_sub2.font.name = 'Arial'
 run_sub2.font.size = Pt(10)
 run_sub2.font.italic = True
@@ -75,22 +75,21 @@ def add_body_paragraph(text):
 # 1. EXECUTIVE SUMMARY (TAGLISH)
 add_heading_1("1. PANGKALAHATANG ALOY AT PROSESO NG SISTEMA (OVERVIEW)")
 add_body_paragraph(
-    "Ang Fleet and Transportation Management System (Team 7) para sa Hirna Mobility Solutions Inc. ay isang kumpletong web application "
-    "na nag-a-automate ng buong biyahe at maintenance ng mga sasakyan. Mula sa pagre-register ng sasakyan at driver, pag-set up ng dispatch "
-    "reservation, live GPS map tracking, AI prediction ng gasolina/diesel/EV battery, hanggang sa preventive maintenance (PMS) at "
-    "Transport Cost Analysis (TCAO), lahat ay automatic na natsu-swipe at nako-compute."
+    "Ang Fleet and Transportation Management System (Team 7) para sa Hirna Mobility Solutions Inc. ay ang sentral na nag-a-automate "
+    "ng buong fleet operations. Kumokonekta ito sa lahat ng kasamang enterprise teams—mula sa HR Management Systems (Teams 1 hanggang 4), "
+    "Financial Accounting (Team 5), Supply Chain & Inventory (Team 6), Facilities & Hubs (Team 8), Operations (Team 9), at Passenger CRM Booking (Team 10)."
 )
 
 add_body_paragraph(
-    "Imbes na gumamit ng lumang manual Excel spreadsheets, automatic na nagpapasahan ng live data ang bawat module sa system. "
-    "Suportado nito ang iba't ibang uri ng fuel tulad ng Gasoline (Gas), Diesel, at Electric (EV), kasama na ang mga Hirna Taxis, Vans, "
-    "MPVs, at Hirna Traysikel 3-wheelers sa Metro Manila at Davao."
+    "Kina-calculate atina-track ng Team 7 ang buong biyahe ng sasakyan—mula sa pag-verify ng bagong hire na driver mula sa HR, "
+    "pagre-reserve ng sasakyan sa dispatch, live Leaflet GPS tracking, AI prediction ng gasolina/diesel/EV battery, hanggang sa "
+    "preventive maintenance (PMS) at real-time Transport Cost Analysis (TCAO)."
 )
 
-# 2. INTERNAL MODULE INTERCONNECTIONS (TAGLISH)
+# 2. INTERNAL MODULE CONNECTIONS WITHIN TEAM 7
 add_heading_1("2. PAANO NAG-UUSAP ANG MGA MODULE SA LOOB NG TEAM 7")
 add_body_paragraph(
-    "Mayroong 7 main modules ang Team 7 na tuloy-tuloy na nagpapalitan ng impormasyon para maging transparent at accurate ang daily operations:"
+    "Mayroong 7 main modules ang Team 7 na tuloy-tuloy na nagpapalitan ng datos para maging transparent at accurate ang daily operations:"
 )
 
 table_modules = doc.add_table(rows=1, cols=3)
@@ -123,16 +122,16 @@ for row_data in modules_data:
 
 doc.add_paragraph().paragraph_format.space_after = Pt(12)
 
-# 3. EXTERNAL PEER INTEGRATION PIPELINES (TAGLISH)
-add_heading_1("3. KONEKSYON NG TEAM 7 SA IBANG ENTERPRISE TEAMS (APIs)")
+# 3. COMPLETE KONEKSYON NG TEAM 7 SA LAHAT NG TEAMS (TEAMS 1 TO 10 & HR 1 TO 4)
+add_heading_1("3. KUMPLETONG INTEGRATION SA LAHAT NG TEAMS (TEAMS 1 TO 10 & HR 1 TO 4)")
 add_body_paragraph(
-    "Automatic ding kumokonekta ang Team 7 sa 5 ibang enterprise system sa pamamagitan ng RESTful APIs (/api/v1/*):"
+    "Narito ang kumpleto at detalyadong koneksyon ng Team 7 sa LAHAT ng iba pang enterprise teams sa buong sistema:"
 )
 
 table_apis = doc.add_table(rows=1, cols=3)
 table_apis.alignment = WD_TABLE_ALIGNMENT.CENTER
 hdr_cells2 = table_apis.rows[0].cells
-headers2 = ["Kasamang Team", "API Endpoint", "Paano Nagpapalitan ng Data"]
+headers2 = ["Enterprise Team / Module", "API Endpoint", "Paano Nagpapalitan ng Data (Integration Flow)"]
 for i, head in enumerate(headers2):
     hdr_cells2[i].text = head
     set_cell_background(hdr_cells2[i], "7F1D1D")
@@ -140,27 +139,31 @@ for i, head in enumerate(headers2):
     p.runs[0].font.color.rgb = RGBColor(255, 255, 255)
     p.runs[0].font.bold = True
 
-api_data = [
-    ("Team 9: HRMS & Payroll", "/api/v1/hrms/*\n/api/v1/payroll/*", "Bina-validate ang lisensya ng driver sa HRMS. Ipinapasa ang Driver Eco-Safety Scores (100% baseline) sa Payroll para sa bonus (kapag maingat mag-drive) o bawas penalty (kapag harsh mag-drive)."),
-    ("Team 10: CRM & Passenger Portal", "/api/v1/crm/*", "Natatanggap ang booking ng pasahero mula sa Team 10, nag-a-assign ng magagamit na driver/sasakyan, at nagpapadala ng live trip status pabalik sa CRM."),
-    ("Team 5: Financials AP/GL", "/api/v1/finance/*", "Ipinapasa ang lahat ng resibo ng gasolina at EV charging sa General Ledger (GL) ni Team 5. Ang mga PMS maintenance bills naman ay pinadadala sa Accounts Payable (AP)."),
-    ("Team 6: Supply Chain (PR)", "/api/v1/supply-chain/*", "Awtomatikong nag-o-order ng Purchase Requisition (PR) para sa mga ekstrang pyesa (brake pads, langis, gulong) sa Supply Chain ni Team 6 kapag may scheduled PMS maintenance."),
-    ("Team 8: Facilities & Hubs", "/api/v1/facilities/*", "Kina-kuha ang eksaktong GPS coordinates ng mga terminal hubs (Manila Port, NAIA, BGC, Davao Hubs) at nagre-reserve ng parking at charging bays para sa fleet vehicles.")
+all_teams_data = [
+    ("Team 1: HR Recruitment & Onboarding", "POST /api/hr/sync-driver", "Kapag nakapasa at na-hire ang bagong driver sa Team 1 HR, automatic nitong ina-add ang driver account sa driver roster ng Team 7."),
+    ("Team 2: HR Training & Certification", "POST /api/hr/sync-driver", "Ipina-pasa ang safety training status at driving certification clearance bago payagang bumiyahe ang driver sa Team 7."),
+    ("Team 3: HR Attendance & Shift Roster", "POST /api/hr/sync-driver", "Ipinapasa ang daily duty shifts at attendance. Tanging ang mga driver na 'Checked-In' lang ang magiging eligible sa Team 7 Dispatch."),
+    ("Team 4: HR Performance & Evaluation", "GET /api/hr/driver-performance", "Kina-kuha mula sa Team 7 ang monthly Driver Eco-Safety Scores (100% baseline), bilang ng harsh braking, at speeding events para sa HR performance review."),
+    ("Team 5: Financials AP / GL Accounting", "GET /api/finance/expenses", "Ipinapasa ng Team 7 ang lahat ng resibo ng gasolina, diesel, at EV charging sa General Ledger (GL), at ang maintenance invoices sa Accounts Payable (AP)."),
+    ("Team 6: Supply Chain & Inventory", "POST /api/inventory/fuel-stock\nGET /api/inventory/fuel-usage", "Kina-kuha ang live fuel inventory stock mula kay Team 6. Automatic ding nag-o-order ng Purchase Requisition (PR) para sa pyesa (gulong, langis, brake pads) kapag nag-PMS maintenance."),
+    ("Team 8: Facilities & Hub Management", "GET /api/v1/facilities/*", "Kina-kuha ang eksaktong GPS coordinates ng mga terminal hubs (Manila Port, NAIA, BGC, Davao Hubs) at nagre-reserve ng parking/charging bays para sa fleet vehicles."),
+    ("Team 9: Operations System", "POST /api/operations/trip-request\nGET /api/operations/vehicle-availability", "Natatanggap ang mga internal trip requests mula sa Operations at ipinapadala pabalik ang listahan ng available at active Hirna vehicles."),
+    ("Team 10: CRM & Passenger Booking Portal", "POST /api/booking/assign-trip", "Natatanggap ang ride booking ng pasahero mula sa Team 10, automatic na nag-a-assign ng driver/sasakyan, at nag-e-stream ng live Leaflet GPS location at ETA pabalik sa passenger app.")
 ]
 
-for row_data in api_data:
+for row_data in all_teams_data:
     row_cells = table_apis.add_row().cells
     for i, item in enumerate(row_data):
         row_cells[i].text = item
         p = row_cells[i].paragraphs[0]
-        p.runs[0].font.size = Pt(9.5)
+        p.runs[0].font.size = Pt(9)
 
 doc.add_paragraph().paragraph_format.space_after = Pt(12)
 
 # 4. STRATEGIC ADVANTAGES FOR HIRNA MOBILITY (TAGLISH)
 add_heading_1("4. MGA BENEPISYO SA HIRNA MOBILITY SOLUTIONS")
-add_body_paragraph("• Automatic at Walang Manual Excel: Mabilis ang pamamahala dahil direkta at live na nag-a-update ang mga datos sa database.")
-add_body_paragraph("• Hiyang sa Gas, Diesel, EV, at Traysikel: Nakadisenyo para sa lahat ng uri ng biyahe—mula sa Hirna Taxis, Vans, hanggang sa 3-wheeler Hirna Traysikel.")
+add_body_paragraph("• 100% Automatic at Kumpletong Koneksyon: Nakakabit sa LAHAT ng Teams (HR 1-4, Finance 5, Inventory 6, Facilities 8, Operations 9, at Booking 10).")
+add_body_paragraph("• Hiyang sa Gas, Diesel, EV, at Traysikel: Nakadisenyo para sa lahat ng uri ng biyahe—mula sa Hirna Taxis, Vans, MPVs, hanggang sa 3-wheeler Hirna Traysikel.")
 add_body_paragraph("• Malinaw na Kita at Gastos (CPK): May real-time Cost-Per-KM at exportable CSV/PDF audit summaries para madaling makapagdesisyon ang pamunuan.")
 
 # Save to public downloads and user Downloads
@@ -168,4 +171,4 @@ downloads_dir = r"c:\xamppp\htdocs\TNVS\public\downloads"
 os.makedirs(downloads_dir, exist_ok=True)
 doc_path = os.path.join(downloads_dir, "Hirna_Team7_System_Architecture_and_Integration_Process.docx")
 doc.save(doc_path)
-print(f"File updated successfully at: {doc_path}")
+print(f"Complete file updated successfully at: {doc_path}")

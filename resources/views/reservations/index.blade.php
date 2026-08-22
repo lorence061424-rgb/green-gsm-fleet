@@ -4,7 +4,7 @@
 <div class="row align-items-center mb-4">
     <div class="col">
         <h2 class="page-header-title">Vehicle Reservation and Dispatch</h2>
-        <p class="page-header-subtitle">Schedule, approve, and track VinFast EV vehicle bookings for dispatches.</p>
+        <p class="page-header-subtitle">Schedule, approve, and track Hirna Vehicle vehicle bookings for dispatches.</p>
     </div>
     <div class="col-auto d-flex gap-2 flex-wrap">
         <button class="btn btn-outline-info rounded-3" onclick="window.location.reload();">
@@ -105,8 +105,8 @@
         <div class="card premium-card border-0 p-4 shadow-sm">
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <div>
-                    <h5 class="fw-bold mb-1"><i class="bi bi-calendar3 text-success me-2"></i> VinFast EV Vehicle Schedule Calendar</h5>
-                    <p class="small text-muted mb-0">Click any date to inspect reserved and available VinFast EV cars in real time.</p>
+                    <h5 class="fw-bold mb-1"><i class="bi bi-calendar3 text-success me-2"></i> Hirna Vehicle Vehicle Schedule Calendar</h5>
+                    <p class="small text-muted mb-0">Click any date to inspect reserved and available Hirna Vehicle cars in real time.</p>
                 </div>
                 <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20 px-3 py-2 fs-6">
                     <i class="bi bi-broadcast me-1"></i> Live VRDS Schedule Sync
@@ -207,7 +207,7 @@
                                                      <input type="hidden" name="status" value="approved">
                                                      <div class="modal-body p-4">
                                                          <div class="alert alert-success bg-success bg-opacity-10 border-success border-opacity-25 text-dark rounded-3 mb-3 small">
-                                                             <i class="bi bi-info-circle-fill text-success me-1"></i> You are authorizing this VinFast EV vehicle reservation dispatch.
+                                                             <i class="bi bi-info-circle-fill text-success me-1"></i> You are authorizing this Hirna Vehicle vehicle reservation dispatch.
                                                          </div>
                                                          <div class="card bg-light border-0 p-3 mb-3 small text-dark">
                                                              <div class="row g-2">
@@ -306,7 +306,7 @@
                 <i class="bi bi-calendar-check me-1"></i> Check Schedule Slot
             </button>
             <div id="availabilityResults" class="d-none">
-                <h6 class="fw-bold text-success small mb-2"><i class="bi bi-check2-circle me-1"></i> Available VinFast EVs:</h6>
+                <h6 class="fw-bold text-success small mb-2"><i class="bi bi-check2-circle me-1"></i> Available Hirna Vehicles:</h6>
                 <div id="availableList" class="mb-3 d-flex flex-wrap gap-1"></div>
                 <h6 class="fw-bold text-danger small mb-2"><i class="bi bi-exclamation-circle me-1"></i> Already Reserved:</h6>
                 <div id="reservedList" class="d-flex flex-wrap gap-1"></div>

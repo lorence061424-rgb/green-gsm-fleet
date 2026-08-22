@@ -11,7 +11,7 @@
 <div class="row align-items-center mb-4">
     <div class="col">
         <h2 class="page-header-title">Driver and Trip Performance Monitoring</h2>
-        <p class="page-header-subtitle">Auto-dispatch available VinFast EV units, plan optimized eco-routes, and monitor live trips.</p>
+        <p class="page-header-subtitle">Auto-dispatch available Hirna Vehicle units, plan optimized eco-routes, and monitor live trips.</p>
     </div>
     <div class="col-auto d-flex gap-2 flex-wrap">
         <button class="btn btn-danger rounded-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#telemetrySimulatorModal" onclick="launchTelemetrySimulator(999, 'Manila Hub (Port Area)', 'Makati Hub (Ayala Ave)', 'Sedan', 9.5, 3.8);">
@@ -101,7 +101,7 @@
                 <div>
                     <span class="text-muted small fw-bold text-uppercase">Total Energy Consumed</span>
                     <h3 class="fw-bold my-1 text-warning">{{ $totalKwhUsed ?? 154.8 }} <small class="fs-6">kWh</small></h3>
-                    <small class="text-warning" style="font-size: 11px;"><i class="bi bi-lightning-charge me-1"></i> VinFast Battery Draw</small>
+                    <small class="text-warning" style="font-size: 11px;"><i class="bi bi-lightning-charge me-1"></i> Hirna Battery Draw</small>
                 </div>
                 <div class="bg-warning bg-opacity-10 text-warning p-3 rounded-4 fs-4">
                     <i class="bi bi-ev-station"></i>
@@ -214,7 +214,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-premium w-100 py-3 rounded-3 fw-bold">
-                    <i class="bi bi-send-check-fill me-1"></i> Dispatch VinFast EV Trip
+                    <i class="bi bi-send-check-fill me-1"></i> Dispatch Hirna Vehicle Trip
                 </button>
             </form>
         </div>
@@ -511,7 +511,7 @@
                         <tr class="small text-muted text-uppercase">
                             <th>TRIP REF & DATE</th>
                             <th>DRIVER & LICENSE</th>
-                            <th>VINFAST EV UNIT</th>
+                            <th>HIRNA FLEET VEHICLE</th>
                             <th>ROUTE ORIGIN & DESTINATION</th>
                             <th>DISTANCE & ETA</th>
                             <th>ENERGY & COST</th>
@@ -525,7 +525,7 @@
                                 [
                                     'ref' => '#TRP-9082', 'date' => '2026-08-16 16:45',
                                     'driver' => 'Juan Dela Cruz', 'license' => 'N01-18-99201',
-                                    'vehicle' => 'VinFast VF 8', 'plate' => 'NCS-8812',
+                                    'vehicle' => 'Hyundai Accent Hirna Taxi', 'plate' => 'TXI-9876',
                                     'origin' => 'Manila Hub (Port Area)', 'dest' => 'Makati Hub (Ayala Ave)',
                                     'dist' => '9.5 km', 'duration' => '22 mins',
                                     'kwh' => '3.8 kWh', 'cost' => '₱43.70', 'score' => '98%'
@@ -533,7 +533,7 @@
                                 [
                                     'ref' => '#TRP-8910', 'date' => '2026-08-16 14:10',
                                     'driver' => 'Marco Santos', 'license' => 'N02-19-44812',
-                                    'vehicle' => 'VinFast Nerio Green', 'plate' => 'EV-2026-01',
+                                    'vehicle' => 'Toyota Vios Hirna Taxi', 'plate' => 'TXI-5421',
                                     'origin' => 'BGC Hub (Market Market)', 'dest' => 'Quezon City Hub (Cubao)',
                                     'dist' => '14.2 km', 'duration' => '35 mins',
                                     'kwh' => '5.2 kWh', 'cost' => '₱59.80', 'score' => '94%'
@@ -541,7 +541,7 @@
                                 [
                                     'ref' => '#TRP-8744', 'date' => '2026-08-15 11:30',
                                     'driver' => 'Ramon Fernandez', 'license' => 'N03-20-11029',
-                                    'vehicle' => 'VinFast VF e34', 'plate' => 'EV-2026-03',
+                                    'vehicle' => 'Nissan Almera Hirna Taxi', 'plate' => 'TXI-1122',
                                     'origin' => 'Pasay Hub (MOA Complex)', 'dest' => 'NAIA Terminal 3 Hub',
                                     'dist' => '7.8 km', 'duration' => '18 mins',
                                     'kwh' => '2.9 kWh', 'cost' => '₱33.35', 'score' => '91%'
@@ -549,7 +549,7 @@
                                 [
                                     'ref' => '#TRP-8601', 'date' => '2026-08-15 09:15',
                                     'driver' => 'Gabriel Alonzo', 'license' => 'N04-21-77391',
-                                    'vehicle' => 'VinFast VF 9', 'plate' => 'EV-2026-05',
+                                    'vehicle' => 'Toyota HiAce Shuttle Van', 'plate' => 'VAN-4509',
                                     'origin' => 'Alabang Hub (Filinvest)', 'dest' => 'Ortigas Hub (Ortigas Center)',
                                     'dist' => '21.0 km', 'duration' => '45 mins',
                                     'kwh' => '8.4 kWh', 'cost' => '₱96.60', 'score' => '88%'
@@ -568,7 +568,7 @@
                                     <small class="text-muted" style="font-size: 11px;">License: {{ $ctrip->driver->license_number ?? 'N/A' }}</small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-dark text-white mb-1" style="font-size: 10px;">{{ $ctrip->vehicle->make ?? 'VinFast' }} {{ $ctrip->vehicle->model ?? 'EV' }}</span>
+                                    <span class="badge bg-dark text-white mb-1" style="font-size: 10px;">{{ $ctrip->vehicle->make ?? 'Hirna' }} {{ $ctrip->vehicle->model ?? 'EV' }}</span>
                                     <small class="d-block text-muted" style="font-size: 11px;">Plate: {{ $ctrip->vehicle->license_plate ?? 'N/A' }}</small>
                                 </td>
                                 <td>
@@ -590,7 +590,7 @@
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-outline-primary rounded-3 px-3" onclick="showCompletedTripModal('{{ $ctrip->booking_reference_id }}', '{{ $ctrip->driver->user->name ?? 'Driver' }}', '{{ $ctrip->vehicle->model ?? 'VinFast EV' }}', '{{ $ctrip->vehicle->license_plate ?? 'N/A' }}', '{{ $ctrip->start_location }}', '{{ $ctrip->end_location }}', '{{ $ctrip->distance_km }} km', '{{ $ctrip->actual_duration_minutes ?? $ctrip->estimated_duration_minutes }} mins', '{{ $ctrip->actual_fuel_liters ?? $ctrip->estimated_fuel_liters }} kWh', '{{ $ctrip->driver->safety_score ?? 96 }}%');">
+                                    <button class="btn btn-sm btn-outline-primary rounded-3 px-3" onclick="showCompletedTripModal('{{ $ctrip->booking_reference_id }}', '{{ $ctrip->driver->user->name ?? 'Driver' }}', '{{ $ctrip->vehicle->model ?? 'Hirna Vehicle' }}', '{{ $ctrip->vehicle->license_plate ?? 'N/A' }}', '{{ $ctrip->start_location }}', '{{ $ctrip->end_location }}', '{{ $ctrip->distance_km }} km', '{{ $ctrip->actual_duration_minutes ?? $ctrip->estimated_duration_minutes }} mins', '{{ $ctrip->actual_fuel_liters ?? $ctrip->estimated_fuel_liters }} kWh', '{{ $ctrip->driver->safety_score ?? 96 }}%');">
                                         <i class="bi bi-receipt me-1"></i> Audit Receipt
                                     </button>
                                 </td>
@@ -663,8 +663,8 @@
                             <strong class="text-dark d-block fs-6" id="rcptDriver">Juan Dela Cruz</strong>
                         </div>
                         <div class="col-6 text-end">
-                            <small class="text-muted d-block" style="font-size: 11px;">VINFAST EV UNIT</small>
-                            <strong class="text-dark d-block fs-6" id="rcptVehicle">VinFast VF 8 (NCS-8812)</strong>
+                            <small class="text-muted d-block" style="font-size: 11px;">HIRNA FLEET VEHICLE</small>
+                            <strong class="text-dark d-block fs-6" id="rcptVehicle">Hyundai Accent Hirna Taxi (TXI-9876)</strong>
                         </div>
                     </div>
                     <div class="bg-light p-2 rounded-3 text-center my-2 border">
@@ -1109,7 +1109,7 @@
                 iconAnchor: [16, 16]
             });
 
-            carMarker = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMap).bindPopup("<b>VinFast EV Live Position</b>");
+            carMarker = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMap).bindPopup("<b>Hirna Vehicle Live Position</b>");
 
             [100, 300, 500, 800, 1200].forEach(delay => {
                 setTimeout(() => {
@@ -1170,7 +1170,7 @@
                 iconAnchor: [18, 18]
             });
 
-            carMarkerModal = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMapModal).bindPopup("<b>VinFast EV Live Position</b>");
+            carMarkerModal = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMapModal).bindPopup("<b>Hirna Vehicle Live Position</b>");
 
             // Fit map camera to frame entire route
             try {
@@ -1497,7 +1497,7 @@
                     } else if (isHarsh) {
                         addSimFeedEvent(`Safety Trigger: Harsh Braking detected. Safety score: ${safetyScoreTracker}%.`, "warning");
                     } else if (speed === 0) {
-                        addSimFeedEvent(`Idle State: VinFast EV idling at traffic intersection.`, "warning");
+                        addSimFeedEvent(`Idle State: Hirna Vehicle idling at traffic intersection.`, "warning");
                     } else {
                         addSimFeedEvent(`GPS broadcast: Lat ${point.lat.toFixed(4)}, Lng ${point.lng.toFixed(4)}. Cruising smoothly.`, "secondary");
                     }
@@ -1530,7 +1530,7 @@
             safetyScoreTracker = Math.max(60, safetyScoreTracker - 3);
             addSimFeedEvent(`Harsh Braking Event: Sudden deceleration recorded.`, "warning");
         } else if (speed === 0) {
-            addSimFeedEvent(`Idle State: VinFast EV idling at traffic intersection (+15s).`, "warning");
+            addSimFeedEvent(`Idle State: Hirna Vehicle idling at traffic intersection (+15s).`, "warning");
         } else {
             addSimFeedEvent(`GPS broadcast: Lat ${point.lat.toFixed(4)}, Lng ${point.lng.toFixed(4)} | Speed ${speed} km/h`, "secondary");
         }
@@ -1615,11 +1615,11 @@
 
     function exportCompletedTripsCSV() {
         const rows = [
-            ["Trip Ref", "Date", "Driver Name", "License Number", "VinFast EV Model", "License Plate", "Origin Hub", "Destination Hub", "Distance (km)", "Trip Duration (min)", "Energy Consumed (kWh)", "Charging Expense (PHP)", "Driver Safety Score"],
-            ["#TRP-9082", "2026-08-16 16:45", "Juan Dela Cruz", "N01-18-99201", "VinFast VF 8", "NCS-8812", "Manila Hub (Port Area)", "Makati Hub (Ayala Ave)", "9.5", "22", "3.8", "43.70", "98%"],
-            ["#TRP-8910", "2026-08-16 14:10", "Marco Santos", "N02-19-44812", "VinFast Nerio Green", "EV-2026-01", "BGC Hub (Market Market)", "Quezon City Hub (Cubao)", "14.2", "35", "5.2", "59.80", "94%"],
-            ["#TRP-8744", "2026-08-15 11:30", "Ramon Fernandez", "N03-20-11029", "VinFast VF e34", "EV-2026-03", "Pasay Hub (MOA Complex)", "NAIA Terminal 3 Hub", "7.8", "18", "2.9", "33.35", "91%"],
-            ["#TRP-8601", "2026-08-15 09:15", "Gabriel Alonzo", "N04-21-77391", "VinFast VF 9", "EV-2026-05", "Alabang Hub (Filinvest)", "Ortigas Hub (Ortigas Center)", "21.0", "45", "8.4", "96.60", "88%"]
+            ["Trip Ref", "Date", "Driver Name", "License Number", "Hirna Vehicle Model", "License Plate", "Origin Hub", "Destination Hub", "Distance (km)", "Trip Duration (min)", "Energy Consumed (kWh)", "Charging Expense (PHP)", "Driver Safety Score"],
+            ["#TRP-9082", "2026-08-16 16:45", "Juan Dela Cruz", "N01-18-99201", "Hyundai Accent Hirna Taxi", "TXI-9876", "Manila Hub (Port Area)", "Makati Hub (Ayala Ave)", "9.5", "22", "3.8", "43.70", "98%"],
+            ["#TRP-8910", "2026-08-16 14:10", "Marco Santos", "N02-19-44812", "Toyota Vios Hirna Taxi", "TXI-5421", "BGC Hub (Market Market)", "Quezon City Hub (Cubao)", "14.2", "35", "5.2", "59.80", "94%"],
+            ["#TRP-8744", "2026-08-15 11:30", "Ramon Fernandez", "N03-20-11029", "Nissan Almera Hirna Taxi", "TXI-1122", "Pasay Hub (MOA Complex)", "NAIA Terminal 3 Hub", "7.8", "18", "2.9", "33.35", "91%"],
+            ["#TRP-8601", "2026-08-15 09:15", "Gabriel Alonzo", "N04-21-77391", "Toyota HiAce Shuttle Van", "VAN-4509", "Alabang Hub (Filinvest)", "Ortigas Hub (Ortigas Center)", "21.0", "45", "8.4", "96.60", "88%"]
         ];
 
         let csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");

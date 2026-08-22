@@ -44,7 +44,7 @@ class RouteController extends Controller
 
         $routeData = $this->routingService->planRoute($validated['start'], $validated['end'], $validated['vehicle_type']);
         
-        // Add VinFast EV kWh prediction & cost optimization to each route option
+        // Add Hirna Vehicle kWh prediction & cost optimization to each route option
         if (!empty($routeData['routes'])) {
             foreach ($routeData['routes'] as &$route) {
                 $predictedKwh = $this->fuelPredictionService->predict(

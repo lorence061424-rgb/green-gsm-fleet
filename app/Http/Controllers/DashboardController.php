@@ -42,7 +42,7 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // 6. VinFast EV Fleet Breakdown
+        // 6. Hirna Vehicle Fleet Breakdown
         $vinfastFleet = Vehicle::orderBy('id', 'asc')->get();
 
         // 7. Chart 1: Energy Usage by Vehicle Category (Dynamic Database Aggregation)
@@ -112,7 +112,7 @@ class DashboardController extends Controller
                         Vehicle::updateOrCreate(
                             ['license_plate' => $item['license_plate']],
                             [
-                                'make' => $item['make'] ?? 'VinFast',
+                                'make' => $item['make'] ?? 'Hirna',
                                 'model' => $item['model'] ?? 'Nerio Green',
                                 'year' => $item['year'] ?? 2026,
                                 'type' => $item['type'] ?? 'Sedan',
@@ -133,7 +133,7 @@ class DashboardController extends Controller
                         Vehicle::updateOrCreate(
                             ['license_plate' => trim($row[1] ?? $row[0])],
                             [
-                                'make' => trim($row[0] ?? 'VinFast'),
+                                'make' => trim($row[0] ?? 'Hirna'),
                                 'model' => trim($row[1] ?? 'Nerio Green'),
                                 'year' => intval($row[2] ?? 2026),
                                 'type' => trim($row[3] ?? 'Sedan'),

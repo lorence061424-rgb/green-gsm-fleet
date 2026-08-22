@@ -4,7 +4,7 @@
 <div class="row align-items-center mb-4">
     <div class="col">
         <h2 class="page-header-title">Fleet and Vehicle Management</h2>
-        <p class="page-header-subtitle">Manage VinFast All-Electric EV vehicle inventory, battery storage, and active fleet statuses.</p>
+        <p class="page-header-subtitle">Manage Hirna Mobility Fleet vehicle inventory, battery storage, and active fleet statuses.</p>
     </div>
     <div class="col-auto d-flex gap-2 flex-wrap">
         <button class="btn btn-outline-success rounded-3" onclick="exportVehiclesToCSV();">
@@ -17,7 +17,7 @@
             <i class="bi bi-printer me-1"></i> Print / PDF
         </button>
         <button class="btn btn-premium d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
-            <i class="bi bi-plus-circle me-1"></i> Register VinFast EV
+            <i class="bi bi-plus-circle me-1"></i> Register Hirna Vehicle
         </button>
     </div>
 </div>
@@ -45,7 +45,7 @@
     <ul class="nav nav-tabs border-bottom mb-4" id="registryTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active fw-bold text-dark border-0 border-bottom border-primary" id="vehicles-tab" data-bs-toggle="tab" data-bs-target="#vehicles-pane" type="button" role="tab" aria-controls="vehicles-pane" aria-selected="true">
-                <i class="bi bi-truck me-1"></i> VinFast EV Units ({{ $vehicles->count() }})
+                <i class="bi bi-truck me-1"></i> Hirna Vehicle Units ({{ $vehicles->count() }})
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -72,7 +72,7 @@
                 <table class="table table-hover align-middle" id="vehiclesTable">
                     <thead>
                         <tr class="text-muted" style="font-size: 13px;">
-                            <th>VINFAST EV MODEL</th>
+                            <th>HIRNA EV MODEL</th>
                             <th>PLATE NUMBER</th>
                             <th>YEAR</th>
                             <th>BATTERY CAPACITY</th>
@@ -128,7 +128,7 @@
                                             @csrf
                                             @method('PUT')
                                             <div class="modal-header bg-secondary text-white border-0">
-                                                <h5 class="modal-title fw-bold" id="editVehicleModalLabel{{ $vehicle->id }}">Edit VinFast EV Details</h5>
+                                                <h5 class="modal-title fw-bold" id="editVehicleModalLabel{{ $vehicle->id }}">Edit Hirna Vehicle Details</h5>
                                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body p-4">
@@ -202,7 +202,7 @@
                 <table class="table table-hover align-middle">
                     <thead>
                         <tr class="text-muted" style="font-size: 13px;">
-                            <th>VINFAST EV UNIT</th>
+                            <th>HIRNA FLEET VEHICLE</th>
                             <th>SERVICE TYPE</th>
                             <th>SCHEDULED DATE</th>
                             <th>COST (PHP)</th>
@@ -214,7 +214,7 @@
                         @forelse($maintenanceRecords as $pms)
                             <tr>
                                 <td>
-                                    <strong class="d-block text-dark small">{{ $pms->vehicle->make ?? 'VinFast' }} {{ $pms->vehicle->model ?? 'EV' }}</strong>
+                                    <strong class="d-block text-dark small">{{ $pms->vehicle->make ?? 'Hirna' }} {{ $pms->vehicle->model ?? 'EV' }}</strong>
                                     <small class="text-muted" style="font-size: 11px;">Plate: {{ $pms->vehicle->license_plate ?? 'N/A' }}</small>
                                 </td>
                                 <td><span class="badge bg-secondary">{{ $pms->service_type }}</span></td>
@@ -231,7 +231,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td><strong class="d-block text-dark small">VinFast VF 8 (NCS-8812)</strong></td>
+                                <td><strong class="d-block text-dark small">Hyundai Accent Hirna Taxi (TXI-9876)</strong></td>
                                 <td><span class="badge bg-secondary">Brake Pad & Battery Diagnostic</span></td>
                                 <td>2026-08-20</td>
                                 <td class="fw-bold text-dark">₱3,450.00</td>
@@ -239,7 +239,7 @@
                                 <td><span class="badge bg-info text-dark" style="font-size: 11px;"><i class="bi bi-cart-check me-1"></i> Team 6 PR Issued</span></td>
                             </tr>
                             <tr>
-                                <td><strong class="d-block text-dark small">VinFast Nerio Green (EV-2026-01)</strong></td>
+                                <td><strong class="d-block text-dark small">Toyota Vios Hirna Taxi (TXI-5421)</strong></td>
                                 <td><span class="badge bg-secondary">Tire Rotation & Coolant Flushing</span></td>
                                 <td>2026-08-14</td>
                                 <td class="fw-bold text-dark">₱1,800.00</td>
@@ -274,7 +274,7 @@
                     <div class="card border rounded-3 p-3 bg-light text-center">
                         <small class="text-muted d-block" style="font-size: 11px;">DC FAST CHARGE CHARGES</small>
                         <h3 class="fw-bold text-warning my-1">{{ $totalDcFastCharges ?? 342 }}</h3>
-                        <small class="text-muted" style="font-size: 10px;">VinFast High-Power Stations</small>
+                        <small class="text-muted" style="font-size: 10px;">Hirna High-Power Stations</small>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -349,14 +349,14 @@
             <form action="{{ route('vehicles.store') }}" method="POST">
                 @csrf
                 <div class="modal-header bg-success text-white border-0">
-                    <h5 class="modal-title fw-bold" id="addVehicleModalLabel"><i class="bi bi-ev-front me-2"></i> Register New VinFast EV</h5>
+                    <h5 class="modal-title fw-bold" id="addVehicleModalLabel"><i class="bi bi-ev-front me-2"></i> Register New Hirna Vehicle</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 500;">Make (Brand)</label>
-                            <input type="text" name="make" value="VinFast" class="form-control rounded-3" required>
+                            <input type="text" name="make" value="Hirna" class="form-control rounded-3" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" style="font-weight: 500;">Model (Name)</label>
@@ -463,7 +463,7 @@ function exportVehiclesToCSV() {
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label" style="font-weight: 500;">Select VinFast EV Unit</label>
+                        <label class="form-label" style="font-weight: 500;">Select Hirna Vehicle Unit</label>
                         <select name="vehicle_id" class="form-select rounded-3" required>
                             @foreach($vehicles as $v)
                                 <option value="{{ $v->id }}">{{ $v->make }} {{ $v->model }} ({{ $v->license_plate }})</option>

@@ -39,7 +39,7 @@ class ImportController extends Controller
                             Vehicle::updateOrCreate(
                                 ['license_plate' => $plate],
                                 [
-                                    'make' => trim($row[0] ?? 'VinFast'),
+                                    'make' => trim($row[0] ?? 'Hirna'),
                                     'model' => trim($row[1] ?? 'Nerio Green'),
                                     'year' => intval($row[3] ?? 2026),
                                     'type' => trim($row[4] ?? 'Sedan'),

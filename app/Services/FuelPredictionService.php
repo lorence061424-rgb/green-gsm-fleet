@@ -7,7 +7,7 @@ use App\Models\Trip;
 
 class FuelPredictionService
 {
-    // Model parameters for VinFast EV Battery Energy (kWh)
+    // Model parameters for Hirna Vehicle Battery Energy (kWh)
     private $weights = [
         'intercept' => 0.5,
         'distance' => 0.12,    // ~12 kWh per 100km base energy rate

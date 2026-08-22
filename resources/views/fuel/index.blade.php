@@ -45,7 +45,7 @@
         <div class="card premium-card p-4 h-100 bg-secondary text-white border-0">
             <h5 class="fw-bold mb-3 text-info"><i class="bi bi-cpu-fill me-1"></i> Active AI Model Weights</h5>
             <p class="text-white-50" style="font-size: 13px;">
-                Coefficients trained by Gradient Descent regression engine on historical VinFast EV trip logs.
+                Coefficients trained by Gradient Descent regression engine on historical Hirna Vehicle trip logs.
             </p>
             <div class="mt-3">
                 <div class="d-flex justify-content-between border-bottom border-dark py-2">

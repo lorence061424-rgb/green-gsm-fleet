@@ -41,7 +41,7 @@
                 </div>
             </div>
             <div class="mt-3">
-                <span class="badge bg-success rounded-pill">{{ $activeVehicles }} Active VinFast EVs</span>
+                <span class="badge bg-success rounded-pill">{{ $activeVehicles }} Active Hirna Vehicles</span>
                 <span class="badge bg-warning text-dark rounded-pill">{{ $maintenanceVehicles }} PMS Servicing</span>
             </div>
         </div>
@@ -102,7 +102,7 @@
     </div>
 </div>
 
-<!-- VinFast EV Fleet Inventory Overview Panel -->
+<!-- Hirna Vehicle Fleet Inventory Overview Panel -->
 <div class="row mb-4">
     <div class="col-12">
         <div class="card premium-card p-4">
@@ -120,7 +120,7 @@
                 <table class="table align-middle mb-0">
                     <thead>
                         <tr class="text-muted" style="font-size: 12px; font-weight: 700;">
-                            <th>VINFAST MODEL</th>
+                            <th>HIRNA MODEL</th>
                             <th>LICENSE PLATE</th>
                             <th>EV CATEGORY</th>
                             <th>BATTERY CAPACITY</th>
@@ -156,7 +156,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-4">No VinFast vehicles registered in fleet inventory.</td>
+                                <td colspan="5" class="text-center text-muted py-4">No Hirna vehicles registered in fleet inventory.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -178,15 +178,15 @@
         </div>
     </div>
 
-    <!-- Chart 2: Energy Consumption by VinFast Class -->
+    <!-- Chart 2: Energy Consumption by Hirna Class -->
     <div class="col-md-4">
         <div class="card premium-card p-4 h-100">
-            <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart text-primary me-2"></i> Energy by VinFast Class</h5>
+            <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart text-primary me-2"></i> Energy by Hirna Class</h5>
             <div style="position: relative; height: 220px;" class="d-flex align-items-center justify-content-center">
                 <canvas id="fuelTypeChart"></canvas>
             </div>
             <div class="mt-3 text-center text-muted" style="font-size: 12px;">
-                Cumulative kWh energy consumed per VinFast EV category.
+                Cumulative kWh energy consumed per Hirna Vehicle category.
             </div>
         </div>
     </div>
@@ -265,7 +265,7 @@
                     <div class="bg-success bg-opacity-10 p-3 rounded-circle d-inline-flex mb-3">
                         <i class="bi bi-check-circle-fill text-success fs-3"></i>
                     </div>
-                    <h6 class="fw-bold text-dark">All VinFast Units Clear</h6>
+                    <h6 class="fw-bold text-dark">All Hirna Units Clear</h6>
                     <p class="text-muted mb-0" style="font-size: 13px;">No vehicles scheduled for PMS in the next 3 days.</p>
                 </div>
             @endif
@@ -430,7 +430,7 @@
                     <div class="mb-3">
                         <label class="form-label" style="font-weight: 500;">Select Target Dataset Category</label>
                         <select name="import_type" class="form-select rounded-3" required>
-                            <option value="vehicles" selected>VinFast EV Fleet Inventory (Vehicles)</option>
+                            <option value="vehicles" selected>Hirna Vehicle Fleet Inventory (Vehicles)</option>
                             <option value="fuel">EV Energy & Charging Logs (kWh)</option>
                             <option value="trips">Driver & Trip Dispatches</option>
                         </select>

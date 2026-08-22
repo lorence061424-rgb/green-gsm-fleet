@@ -268,22 +268,22 @@
 
 <!-- Recent Charging & Energy Logs Table -->
 <div class="card premium-card p-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold mb-0"><i class="bi bi-lightning-charge-fill text-success me-2"></i> EV Charging & Energy Logs</h5>
-        <span class="badge bg-success rounded-pill px-3 py-1">Metro Manila Grid Rate: ₱11.50/kWh</span>
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h5 class="fw-bold mb-0"><i class="bi bi-fuel-pump-fill text-danger me-2"></i> Hirna Fleet Refueling & EV Charging Logs</h5>
+        <span class="badge bg-danger text-white rounded-pill px-3 py-2" style="background: #CE2029 !important;">Rates: Gas ₱64.50/L &bull; Diesel ₱58.00/L &bull; EV ₱11.50/kWh</span>
     </div>
 
     <div class="table-responsive">
         <table class="table table-hover align-middle" id="fuelLogsTable">
             <thead>
-                <tr class="text-muted" style="font-size: 12px; font-weight: 700;">
+                <tr class="text-muted" style="font-size: 12px; font-weight: 700; text-transform: uppercase;">
                     <th>DATE</th>
-                    <th>VINFAST EV UNIT</th>
-                    <th>CHARGED BY DRIVER</th>
-                    <th>ENERGY ADDED (kWh)</th>
-                    <th>CHARGING COST (₱)</th>
+                    <th>HIRNA FLEET VEHICLE</th>
+                    <th>DRIVER / OPERATOR</th>
+                    <th>FUEL / ENERGY ADDED</th>
+                    <th>REFUEL / CHARGE COST (₱)</th>
                     <th>ODOMETER (KM)</th>
-                    <th>CHARGING TYPE</th>
+                    <th>REFUELING / CHARGING TYPE</th>
                 </tr>
             </thead>
             <tbody>
@@ -296,7 +296,7 @@
                         </td>
                         <td>
                             <div class="d-flex align-items-center">
-                                <div class="bg-primary bg-opacity-10 text-primary fw-bold rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width:32px; height:32px; font-size:12px;">
+                                <div class="bg-danger bg-opacity-10 text-danger fw-bold rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width:32px; height:32px; font-size:12px;">
                                     {{ strtoupper(substr($log->trip->driver->user->name ?? 'J', 0, 1)) }}
                                 </div>
                                 <div>
@@ -305,20 +305,26 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="fw-bold text-success" style="font-size: 14px;">
-                            <i class="bi bi-lightning-charge me-1"></i> {{ number_format($log->amount_liters, 2) }} kWh
+                        <td class="fw-bold text-dark" style="font-size: 14px;">
+                            @if(str_contains(strtolower($log->fuel_type ?? ''), 'gas'))
+                                <span class="text-danger"><i class="bi bi-fuel-pump me-1"></i> {{ number_format($log->amount_liters, 2) }} Liters (Gas)</span>
+                            @elseif(str_contains(strtolower($log->fuel_type ?? ''), 'diesel'))
+                                <span class="text-warning"><i class="bi bi-fuel-pump-fill me-1"></i> {{ number_format($log->amount_liters, 2) }} Liters (Diesel)</span>
+                            @else
+                                <span class="text-success"><i class="bi bi-lightning-charge me-1"></i> {{ number_format($log->amount_liters, 2) }} kWh (EV)</span>
+                            @endif
                         </td>
                         <td class="fw-bold text-dark" style="font-size: 14px;">₱{{ number_format($log->cost, 2) }}</td>
                         <td style="font-size: 13px;">{{ number_format($log->odometer_reading, 1) }} km</td>
                         <td>
-                            <span class="badge bg-primary text-white px-3 py-2 rounded-3 shadow-sm fw-bold">
-                                <i class="bi bi-ev-station me-1"></i> {{ $log->fuel_type ?: 'DC Fast Charge (kWh)' }}
+                            <span class="badge bg-dark text-white px-3 py-2 rounded-3 shadow-sm fw-bold">
+                                {{ $log->fuel_type ?: 'Gasoline Refueling (Hirna Station)' }}
                             </span>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-4">No charging logs recorded.</td>
+                        <td colspan="7" class="text-center text-muted py-4">No refueling or charging logs recorded.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -329,16 +335,16 @@
 <!-- Modal Log Refill -->
 <div class="modal fade" id="logFuelModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog rounded-4 overflow-hidden">
-        <div class="modal-content border-0">
+        <div class="modal-content border-0 shadow">
             <form action="{{ route('fuel.store') }}" method="POST">
                 @csrf
-                <div class="modal-header bg-success text-white border-0">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-lightning-charge-fill me-2"></i> Log EV Charging Event</h5>
+                <div class="modal-header text-white border-0" style="background: linear-gradient(135deg, #CE2029 0%, #7F1D1D 100%);">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-fuel-pump-fill me-2"></i> Log Refueling / EV Charging Transaction</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label" style="font-weight: 500;">Select VinFast EV Unit</label>
+                        <label class="form-label" style="font-weight: 500;">Select Hirna Fleet Vehicle</label>
                         <select name="vehicle_id" class="form-select rounded-3" required>
                             <option value="" disabled selected>-- Select Vehicle --</option>
                             @foreach($vehicles as $vehicle)
@@ -348,7 +354,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" style="font-weight: 500;">Charged By Driver (Team 9 Synced)</label>
+                        <label class="form-label" style="font-weight: 500;">Driver / Operator</label>
                         <select name="driver_id" class="form-select rounded-3">
                             @foreach($drivers as $drv)
                                 <option value="{{ $drv->id }}">{{ $drv->user->name ?? 'Driver' }} (License: {{ $drv->license_number }})</option>
@@ -357,18 +363,18 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" style="font-weight: 500;">Date</label>
+                        <label class="form-label" style="font-weight: 500;">Transaction Date</label>
                         <input type="date" name="date" class="form-control rounded-3" value="{{ date('Y-m-d') }}" required>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-6">
-                            <label class="form-label" style="font-weight: 500;">Energy Added (kWh)</label>
-                            <input type="number" step="0.01" name="amount_liters" class="form-control rounded-3" placeholder="e.g. 35.5" required>
+                            <label class="form-label" style="font-weight: 500;">Quantity (Liters or kWh)</label>
+                            <input type="number" step="0.01" name="amount_liters" class="form-control rounded-3" placeholder="e.g. 25.5" required>
                         </div>
                         <div class="col-6">
-                            <label class="form-label" style="font-weight: 500;">Charging Cost (₱)</label>
-                            <input type="number" step="0.01" name="cost" class="form-control rounded-3" placeholder="e.g. 408.25" required>
+                            <label class="form-label" style="font-weight: 500;">Total Cost (₱)</label>
+                            <input type="number" step="0.01" name="cost" class="form-control rounded-3" placeholder="e.g. 1644.75" required>
                         </div>
                     </div>
 

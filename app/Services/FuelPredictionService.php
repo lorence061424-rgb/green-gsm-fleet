@@ -145,19 +145,43 @@ class FuelPredictionService
     }
 
     /**
-     * Analyze route efficiency and suggest improvements.
+     * Analyze route efficiency and calculate predicted fuel/energy quantity and price forecast.
      */
-    public function analyzeTripEfficiency(float $distance, float $avgSpeed, string $vehicleType, float $actualFuel = null): array
+    public function analyzeTripEfficiency(float $distance, float $avgSpeed, string $vehicleType, float $actualFuel = null, string $fuelType = 'gasoline', float $unitPrice = null): array
     {
-        $predicted = $this->predict($distance, $avgSpeed, $vehicleType);
+        $predicted = $this->predict($distance, $avgSpeed, $vehicleType, $fuelType);
+
+        if (!$unitPrice) {
+            $unitPrice = match (strtolower($fuelType)) {
+                'gasoline', 'gas', 'unleaded' => 64.50, // ₱64.50/L
+                'diesel' => 58.00, // ₱58.00/L
+                'electric', 'ev' => 11.50, // ₱11.50/kWh
+                default => 64.50,
+            };
+        }
+
+        $unitLabel = match (strtolower($fuelType)) {
+            'gasoline', 'gas', 'unleaded' => 'Liters (Gas)',
+            'diesel' => 'Liters (Diesel)',
+            'electric', 'ev' => 'kWh (EV)',
+            default => 'Liters (Gas)',
+        };
+
+        $predictedCost = round($predicted * $unitPrice, 2);
         $insights = [];
 
-        if ($avgSpeed < 30) {
-            $insights[] = "Heavy traffic or excessive idling detected. Recommend eco-routing to bypass traffic signals.";
-        } elseif ($avgSpeed > 90) {
-            $insights[] = "High speed detected. Speeds above 90 km/h increase aerodynamic drag. Advise driver to maintain speeds between 60-80 km/h for optimal EV battery range.";
+        if (in_array(strtolower($fuelType), ['gasoline', 'gas', 'unleaded', 'diesel'])) {
+            $insights[] = sprintf("Gasoline/Engine fuel burn predicted at %.2f %s (@ ₱%.2f/Liter). Total Cost: ₱%.2f.", $predicted, $unitLabel, $unitPrice, $predictedCost);
         } else {
-            $insights[] = "Average speed was within optimal EV battery efficiency range (60-80 km/h).";
+            $insights[] = sprintf("EV Battery energy consumption predicted at %.2f kWh (@ ₱%.2f/kWh). Total Cost: ₱%.2f.", $predicted, $unitPrice, $predictedCost);
+        }
+
+        if ($avgSpeed < 30) {
+            $insights[] = "Heavy traffic or excessive idling detected. Recommend eco-routing to bypass congested corridors.";
+        } elseif ($avgSpeed > 90) {
+            $insights[] = "High speed (>90 km/h) increases aerodynamic drag. Advise driver to cruise between 60-80 km/h for peak efficiency.";
+        } else {
+            $insights[] = "Cruising speed was within optimal fuel efficiency range (60-80 km/h).";
         }
 
         $isInefficient = false;
@@ -165,20 +189,24 @@ class FuelPredictionService
             $deviation = (($actualFuel - $predicted) / $predicted) * 100;
             if ($deviation > 15) {
                 $isInefficient = true;
-                $insights[] = sprintf("Actual energy usage was %.1f%% higher than predicted. This could indicate aggressive acceleration or HVAC overload.", $deviation);
+                $insights[] = sprintf("Actual fuel usage was %.1f%% higher than predicted. Check for aggressive acceleration or HVAC load.", $deviation);
             } elseif ($deviation < -15) {
-                $insights[] = sprintf("Actual energy usage was %.1f%% lower than predicted. Driver displayed optimal eco-driving habits.", abs($deviation));
+                $insights[] = sprintf("Actual fuel usage was %.1f%% lower than predicted. Driver displayed optimal eco-driving habits.", abs($deviation));
             }
         }
 
         return [
             'predicted_fuel' => $predicted,
+            'predicted_cost' => $predictedCost,
+            'unit_price' => $unitPrice,
+            'fuel_unit' => $unitLabel,
+            'fuel_type' => ucfirst($fuelType),
             'is_inefficient' => $isInefficient,
             'insights' => $insights,
             'recommendations' => [
-                "Optimize regenerative braking mode to recapture up to 12% energy during deceleration.",
+                "Maintain steady cruising speeds to optimize engine fuel combustion / battery pack efficiency.",
                 "Ensure tire pressure is maintained at recommended PSI levels to reduce rolling resistance.",
-                "Smooth accelerations: Maintain steady speed to optimize VinFast EV battery pack range."
+                "Avoid unnecessary engine idling during passenger waiting periods."
             ]
         ];
     }

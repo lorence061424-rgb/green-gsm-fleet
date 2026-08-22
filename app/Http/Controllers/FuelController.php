@@ -52,16 +52,22 @@ class FuelController extends Controller
             'distance' => 'required|numeric|min:0.1',
             'speed' => 'required|numeric|min:1',
             'vehicle_type' => 'required|string',
+            'fuel_type' => 'nullable|string',
+            'unit_price' => 'nullable|numeric|min:0',
             'actual_fuel' => 'nullable|numeric|min:0',
         ]);
 
         $actualFuel = $request->filled('actual_fuel') ? (float)$validated['actual_fuel'] : null;
+        $fuelType = $request->get('fuel_type', 'gasoline');
+        $unitPrice = $request->filled('unit_price') ? (float)$validated['unit_price'] : null;
 
         $analysis = $this->fuelPredictionService->analyzeTripEfficiency(
             (float)$validated['distance'],
             (float)$validated['speed'],
             $validated['vehicle_type'],
-            $actualFuel
+            $actualFuel,
+            $fuelType,
+            $unitPrice
         );
 
         return response()->json($analysis);

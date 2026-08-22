@@ -80,30 +80,47 @@
                 <!-- Form Inputs -->
                 <div class="col-md-6 border-end">
                     <form id="aiPredictForm" onsubmit="runPredictionTest(event);">
-                        <div class="mb-3">
-                            <label class="form-label" style="font-weight: 500;">Planned Distance (km)</label>
-                            <input type="number" step="0.1" id="testDistance" class="form-control rounded-3" placeholder="e.g. 15.2" required>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label" style="font-weight: 500;">Planned Distance (km)</label>
+                                <input type="number" step="0.1" id="testDistance" class="form-control rounded-3" placeholder="e.g. 15.2" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" style="font-weight: 500;">Avg Speed (km/h)</label>
+                                <input type="number" id="testSpeed" class="form-control rounded-3" placeholder="e.g. 45" required>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label" style="font-weight: 500;">Estimated Avg Speed (km/h)</label>
-                            <input type="number" id="testSpeed" class="form-control rounded-3" placeholder="e.g. 45" required>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label" style="font-weight: 500;">Fuel / Energy Engine</label>
+                                <select id="testFuelType" class="form-select rounded-3" onchange="updateDefaultFuelPrice();" required>
+                                    <option value="gasoline" selected>⛽ Gasoline (Gas)</option>
+                                    <option value="diesel">🛢️ Diesel</option>
+                                    <option value="electric">⚡ Electric (EV)</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" style="font-weight: 500;">Fuel Price (₱ / Unit)</label>
+                                <input type="number" step="0.1" id="testUnitPrice" class="form-control rounded-3" value="64.50" placeholder="64.50" required>
+                            </div>
                         </div>
+
                         <div class="mb-3">
-                            <label class="form-label" style="font-weight: 500;">VinFast EV Model</label>
+                            <label class="form-label" style="font-weight: 500;">Vehicle Category</label>
                             <select id="testVehicleType" class="form-select rounded-3" required>
-                                <option value="Nerio Green" selected>VinFast Nerio Green (EV Sedan - 42 kWh)</option>
-                                <option value="VF 8">VinFast VF 8 (EV SUV - 87.7 kWh)</option>
-                                <option value="VF e34">VinFast VF e34 (EV Crossover - 42 kWh)</option>
-                                <option value="VF 5">VinFast VF 5 (EV Compact - 37.2 kWh)</option>
-                                <option value="VF 9">VinFast VF 9 (EV Premium SUV - 92 kWh)</option>
+                                <option value="Sedan" selected>Taxi Sedan / Nerio</option>
+                                <option value="SUV">SUV / MPV Fleet</option>
+                                <option value="Crossover">Crossover Fleet</option>
+                                <option value="Hatchback">Compact / Hatchback</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" style="font-weight: 500;">Actual Energy Used (kWh, Optional)</label>
+                            <label class="form-label" style="font-weight: 500;">Actual Fuel Used (Optional)</label>
                             <input type="number" step="0.1" id="testActualFuel" class="form-control rounded-3" placeholder="e.g. 1.8">
                         </div>
                         <button type="submit" class="btn btn-premium w-100 rounded-3">
-                            <i class="bi bi-cpu me-1"></i> Predict EV kWh Consumption
+                            <i class="bi bi-cpu me-1"></i> Predict Fuel & Price Output
                         </button>
                     </form>
                 </div>
@@ -111,20 +128,20 @@
                 <!-- Live Results Output -->
                 <div class="col-md-6 bg-light bg-opacity-50 p-3 rounded-4 d-flex align-items-center justify-content-center" id="predictResultContainer">
                     <div class="text-center text-muted" id="placeholderResult">
-                        <i class="bi bi-lightning-charge fs-1 mb-2 text-success"></i>
-                        <h6>Energy Estimation Results</h6>
-                        <p class="mb-0 small">Enter trip parameters on the left to estimate battery energy outputs.</p>
+                        <i class="bi bi-fuel-pump-fill fs-1 mb-2 text-danger"></i>
+                        <h6>Fuel & Cost Estimation Results</h6>
+                        <p class="mb-0 small">Select fuel engine type (Gas/Diesel/EV) and trip parameters to predict cost.</p>
                     </div>
 
                     <div id="actualResultPanel" class="w-100 d-none">
                         <div class="mb-3 text-center">
-                            <span class="text-muted text-uppercase fw-bold" style="font-size: 11px;">Estimated Battery Energy</span>
-                            <h2 class="fw-bold text-success mt-1 mb-0" id="resultPredictedLiters">0.00 kWh</h2>
-                            <small class="text-muted">Charging expense: <strong class="text-dark" id="resultCost">₱0.00</strong></small>
+                            <span class="text-muted text-uppercase fw-bold" style="font-size: 11px;" id="resultFuelUnitHeader">Estimated Fuel Usage</span>
+                            <h2 class="fw-bold text-danger mt-1 mb-0" id="resultPredictedLiters">0.00 Liters (Gas)</h2>
+                            <small class="text-muted">Total Predicted Trip Cost: <strong class="text-dark fs-6" id="resultCost">₱0.00</strong></small>
                         </div>
                         
                         <div class="border-top pt-2">
-                            <h6 class="fw-bold small text-dark mb-1">AI Route Insights:</h6>
+                            <h6 class="fw-bold small text-dark mb-1">AI Fuel & Cost Insights:</h6>
                             <ul class="ps-3 mb-2 small text-muted" id="resultInsightsList"></ul>
                         </div>
                     </div>
@@ -382,11 +399,27 @@
 
 @section('scripts')
 <script>
+function updateDefaultFuelPrice() {
+    const fuelType = document.getElementById('testFuelType').value;
+    const priceInput = document.getElementById('testUnitPrice');
+    if (!priceInput) return;
+    
+    if (fuelType === 'gasoline') {
+        priceInput.value = "64.50";
+    } else if (fuelType === 'diesel') {
+        priceInput.value = "58.00";
+    } else if (fuelType === 'electric') {
+        priceInput.value = "11.50";
+    }
+}
+
 function runPredictionTest(e) {
     e.preventDefault();
     const distance = document.getElementById('testDistance').value;
     const speed = document.getElementById('testSpeed').value;
     const type = document.getElementById('testVehicleType').value;
+    const fuelType = document.getElementById('testFuelType').value;
+    const unitPrice = document.getElementById('testUnitPrice').value;
     const actualFuel = document.getElementById('testActualFuel').value;
 
     fetch("{{ route('fuel.predict') }}", {
@@ -395,16 +428,19 @@ function runPredictionTest(e) {
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
-        body: JSON.stringify({ distance, speed, vehicle_type: type, actual_fuel: actualFuel })
+        body: JSON.stringify({ distance, speed, vehicle_type: type, fuel_type: fuelType, unit_price: unitPrice, actual_fuel: actualFuel })
     })
     .then(res => res.json())
     .then(data => {
         document.getElementById('placeholderResult').classList.add('d-none');
         document.getElementById('actualResultPanel').classList.remove('d-none');
 
-        const kWh = data.predicted_fuel;
-        document.getElementById('resultPredictedLiters').innerText = kWh.toFixed(2) + " kWh";
-        document.getElementById('resultCost').innerText = "₱" + (kWh * 11.50).toFixed(2);
+        const quantity = data.predicted_fuel;
+        const fuelUnit = data.fuel_unit || 'Liters';
+        const cost = data.predicted_cost || (quantity * (unitPrice || 64.50));
+
+        document.getElementById('resultPredictedLiters').innerText = quantity.toFixed(2) + " " + fuelUnit;
+        document.getElementById('resultCost').innerText = "₱" + Number(cost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " (@ ₱" + parseFloat(unitPrice || 64.50).toFixed(2) + ")";
 
         const list = document.getElementById('resultInsightsList');
         list.innerHTML = "";

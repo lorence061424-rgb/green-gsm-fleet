@@ -418,7 +418,7 @@ function exportVehiclesToCSV() {
 
     const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
     const downloadLink = document.createElement("a");
-    downloadLink.download = "Green_GSM_VinFast_EV_Fleet_Inventory.csv";
+    downloadLink.download = "Hirna_Fleet_Inventory.csv";
     downloadLink.href = window.URL.createObjectURL(csvFile);
     downloadLink.style.display = "none";
     document.body.appendChild(downloadLink);

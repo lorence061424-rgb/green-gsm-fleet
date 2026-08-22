@@ -217,7 +217,7 @@
 
         const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
         const downloadLink = document.createElement("a");
-        downloadLink.download = "Green_GSM_Preventive_Maintenance_Records.csv";
+        downloadLink.download = "Hirna_Maintenance_Records.csv";
         downloadLink.href = window.URL.createObjectURL(csvFile);
         downloadLink.style.display = "none";
         document.body.appendChild(downloadLink);

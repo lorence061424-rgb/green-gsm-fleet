@@ -428,7 +428,7 @@ function exportFuelTableToCSV() {
 
     const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
     const downloadLink = document.createElement("a");
-    downloadLink.download = "Green_GSM_EV_Energy_Logs.csv";
+    downloadLink.download = "Hirna_Fuel_and_Energy_Logs.csv";
     downloadLink.href = window.URL.createObjectURL(csvFile);
     downloadLink.style.display = "none";
     document.body.appendChild(downloadLink);

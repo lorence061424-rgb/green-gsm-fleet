@@ -1588,7 +1588,7 @@
 
         const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
         const downloadLink = document.createElement("a");
-        downloadLink.download = "Green_GSM_Driver_and_Trip_Dispatches.csv";
+        downloadLink.download = "Hirna_Driver_and_Trip_Dispatches.csv";
         downloadLink.href = window.URL.createObjectURL(csvFile);
         downloadLink.style.display = "none";
         document.body.appendChild(downloadLink);

@@ -18,15 +18,15 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Create Core Users
         $admin = User::create([
-            'name' => 'Green GSM Admin',
-            'email' => 'admin@greengsm.com',
+            'name' => 'Hirna System Admin',
+            'email' => 'admin@hirna.ph',
             'password' => Hash::make('Password@123'),
             'role' => 'admin',
         ]);
 
         $dispatcher = User::create([
             'name' => 'John Dispatcher',
-            'email' => 'dispatcher@greengsm.com',
+            'email' => 'dispatcher@hirna.ph',
             'password' => Hash::make('Password@123'),
             'role' => 'dispatcher',
         ]);
@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
         $driverModels = [];
 
         foreach ($driverNames as $index => $name) {
-            $email = 'driver' . ($index + 1) . '@greengsm.com';
+            $email = 'driver' . ($index + 1) . '@hirna.ph';
             $user = User::create([
                 'name' => $name,
                 'email' => $email,

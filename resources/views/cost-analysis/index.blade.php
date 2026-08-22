@@ -231,7 +231,7 @@ function exportTcaoToCSV() {
 
     const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
     const downloadLink = document.createElement("a");
-    downloadLink.download = "Green_GSM_Transport_Cost_Analysis_TCAO.csv";
+    downloadLink.download = "Hirna_Transport_Cost_Analysis_TCAO.csv";
     downloadLink.href = window.URL.createObjectURL(csvFile);
     downloadLink.style.display = "none";
     document.body.appendChild(downloadLink);

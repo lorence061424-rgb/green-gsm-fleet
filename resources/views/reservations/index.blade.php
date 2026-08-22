@@ -485,7 +485,7 @@ function exportReservationsToCSV() {
 
     const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
     const downloadLink = document.createElement("a");
-    downloadLink.download = "Green_GSM_Vehicle_Reservations_and_Dispatch.csv";
+    downloadLink.download = "Hirna_Vehicle_Reservations_and_Dispatch.csv";
     downloadLink.href = window.URL.createObjectURL(csvFile);
     downloadLink.style.display = "none";
     document.body.appendChild(downloadLink);

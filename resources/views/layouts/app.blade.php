@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Green GSM - Fleet & Transportation Management System</title>
+    <title>Hirna Mobility Solutions - Fleet & Transportation Management System</title>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -379,8 +379,8 @@
                     <span class="badge bg-warning text-dark" style="font-size: 9px;">Taxi & Fleet Portal</span>
                 </div>
             </div>
-            <a href="tel:0277778080" class="btn btn-sm btn-light rounded-pill px-3 fw-medium text-decoration-none text-danger">
-                <i class="bi bi-telephone-fill me-1"></i> (02) 7777-8080
+            <a href="tel:0288884476" class="btn btn-sm btn-light rounded-pill px-3 fw-medium text-decoration-none text-danger">
+                <i class="bi bi-telephone-fill me-1"></i> (02) 8888-HIRNA
             </a>
         </div>
 
@@ -393,8 +393,8 @@
             <div class="d-flex align-items-center gap-3 ms-auto">
                 @php
                     $currentRole = session('user_role', 'admin');
-                    $currentName = session('user_name', 'Green GSM Admin');
-                    $currentEmail = session('user_email', 'admin@greengsm.com');
+                    $currentName = session('user_name', 'Hirna System Admin');
+                    $currentEmail = session('user_email', 'admin@hirna.ph');
                     
                     $roleTitles = [
                         'admin' => 'System Administrator',

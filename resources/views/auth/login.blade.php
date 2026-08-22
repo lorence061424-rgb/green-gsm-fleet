@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Green GSM - Enterprise Fleet Portal Login</title>
+    <title>Hirna Mobility Solutions - Enterprise Fleet Portal Login</title>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -318,18 +318,18 @@
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-white">Email Address</label>
                         <div class="input-group">
-                            <span class="input-group-text border-end-0 text-white"><i class="bi bi-envelope text-success"></i></span>
-                            <input type="email" id="emailInput" name="email" class="form-control border-start-0 text-white fw-medium" value="admin@greengsm.com" required placeholder="name@greengsm.com">
+                            <span class="input-group-text border-end-0 text-white"><i class="bi bi-envelope text-warning"></i></span>
+                            <input type="email" id="emailInput" name="email" class="form-control border-start-0 text-white fw-medium" value="admin@hirna.ph" required placeholder="name@hirna.ph">
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <label class="form-label small fw-bold text-white mb-0">Password</label>
-                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-30" style="font-size: 11px;"><i class="bi bi-key-fill me-1"></i> Default: Password@123</span>
+                            <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-30" style="font-size: 11px;"><i class="bi bi-key-fill me-1"></i> Default: Password@123</span>
                         </div>
                         <div class="input-group mb-2">
-                            <span class="input-group-text border-end-0 text-white"><i class="bi bi-lock text-success"></i></span>
+                            <span class="input-group-text border-end-0 text-white"><i class="bi bi-lock text-warning"></i></span>
                             <input type="password" id="passwordInput" name="password" class="form-control border-start-0 border-end-0 text-white fw-medium" value="Password@123" required>
                             <button class="btn btn-outline-secondary border border-start-0 text-white" type="button" id="togglePassword">
                                 <i class="bi bi-eye text-white" id="eyeIcon"></i>
@@ -339,17 +339,17 @@
                         <div class="p-2 rounded-3 border border-secondary border-opacity-30 bg-dark bg-opacity-50" style="font-size: 11px;">
                             <span class="d-block text-white-50 fw-bold mb-1"><i class="bi bi-shield-lock-fill text-warning me-1"></i> Enterprise Password Complexity Rule:</span>
                             <div class="d-flex flex-wrap gap-2 text-white-50">
-                                <span><i class="bi bi-check-circle-fill text-success"></i> 8+ Chars</span>
-                                <span><i class="bi bi-check-circle-fill text-success"></i> 1 Capital [A-Z]</span>
-                                <span><i class="bi bi-check-circle-fill text-success"></i> 1 Lowercase [a-z]</span>
-                                <span><i class="bi bi-check-circle-fill text-success"></i> 1 Number [0-9]</span>
-                                <span><i class="bi bi-check-circle-fill text-success"></i> 1 Special (@$!%*#?)</span>
+                                <span><i class="bi bi-check-circle-fill text-warning"></i> 8+ Chars</span>
+                                <span><i class="bi bi-check-circle-fill text-warning"></i> 1 Capital [A-Z]</span>
+                                <span><i class="bi bi-check-circle-fill text-warning"></i> 1 Lowercase [a-z]</span>
+                                <span><i class="bi bi-check-circle-fill text-warning"></i> 1 Number [0-9]</span>
+                                <span><i class="bi bi-check-circle-fill text-warning"></i> 1 Special (@$!%*#?)</span>
                             </div>
                         </div>
                     </div>
 
                     <button type="submit" class="btn btn-submit mb-4 fs-6 py-3 fw-bold">
-                        <i class="bi bi-box-arrow-in-right me-2"></i> Access Green GSM Portal
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Access Hirna Portal
                     </button>
                 </form>
 
@@ -357,20 +357,20 @@
                 <div class="pt-3 border-top border-secondary border-opacity-30">
                     <span class="d-block text-white small fw-bold mb-2">⚡ Quick 1-Click Role Access (Internal Staff):</span>
                     <div class="d-flex flex-wrap gap-2">
-                        <button type="button" onclick="fillRole('admin@greengsm.com')" class="role-pill">
-                            <i class="bi bi-shield-check text-success me-1"></i> System Admin
+                        <button type="button" onclick="fillRole('admin@hirna.ph')" class="role-pill">
+                            <i class="bi bi-shield-check text-warning me-1"></i> System Admin
                         </button>
-                        <button type="button" onclick="fillRole('fleetmanager@greengsm.com')" class="role-pill">
-                            <i class="bi bi-truck text-primary me-1"></i> Fleet Manager
+                        <button type="button" onclick="fillRole('fleetmanager@hirna.ph')" class="role-pill">
+                            <i class="bi bi-truck text-warning me-1"></i> Fleet Manager
                         </button>
-                        <button type="button" onclick="fillRole('dispatcher@greengsm.com')" class="role-pill">
-                            <i class="bi bi-calendar-event text-info me-1"></i> Dispatcher
+                        <button type="button" onclick="fillRole('dispatcher@hirna.ph')" class="role-pill">
+                            <i class="bi bi-calendar-event text-warning me-1"></i> Dispatcher
                         </button>
-                        <button type="button" onclick="fillRole('finance@greengsm.com')" class="role-pill">
+                        <button type="button" onclick="fillRole('finance@hirna.ph')" class="role-pill">
                             <i class="bi bi-graph-up-arrow text-warning me-1"></i> Finance Officer
                         </button>
-                        <button type="button" onclick="fillRole('operations@greengsm.com')" class="role-pill">
-                            <i class="bi bi-speedometer2 text-secondary me-1"></i> Operations Manager
+                        <button type="button" onclick="fillRole('operations@hirna.ph')" class="role-pill">
+                            <i class="bi bi-speedometer2 text-warning me-1"></i> Operations Manager
                         </button>
                     </div>
                 </div>

@@ -167,7 +167,7 @@
                 <!-- Route Optimization Preview Card (Dynamically updated via AJAX) -->
                 <div id="routePreviewCard" class="card border-0 rounded-4 bg-light p-3 mb-3 d-none">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-uppercase text-muted fw-bold" style="font-size: 11px;">Green GSM Optimized Path</span>
+                        <span class="text-uppercase text-muted fw-bold" style="font-size: 11px;">Hirna Mobility Optimized Path</span>
                         <span id="ecoBadge" class="badge bg-success rounded-pill d-none"><i class="bi bi-leaf-fill"></i> Zero-Emission Route</span>
                     </div>
                     <div class="row g-2 mb-2">
@@ -1091,7 +1091,7 @@
             
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
-                attribution: '&copy; OpenStreetMap &bull; Green GSM Telemetry'
+                attribution: '&copy; OpenStreetMap &bull; Hirna Mobility Telemetry'
             }).addTo(leafletMap);
 
             // Start & Destination Hub Markers
@@ -1147,7 +1147,7 @@
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
-                attribution: '&copy; OpenStreetMap &bull; Green GSM Modal GPS'
+                attribution: '&copy; OpenStreetMap &bull; Hirna Modal GPS'
             }).addTo(leafletMapModal);
 
             // Start & Destination Hub Markers

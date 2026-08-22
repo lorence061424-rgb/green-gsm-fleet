@@ -258,7 +258,7 @@
         map = L.map('routeVisualizerMap', { zoomControl: true }).setView([14.5995, 120.9842], 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '&copy; OpenStreetMap &bull; Green GSM Eco-Routing'
+            attribution: '&copy; OpenStreetMap &bull; Hirna Mobility Routing'
         }).addTo(map);
 
         // Auto calculate on load

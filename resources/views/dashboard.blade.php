@@ -4,11 +4,11 @@
 <div class="row align-items-center mb-4">
     <div class="col">
         <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-success text-white px-3 py-1 rounded-pill" style="font-size: 11px; letter-spacing: 0.5px;">GREEN GSM METRO MANILA</span>
-            <span class="text-muted" style="font-size: 12px;">Hotline: (02) 7777-8080</span>
+            <span class="badge bg-danger text-white px-3 py-1 rounded-pill" style="font-size: 11px; letter-spacing: 0.5px; background: #CE2029 !important;">HIRNA MOBILITY SOLUTIONS INC.</span>
+            <span class="text-muted" style="font-size: 12px;"><i class="bi bi-telephone-fill text-danger me-1"></i> 24/7 Booking Hotline: (02) 8888-HIRNA</span>
         </div>
-        <h2 class="page-header-title mt-1">Green GSM Fleet Analytics Dashboard</h2>
-        <p class="page-header-subtitle">Real-time performance metrics, VinFast EV fleet status, and AI energy predictions.</p>
+        <h2 class="page-header-title mt-1">Hirna Fleet Analytics Dashboard</h2>
+        <p class="page-header-subtitle">Real-time performance metrics, taxi & vehicle fleet status, AI fuel & energy predictions, and transport cost analytics.</p>
     </div>
     <div class="col-auto d-flex gap-2 flex-wrap">
         <button class="btn btn-outline-success rounded-3" onclick="exportDashboardToCSV();">
@@ -108,8 +108,8 @@
         <div class="card premium-card p-4">
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <div>
-                    <h5 class="fw-bold mb-1"><i class="bi bi-shield-shaded text-success me-2"></i> Green GSM VinFast 100% Electric Vehicles Fleet</h5>
-                    <p class="text-muted small mb-0">Active VinFast electric car lineup deployed across Metro Manila hubs.</p>
+                    <h5 class="fw-bold mb-1"><i class="bi bi-shield-shaded text-danger me-2"></i> Hirna Mobility Fleet Inventory</h5>
+                    <p class="text-muted small mb-0">Active vehicle lineup deployed across Hirna regional transport hubs.</p>
                 </div>
                 <a href="{{ route('vehicles.index') }}" class="btn btn-sm btn-outline-primary rounded-3 px-3 fw-medium">
                     Manage Fleet Inventory <i class="bi bi-arrow-right ms-1"></i>

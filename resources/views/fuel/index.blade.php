@@ -360,11 +360,12 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" style="font-weight: 500;">Charging Type</label>
+                        <label class="form-label" style="font-weight: 500;">Fuel / Energy Station Type</label>
                         <select name="fuel_type" class="form-select rounded-3" required>
-                            <option value="Fast DC Charging" selected>Fast DC Charging (Green GSM Station)</option>
-                            <option value="AC Level 2 Depot Charging">AC Level 2 Depot Charging</option>
-                            <option value="Public Network Fast Charging">Public Network Fast Charging</option>
+                            <option value="Gasoline Refueling" selected>⛽ Gasoline Refueling (Hirna Station)</option>
+                            <option value="Diesel Refueling">🛢️ Diesel Refueling (Hirna Station)</option>
+                            <option value="Fast DC EV Charging">⚡ Fast DC EV Charging (Hirna Depot)</option>
+                            <option value="AC Level 2 Depot Charging">🔌 AC Level 2 Depot Charging</option>
                         </select>
                     </div>
                 </div>

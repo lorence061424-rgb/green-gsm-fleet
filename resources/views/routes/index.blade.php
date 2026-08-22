@@ -3,8 +3,12 @@
 @section('content')
 <div class="row align-items-center mb-4">
     <div class="col">
-        <h2 class="page-header-title">Route Planning and Optimization</h2>
-        <p class="page-header-subtitle">Plan eco-friendly VinFast EV routes, analyze Metro Manila traffic delays, and minimize kWh energy consumption.</p>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge bg-danger text-white px-3 py-1 rounded-pill" style="font-size: 11px; letter-spacing: 0.5px; background: #CE2029 !important;">HIRNA MOBILITY SOLUTIONS INC.</span>
+            <span class="text-muted" style="font-size: 12px;"><i class="bi bi-compass text-danger me-1"></i> Route Planning & Optimization</span>
+        </div>
+        <h2 class="page-header-title mt-1">Route Planning and Optimization</h2>
+        <p class="page-header-subtitle">Plan eco-friendly Hirna routes, analyze traffic delays across Metro Manila & Davao transit corridors, and optimize Gasoline (Gas), Diesel, and EV fuel consumption.</p>
     </div>
     <div class="col-auto d-flex gap-2 flex-wrap">
         <button class="btn btn-outline-success rounded-3" onclick="exportRoutesToCSV();">
@@ -23,15 +27,15 @@
 <div class="alert alert-dark bg-dark text-white border-0 rounded-4 p-3 mb-4 shadow-sm">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div class="d-flex align-items-center">
-            <i class="bi bi-diagram-3-fill text-success fs-4 me-2"></i>
+            <i class="bi bi-diagram-3-fill text-warning fs-4 me-2"></i>
             <div>
-                <span class="fw-bold d-block text-white small">INTER-SYSTEM INTEGRATION PIPELINE (TEAM 7 &bull; RPO)</span>
-                <span class="text-white fw-medium" style="font-size: 11px;">Connected to peer enterprise systems for customer fare estimation, eco-routing, and hub transit paths.</span>
+                <span class="fw-bold d-block text-white small">HIRNA MOBILITY INTER-SYSTEM INTEGRATION PIPELINE (RPO)</span>
+                <span class="text-white-50 fw-medium" style="font-size: 11px;">Connected to peer enterprise systems for customer fare estimation, multi-fuel eco-routing, and hub transit paths.</span>
             </div>
         </div>
         <div class="d-flex gap-2 flex-wrap">
-            <span class="badge bg-warning text-dark fw-bold px-3 py-2"><i class="bi bi-geo me-1"></i> Team 10: Passenger Fare & Route Estimation</span>
-            <span class="badge bg-success text-white fw-bold px-3 py-2"><i class="bi bi-buildings me-1"></i> Team 8: Facilities Hub Transit Paths</span>
+            <span class="badge bg-warning text-dark fw-bold px-3 py-2"><i class="bi bi-geo me-1"></i> Passenger Fare & Route Estimation</span>
+            <span class="badge bg-success text-white fw-bold px-3 py-2"><i class="bi bi-buildings me-1"></i> Facilities Hub Transit Paths</span>
         </div>
     </div>
 </div>
@@ -40,7 +44,7 @@
     <!-- Left Panel: Interactive Route Planner -->
     <div class="col-lg-5">
         <div class="card premium-card p-4 h-100">
-            <h5 class="fw-bold mb-3"><i class="bi bi-compass-fill text-primary me-2"></i> VinFast EV Route Planner</h5>
+            <h5 class="fw-bold mb-3"><i class="bi bi-compass-fill text-danger me-2"></i> Hirna Multi-Fuel Route Planner</h5>
             <form id="routePlannerForm" onsubmit="calculateOptimizedRoutes(event);">
                 <div class="mb-3">
                     <label class="form-label fw-medium">Origin Hub / Location</label>
@@ -60,34 +64,37 @@
                     </select>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-medium">Select Active VinFast EV Unit (Synced with FVM)</label>
-                    <select id="routeVehicleType" class="form-select rounded-3" required>
-                        @forelse($vehicles as $v)
-                            <option value="{{ $v->type }}" {{ $loop->first ? 'selected' : '' }}>
-                                {{ $v->license_plate }} &bull; {{ $v->make }} {{ $v->model }} ({{ $v->type }} - {{ $v->fuel_capacity }} kWh)
-                            </option>
-                        @empty
-                            <option value="Nerio Green" selected>VinFast Nerio Green (EV Sedan - 42 kWh)</option>
-                            <option value="VF 8">VinFast VF 8 (EV SUV - 87.7 kWh)</option>
-                            <option value="VF e34">VinFast VF e34 (EV Crossover - 42 kWh)</option>
-                            <option value="VF 5">VinFast VF 5 (EV Compact - 37.2 kWh)</option>
-                            <option value="VF 9">VinFast VF 9 (EV Premium SUV - 92 kWh)</option>
-                        @endforelse
-                    </select>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label fw-medium">Fuel / Energy Engine</label>
+                        <select id="routeFuelType" class="form-select rounded-3" required>
+                            <option value="gasoline" selected>⛽ Gasoline (Gas)</option>
+                            <option value="diesel">🛢️ Diesel</option>
+                            <option value="electric">⚡ Electric (EV)</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-medium">Vehicle Category</label>
+                        <select id="routeVehicleType" class="form-select rounded-3" required>
+                            <option value="Sedan" selected>🚕 Hirna Taxi Sedan / Nerio</option>
+                            <option value="Hirna Traysikel">🛺 Hirna Traysikel (3-Wheeler)</option>
+                            <option value="SUV">🚙 Hirna SUV / MPV</option>
+                            <option value="Crossover">🚘 Crossover Fleet</option>
+                        </select>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-premium w-100 py-3 rounded-3 fw-bold">
-                    <i class="bi bi-lightning-charge-fill me-1"></i> Calculate Optimized Eco-Routes
+                <button type="submit" class="btn btn-danger w-100 py-3 rounded-3 fw-bold shadow-sm" style="background: #CE2029 !important;">
+                    <i class="bi bi-geo-alt-fill me-1"></i> Calculate Optimized Fuel & Eco-Routes
                 </button>
             </form>
 
             <div class="mt-4 pt-3 border-top">
-                <h6 class="fw-bold small text-dark mb-2">Supported Metro Manila Hubs:</h6>
+                <h6 class="fw-bold small text-dark mb-2">Supported Transit Hubs:</h6>
                 <div class="d-flex flex-wrap gap-1">
                     @foreach($hubs as $name => $c)
                         <span class="badge bg-secondary bg-opacity-10 text-dark border px-2 py-1" style="font-size: 11px;">
-                            <i class="bi bi-geo-alt-fill text-success me-1"></i>{{ $name }}
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ $name }}
                         </span>
                     @endforeach
                 </div>
@@ -98,22 +105,22 @@
     <!-- Right Panel: Interactive Route Map & Optimization Options -->
     <div class="col-lg-7">
         <div class="card premium-card p-4 h-100">
-            <h5 class="fw-bold mb-3"><i class="bi bi-map-fill text-success me-2"></i> Live OpenStreetMap Route Visualizer</h5>
+            <h5 class="fw-bold mb-3"><i class="bi bi-map-fill text-danger me-2"></i> Live OpenStreetMap Route Visualizer</h5>
             
             <div class="card border-0 rounded-4 overflow-hidden shadow-sm mb-3" style="height: 320px; position: relative;">
                 <div id="routeVisualizerMap" style="width: 100%; height: 100%; z-index: 1;"></div>
                 <div class="position-absolute top-0 end-0 m-2 bg-dark bg-opacity-80 text-white px-3 py-1 rounded-pill small shadow-sm" style="z-index: 10; font-size: 11px; backdrop-filter: blur(4px);">
-                    <span class="spinner-grow spinner-grow-sm text-success me-1" role="status"></span>
-                    <span class="fw-bold text-success">METRO MANILA ECO-ROUTING</span>
+                    <span class="spinner-grow spinner-grow-sm text-danger me-1" role="status"></span>
+                    <span class="fw-bold text-white">HIRNA MULTI-FUEL ROUTING</span>
                 </div>
             </div>
 
             <!-- Route Comparison Options Container -->
             <div id="routeResultsContainer">
                 <div class="alert alert-light text-center py-4 border rounded-3 mb-0">
-                    <i class="bi bi-compass fs-1 text-primary mb-2 d-block"></i>
+                    <i class="bi bi-compass fs-1 text-danger mb-2 d-block"></i>
                     <h6 class="fw-bold">Ready to Optimize Routes</h6>
-                    <p class="small text-muted mb-0">Select an origin and destination on the left to display optimized route options and kWh energy predictions.</p>
+                    <p class="small text-muted mb-0">Select origin, destination, and fuel engine type on the left to display optimized route options and fuel/energy predictions.</p>
                 </div>
             </div>
         </div>

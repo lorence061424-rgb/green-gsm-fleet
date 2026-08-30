@@ -1,4 +1,11 @@
-<mxfile host="Electron" modified="2026-08-30T23:31:00.000Z" agent="Mozilla/5.0" version="21.6.8" type="device">
+import os
+
+downloads_dir = r"c:\xamppp\htdocs\TNVS\public\downloads"
+user_downloads = os.path.expanduser(r"~\Downloads")
+os.makedirs(downloads_dir, exist_ok=True)
+
+# High-precision Draw.io XML for Figure 3: Microservices Diagram with ALL explicit directional arrows
+fig3_detailed_xml = """<mxfile host="Electron" modified="2026-08-30T23:31:00.000Z" agent="Mozilla/5.0" version="21.6.8" type="device">
   <diagram id="Figure3_Detailed" name="Figure 3 - Microservices Architecture">
     <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
@@ -105,4 +112,13 @@
       </root>
     </mxGraphModel>
   </diagram>
-</mxfile>
+</mxfile>"""
+
+# Save to public/downloads and User's Downloads
+pub_path = os.path.join(downloads_dir, "Figure3_Microservices_Diagram.drawio")
+usr_path = os.path.join(user_downloads, "Figure3_Microservices_Diagram.drawio")
+
+with open(pub_path, "w", encoding="utf-8") as f: f.write(fig3_detailed_xml)
+with open(usr_path, "w", encoding="utf-8") as f: f.write(fig3_detailed_xml)
+
+print("Successfully regenerated Figure3_Microservices_Diagram.drawio with full directional arrows!")

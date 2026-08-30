@@ -1,0 +1,40 @@
+<mxfile host="Electron" modified="2026-08-30T20:35:00.000Z" agent="Mozilla/5.0" version="21.6.8" type="device">
+  <diagram id="MicroservicesArchitecture" name="Figure 3 - Microservices Architecture">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="FIGURE 3 &amp; 10: HIRNA MOBILITY MICROSERVICES ARCHITECTURE &amp; API GATEWAY" style="text;html=1;strokeColor=none;fillColor=#CE2029;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontColor=#FFFFFF;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="180" y="20" width="800" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="clients" value="CLIENT USERS &amp; DEVICES&#10;(Admins, Dispatchers, Finance Officers, Drivers)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8F8;strokeColor=#CE2029;fontStyle=1;fontSize=11;fontColor=#7F1D1D;" vertex="1" parent="1">
+          <mxGeometry x="60" y="100" width="220" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="gw" value="API GATEWAY &amp; REVERSE PROXY&#10;(Route Handler • Token Auth • Rate Limiting)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CE2029;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="340" y="100" width="160" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="s1" value="AUTH &amp; RBAC SERVICE&#10;(Bcrypt / JWT Security)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7F1D1D;fontColor=#FFFFFF;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="560" y="100" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="s2" value="DISPATCH &amp; HUB SERVICE&#10;(Vehicle-Driver Auto Pairing)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7F1D1D;fontColor=#FFFFFF;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="560" y="165" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="s3" value="LEAFLET TELEMETRY SERVICE&#10;(Live GPS &amp; Speeding Alerts)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7F1D1D;fontColor=#FFFFFF;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="560" y="230" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="s4" value="AI FUEL PREDICTOR SERVICE&#10;(XGBoost / Random Forest ML)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F59E0B;fontColor=#000000;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="560" y="295" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="s5" value="TRANSPORT COST ANALYTICS (TCAO)&#10;(CPK &amp; Profit Margin Engine)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7F1D1D;fontColor=#FFFFFF;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="560" y="360" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="db" value="POLYGLOT PERSISTENCE&#10;MySQL RDBMS + Redis Cache" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#10B981;fontColor=#FFFFFF;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="840" y="150" width="180" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="a1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#CE2029;strokeWidth=2;" edge="1" parent="1" source="clients" target="gw" />
+        <mxCell id="a2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#CE2029;strokeWidth=2;" edge="1" parent="1" source="gw" target="s3" />
+        <mxCell id="a3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#CE2029;strokeWidth=2;" edge="1" parent="1" source="s3" target="db" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,55 @@
+<mxfile host="Electron" modified="2026-08-30T20:35:00.000Z" agent="Mozilla/5.0" version="21.6.8" type="device">
+  <diagram id="UseCaseDiagram" name="Figure 12 - Use Case Diagram">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="FIGURE 12: HIRNA MOBILITY FLEET SYSTEM USE CASE DIAGRAM" style="text;html=1;strokeColor=none;fillColor=#CE2029;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontColor=#FFFFFF;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="180" y="20" width="800" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_admin" value="System Administrator" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontStyle=1;fontColor=#7F1D1D;" vertex="1" parent="1">
+          <mxGeometry x="80" y="100" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_fm" value="Fleet Manager" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontStyle=1;fontColor=#7F1D1D;" vertex="1" parent="1">
+          <mxGeometry x="80" y="230" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_disp" value="Dispatcher" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontStyle=1;fontColor=#7F1D1D;" vertex="1" parent="1">
+          <mxGeometry x="80" y="360" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_fin" value="Finance Officer" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontStyle=1;fontColor=#7F1D1D;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="140" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_driver" value="Driver" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontStyle=1;fontColor=#7F1D1D;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="320" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="sys_box" value="HIRNA MOBILITY FLEET PLATFORM" style="swimlane;startSize=30;horizontal=1;fontStyle=1;fontSize=12;fillColor=#FFF8F8;strokeColor=#CE2029;fontColor=#7F1D1D;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="80" width="760" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="uc1" value="Manage Users &amp; Roles (RBAC)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FEF2F2;strokeColor=#CE2029;fontStyle=1;fontSize=10;" vertex="1" parent="sys_box">
+          <mxGeometry x="40" y="45" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc2" value="Manage Fleet Inventory (Taxis, EVs)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FEF2F2;strokeColor=#CE2029;fontStyle=1;fontSize=10;" vertex="1" parent="sys_box">
+          <mxGeometry x="40" y="115" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc3" value="Dispatch Vehicle &amp; Override Pairing" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FEF2F2;strokeColor=#CE2029;fontStyle=1;fontSize=10;" vertex="1" parent="sys_box">
+          <mxGeometry x="40" y="185" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc4" value="Track Leaflet Live GPS Telemetry" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FEF2F2;strokeColor=#CE2029;fontStyle=1;fontSize=10;" vertex="1" parent="sys_box">
+          <mxGeometry x="280" y="115" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc5" value="Predict AI Fuel/Energy Burn (kWh/L)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FEF2F2;strokeColor=#CE2029;fontStyle=1;fontSize=10;" vertex="1" parent="sys_box">
+          <mxGeometry x="280" y="185" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc6" value="Monitor Driver Eco-Safety Scores" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FEF2F2;strokeColor=#CE2029;fontStyle=1;fontSize=10;" vertex="1" parent="sys_box">
+          <mxGeometry x="280" y="255" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc7" value="Generate CPK Transport Cost Dashboard" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FEF2F2;strokeColor=#CE2029;fontStyle=1;fontSize=10;" vertex="1" parent="sys_box">
+          <mxGeometry x="530" y="115" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uc8" value="View Assigned Schedule &amp; Scorecard" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FEF2F2;strokeColor=#CE2029;fontStyle=1;fontSize=10;" vertex="1" parent="sys_box">
+          <mxGeometry x="530" y="255" width="200" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

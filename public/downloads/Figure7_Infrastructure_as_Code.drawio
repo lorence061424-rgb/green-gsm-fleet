@@ -1,0 +1,28 @@
+<mxfile host="Electron" modified="2026-08-30T20:42:00.000Z" agent="Mozilla/5.0" version="21.6.8" type="device">
+  <diagram id="Figure7" name="Figure 7 - Infrastructure as Code">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="FIGURE 7: INFRASTRUCTURE AS A CODE (IaC DOCKER CONTAINERS)" style="text;html=1;strokeColor=none;fillColor=#CE2029;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontColor=#FFFFFF;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="180" y="20" width="800" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="dc" value="DOCKER COMPOSE ORCHESTRATION ENGINE" style="swimlane;startSize=30;horizontal=1;fontStyle=1;fontSize=12;fillColor=#FFF8F8;strokeColor=#CE2029;fontColor=#7F1D1D;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="90" width="840" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="cont1" value="Nginx Web Server Container" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CE2029;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="dc">
+          <mxGeometry x="30" y="60" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="cont2" value="Laravel PHP 8.2 Runtime Container" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7F1D1D;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="dc">
+          <mxGeometry x="230" y="60" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="cont3" value="MySQL RDBMS Data Container" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#10B981;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="dc">
+          <mxGeometry x="430" y="60" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="cont4" value="Redis Key-Value Cache Container" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F59E0B;fontColor=#000000;fontStyle=1;" vertex="1" parent="dc">
+          <mxGeometry x="630" y="60" width="170" height="120" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

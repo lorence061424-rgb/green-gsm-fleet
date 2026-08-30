@@ -1,0 +1,29 @@
+<mxfile host="Electron" modified="2026-08-30T20:42:00.000Z" agent="Mozilla/5.0" version="21.6.8" type="device">
+  <diagram id="Figure4" name="Figure 4 - Communication Pattern">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="FIGURE 4: COMMUNICATION PATTERN (REST JSON &amp; WEBSOCKET TELEMETRY)" style="text;html=1;strokeColor=none;fillColor=#CE2029;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontColor=#FFFFFF;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="180" y="20" width="800" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c1" value="Client Web Browser" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7F1D1D;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="120" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="rest" value="Synchronous HTTP REST JSON API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CE2029;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="90" width="260" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ws" value="Asynchronous WebSocket Telemetry Stream" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F59E0B;fontColor=#000000;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="170" width="260" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="srv" value="Hirna Core Services" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#10B981;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="720" y="120" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="a1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#CE2029;strokeWidth=2;" edge="1" parent="1" source="c1" target="rest" />
+        <mxCell id="a2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#CE2029;strokeWidth=2;" edge="1" parent="1" source="rest" target="srv" />
+        <mxCell id="a3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#F59E0B;strokeWidth=2;" edge="1" parent="1" source="c1" target="ws" />
+        <mxCell id="a4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#F59E0B;strokeWidth=2;" edge="1" parent="1" source="ws" target="srv" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

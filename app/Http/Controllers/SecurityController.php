@@ -86,6 +86,7 @@ class SecurityController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'phone_number' => 'nullable|string|max:30',
             'password' => [
                 'required',
                 'string',
@@ -105,6 +106,7 @@ class SecurityController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'email' => trim(Str::lower($validated['email'])),
+            'phone_number' => $validated['phone_number'] ?? null,
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
         ]);

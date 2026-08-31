@@ -164,7 +164,10 @@
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <div>
                                 <strong class="text-dark d-block">{{ $usr->name }}</strong>
-                                <small class="text-muted" style="font-size: 11px;">{{ $usr->email }}</small>
+                                <small class="text-muted d-block" style="font-size: 11px;">{{ $usr->email }}</small>
+                                @if(!empty($usr->phone_number))
+                                    <small class="text-success fw-medium d-block" style="font-size: 10.5px;"><i class="bi bi-telephone-fill me-1"></i> {{ $usr->phone_number }}</small>
+                                @endif
                             </div>
                             <span class="badge bg-dark" style="font-size: 10px;">{{ ucfirst($usr->role ?? 'User') }}</span>
                         </div>
@@ -308,9 +311,15 @@
                         <input type="text" name="name" class="form-control rounded-3" placeholder="e.g. Maria Clara Santos" required>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Email Address</label>
-                        <input type="email" name="email" class="form-control rounded-3" placeholder="e.g. maria.santos@hirna.ph" required>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Email Address</label>
+                            <input type="email" name="email" class="form-control rounded-3" placeholder="e.g. maria.santos@hirna.ph" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Phone Number (Mobile)</label>
+                            <input type="text" name="phone_number" class="form-control rounded-3" placeholder="e.g. +63 917 123 4567">
+                        </div>
                     </div>
 
                     <div class="mb-3">

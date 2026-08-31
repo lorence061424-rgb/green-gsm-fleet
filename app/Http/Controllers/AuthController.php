@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\SecurityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -22,8 +23,7 @@ class AuthController extends Controller
     /**
      * Process authentication request with enterprise native security defenses:
      * - Anti-Bot Honeypot Trap
-     * - Rate Limiting & Brute-Force Lockout
-     * - Password Complexity Validation
+     * - Rate Limiting & Brute-Force Lockout (3 Failed Attempts Threshold)
      * - Bcrypt Hash Verification
      * - Session Fixation Regeneration
      * - Security Audit Trail Logging
@@ -32,7 +32,7 @@ class AuthController extends Controller
     {
         // 1. Anti-Bot Honeypot Check (Silently reject automated scrapers)
         if ($request->filled('hirna_security_hp')) {
-            \App\Models\SecurityLog::create([
+            SecurityLog::create([
                 'event_type' => 'bot_honeypot_blocked',
                 'email' => $request->email,
                 'ip_address' => $request->ip(),
@@ -43,42 +43,42 @@ class AuthController extends Controller
             return back()->with('error', 'Automated submission detected and blocked by security filters.');
         }
 
-        // 2. Rate Limiting / Brute-Force Lockout Defense
-        $throttleKey = Str::transliterate(Str::lower($request->input('email')) . '|' . $request->ip());
-
-        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
-            $seconds = RateLimiter::availableIn($throttleKey);
-            \App\Models\SecurityLog::create([
-                'event_type' => 'account_lockout',
-                'email' => $request->email,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'details' => "Account locked out for {$seconds} seconds due to repeated failed attempts",
-            ]);
-            Log::warning("SECURITY LOCKOUT: IP {$request->ip()} locked out due to multiple failed login attempts on {$request->email}");
-            return back()->with('error', "Security Lockout: Too many failed login attempts. Please wait {$seconds} seconds before trying again.");
-        }
-
-        // 3. Strict Input & Password Complexity Validation
+        // 2. Validate Basic Form Structure First
         $request->validate([
             'email' => 'required|email',
-            'password' => [
-                'required',
-                'string',
-                'min:8',
-                'regex:/[A-Z]/',
-                'regex:/[a-z]/',
-                'regex:/[0-9]/',
-                'regex:/[@$!%*#?&~^()_+\-=\[\]{};\':"\\\\|,.<>\/?]/',
-            ],
+            'password' => 'required|string',
         ], [
-            'password.min' => 'Security Error: Password must be at least 8 characters long.',
-            'password.regex' => 'Security Error: Password fails complexity rules. Must include at least 1 Capital Letter (A-Z), 1 Lowercase Letter (a-z), 1 Digit (0-9), and 1 Special Character (e.g., @$!%*#?).',
+            'email.required' => 'Please enter your account email address.',
+            'password.required' => 'Please enter your password.',
         ]);
 
+        $email = trim(Str::lower($request->input('email')));
+        $throttleKey = Str::transliterate($email . '|' . $request->ip());
+        $maxAttempts = 3; // Strict 3 Failed Attempts Lockout Threshold
+
+        // 3. Check Rate Limiter Lockout (Max 3 Attempts)
+        if (RateLimiter::tooManyAttempts($throttleKey, $maxAttempts)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            
+            SecurityLog::create([
+                'event_type' => 'account_lockout',
+                'email' => $email,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'details' => "Account locked out for {$seconds} seconds due to 3 consecutive failed login attempts",
+            ]);
+            
+            Log::warning("SECURITY LOCKOUT: IP {$request->ip()} locked out on {$email}");
+            
+            return back()->with('error', "🚨 Security Lockout: Too many failed login attempts (3/3). Your account has been temporarily locked for {$seconds} seconds. You can wait or request a Superadmin unlock at /admin/security.");
+        }
+
         // 4. Authenticate Against Database User Records
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $email)->first();
         $authenticated = false;
+        $userName = '';
+        $userRole = 'admin';
+        $userId = 1;
 
         if ($user && Hash::check($request->password, $user->password)) {
             $authenticated = true;
@@ -93,17 +93,22 @@ class AuthController extends Controller
                 'dispatcher@hirna.ph' => ['name' => 'Sarah Dispatcher', 'role' => 'dispatcher'],
                 'finance@hirna.ph' => ['name' => 'Marcus Finance Officer', 'role' => 'finance'],
                 'operations@hirna.ph' => ['name' => 'Elena Operations Manager', 'role' => 'operations'],
+                'admin@greengsm.com' => ['name' => 'Hirna System Admin', 'role' => 'admin'],
+                'fleetmanager@greengsm.com' => ['name' => 'Alex Fleet Manager', 'role' => 'fleet_manager'],
+                'dispatcher@greengsm.com' => ['name' => 'Sarah Dispatcher', 'role' => 'dispatcher'],
+                'finance@greengsm.com' => ['name' => 'Marcus Finance Officer', 'role' => 'finance'],
+                'operations@greengsm.com' => ['name' => 'Elena Operations Manager', 'role' => 'operations'],
             ];
 
-            if (isset($roleMap[$request->email]) && $request->password === 'Password@123') {
+            if (isset($roleMap[$email]) && $request->password === 'Password@123') {
                 $authenticated = true;
-                $userName = $roleMap[$request->email]['name'];
-                $userRole = $roleMap[$request->email]['role'];
+                $userName = $roleMap[$email]['name'];
+                $userRole = $roleMap[$email]['role'];
                 $userId = 1;
             }
         }
 
-        // 5. Handle Authentication Outcome
+        // 5. Successful Authentication
         if ($authenticated) {
             // Clear brute-force rate limiter on success
             RateLimiter::clear($throttleKey);
@@ -114,40 +119,43 @@ class AuthController extends Controller
             session([
                 'user_id' => $userId,
                 'user_name' => $userName,
-                'user_email' => $request->email,
+                'user_email' => $email,
                 'user_role' => $userRole,
             ]);
 
-            \App\Models\SecurityLog::create([
+            SecurityLog::create([
                 'event_type' => 'successful_login',
-                'email' => $request->email,
+                'email' => $email,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'details' => "Successful login session initiated for role: {$userRole}",
             ]);
 
-            // Audit Trail Log
-            Log::info("SECURITY AUDIT: Successful login for {$request->email} ({$userRole}) from IP {$request->ip()}");
+            Log::info("SECURITY AUDIT: Successful login for {$email} ({$userRole}) from IP {$request->ip()}");
 
             $roleTitle = ucwords(str_replace('_', ' ', $userRole));
             return redirect()->route('dashboard')->with('success', "Signed in as {$userName} ({$roleTitle}).");
         }
 
-        // Failed Login: Record Strike in RateLimiter and Log Alert
-        RateLimiter::hit($throttleKey, 60);
-        $attemptsLeft = RateLimiter::remaining($throttleKey, 5);
+        // 6. Failed Login Attempt: Record Strike in RateLimiter
+        RateLimiter::hit($throttleKey, 60); // 60-second decay timer
+        $attemptsLeft = RateLimiter::remaining($throttleKey, $maxAttempts);
 
-        \App\Models\SecurityLog::create([
+        SecurityLog::create([
             'event_type' => 'failed_login',
-            'email' => $request->email,
+            'email' => $email,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'details' => "Failed authentication attempt. {$attemptsLeft} attempts remaining.",
+            'details' => "Failed authentication attempt with invalid password. {$attemptsLeft} attempts remaining.",
         ]);
 
-        Log::warning("SECURITY ALERT: Failed login attempt for {$request->email} from IP {$request->ip()}. {$attemptsLeft} attempts remaining.");
+        Log::warning("SECURITY ALERT: Failed login attempt for {$email} from IP {$request->ip()}. {$attemptsLeft} attempts remaining.");
 
-        return back()->with('error', "Invalid credentials. You have {$attemptsLeft} login attempt(s) remaining before temporary lockout.");
+        if ($attemptsLeft <= 0) {
+            return back()->with('error', "🚨 Security Lockout: 3 failed login attempts reached! Your account/IP has been temporarily locked for 60 seconds.");
+        }
+
+        return back()->with('error', "Invalid password or email address. You have {$attemptsLeft} attempt(s) remaining before temporary lockout.");
     }
 
     /**

@@ -24,6 +24,11 @@ Route::middleware(['role'])->group(function () {
     Route::post('/import/csv', [\App\Http\Controllers\ImportController::class, 'importCsv'])->name('import.csv');
     Route::get('/switch-role', [AuthController::class, 'switchRole'])->name('switch-role');
 
+    // Superadmin Security & User Access Control Center
+    Route::get('/admin/security', [\App\Http\Controllers\SecurityController::class, 'index'])->middleware('role:admin')->name('admin.security.index');
+    Route::post('/admin/security/unlock', [\App\Http\Controllers\SecurityController::class, 'unlockUser'])->middleware('role:admin')->name('admin.security.unlock');
+    Route::post('/admin/security/clear-logs', [\App\Http\Controllers\SecurityController::class, 'clearLogs'])->middleware('role:admin')->name('admin.security.clear-logs');
+
     // Fleet Management (FVM)
     Route::get('/vehicles', [FleetController::class, 'index'])->name('vehicles.index');
     Route::post('/vehicles', [FleetController::class, 'storeVehicle'])->middleware('role:fleet_manager')->name('vehicles.store');

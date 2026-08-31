@@ -323,6 +323,11 @@
             <a href="{{ route('routes.index') }}" class="sidebar-nav-link {{ Route::is('routes.*') ? 'active' : '' }}">
                 <i class="bi bi-compass"></i> Route Planning and Optimization
             </a>
+            @if(session('user_role', 'admin') === 'admin')
+            <a href="{{ route('admin.security.index') }}" class="sidebar-nav-link {{ Route::is('admin.security.*') ? 'active' : '' }}">
+                <i class="bi bi-shield-lock-fill"></i> Security & Access Center
+            </a>
+            @endif
         </nav>
     </div>
 
@@ -361,6 +366,11 @@
                 <a href="{{ route('routes.index') }}" class="sidebar-nav-link {{ Route::is('routes.*') ? 'active' : '' }}">
                     <i class="bi bi-compass"></i> Route Planning and Optimization
                 </a>
+                @if(session('user_role', 'admin') === 'admin')
+                <a href="{{ route('admin.security.index') }}" class="sidebar-nav-link {{ Route::is('admin.security.*') ? 'active' : '' }}">
+                    <i class="bi bi-shield-lock-fill"></i> Security & Access Center
+                </a>
+                @endif
             </nav>
         </div>
     </div>

@@ -32,6 +32,13 @@ class AuthController extends Controller
     {
         // 1. Anti-Bot Honeypot Check (Silently reject automated scrapers)
         if ($request->filled('hirna_security_hp')) {
+            \App\Models\SecurityLog::create([
+                'event_type' => 'bot_honeypot_blocked',
+                'email' => $request->email,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'details' => 'Automated bot scraper trapped by hidden honeypot field',
+            ]);
             Log::warning("SECURITY ALERT: Bot honeypot triggered from IP: {$request->ip()}");
             return back()->with('error', 'Automated submission detected and blocked by security filters.');
         }
@@ -41,6 +48,13 @@ class AuthController extends Controller
 
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
+            \App\Models\SecurityLog::create([
+                'event_type' => 'account_lockout',
+                'email' => $request->email,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'details' => "Account locked out for {$seconds} seconds due to repeated failed attempts",
+            ]);
             Log::warning("SECURITY LOCKOUT: IP {$request->ip()} locked out due to multiple failed login attempts on {$request->email}");
             return back()->with('error', "Security Lockout: Too many failed login attempts. Please wait {$seconds} seconds before trying again.");
         }
@@ -104,6 +118,14 @@ class AuthController extends Controller
                 'user_role' => $userRole,
             ]);
 
+            \App\Models\SecurityLog::create([
+                'event_type' => 'successful_login',
+                'email' => $request->email,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'details' => "Successful login session initiated for role: {$userRole}",
+            ]);
+
             // Audit Trail Log
             Log::info("SECURITY AUDIT: Successful login for {$request->email} ({$userRole}) from IP {$request->ip()}");
 
@@ -114,6 +136,14 @@ class AuthController extends Controller
         // Failed Login: Record Strike in RateLimiter and Log Alert
         RateLimiter::hit($throttleKey, 60);
         $attemptsLeft = RateLimiter::remaining($throttleKey, 5);
+
+        \App\Models\SecurityLog::create([
+            'event_type' => 'failed_login',
+            'email' => $request->email,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'details' => "Failed authentication attempt. {$attemptsLeft} attempts remaining.",
+        ]);
 
         Log::warning("SECURITY ALERT: Failed login attempt for {$request->email} from IP {$request->ip()}. {$attemptsLeft} attempts remaining.");
 

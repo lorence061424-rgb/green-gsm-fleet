@@ -309,11 +309,14 @@
                 <form action="{{ route('login.post') }}" method="POST">
                     @csrf
                     
+                    <!-- Native Anti-Bot Honeypot Trap (Invisible to humans, traps automated scrapers) -->
+                    <input type="text" name="hirna_security_hp" style="display:none !important; position:absolute !important; left:-9999px !important;" tabindex="-1" autocomplete="off">
+
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-white">Email Address</label>
                         <div class="input-group">
                             <span class="input-group-text border-end-0 text-white"><i class="bi bi-envelope text-warning"></i></span>
-                            <input type="email" id="emailInput" name="email" class="form-control border-start-0 text-white fw-medium" value="admin@hirna.ph" required placeholder="name@hirna.ph">
+                            <input type="email" id="emailInput" name="email" class="form-control border-start-0 text-white fw-medium" value="{{ old('email') }}" required placeholder="name@hirna.ph" autocomplete="username">
                         </div>
                     </div>
 
@@ -323,7 +326,7 @@
                         </div>
                         <div class="input-group mb-2">
                             <span class="input-group-text border-end-0 text-white"><i class="bi bi-lock text-warning"></i></span>
-                            <input type="password" id="passwordInput" name="password" class="form-control border-start-0 border-end-0 text-white fw-medium" value="Password@123" required>
+                            <input type="password" id="passwordInput" name="password" class="form-control border-start-0 border-end-0 text-white fw-medium" required placeholder="••••••••••••" autocomplete="current-password">
                             <button class="btn btn-outline-secondary border border-start-0 text-white" type="button" id="togglePassword">
                                 <i class="bi bi-eye text-white" id="eyeIcon"></i>
                             </button>
@@ -341,30 +344,17 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-submit mb-4 fs-6 py-3 fw-bold">
+                    <button type="submit" class="btn btn-submit mb-3 fs-6 py-3 fw-bold">
                         <i class="bi bi-box-arrow-in-right me-2"></i> Access Hirna Portal
                     </button>
                 </form>
 
-                <!-- Quick Role Selector Buttons -->
-                <div class="pt-3 border-top border-secondary border-opacity-30">
-                    <span class="d-block text-white small fw-bold mb-2">⚡ Quick 1-Click Role Access (Internal Staff):</span>
-                    <div class="d-flex flex-wrap gap-2">
-                        <button type="button" onclick="fillRole('admin@hirna.ph')" class="role-pill">
-                            <i class="bi bi-shield-check text-warning me-1"></i> System Admin
-                        </button>
-                        <button type="button" onclick="fillRole('fleetmanager@hirna.ph')" class="role-pill">
-                            <i class="bi bi-truck text-warning me-1"></i> Fleet Manager
-                        </button>
-                        <button type="button" onclick="fillRole('dispatcher@hirna.ph')" class="role-pill">
-                            <i class="bi bi-calendar-event text-warning me-1"></i> Dispatcher
-                        </button>
-                        <button type="button" onclick="fillRole('finance@hirna.ph')" class="role-pill">
-                            <i class="bi bi-graph-up-arrow text-warning me-1"></i> Finance Officer
-                        </button>
-                        <button type="button" onclick="fillRole('operations@hirna.ph')" class="role-pill">
-                            <i class="bi bi-speedometer2 text-warning me-1"></i> Operations Manager
-                        </button>
+                <!-- Security Assurance Banner (Zero Third-Party) -->
+                <div class="pt-3 border-top border-secondary border-opacity-30 text-center">
+                    <div class="d-flex justify-content-center align-items-center gap-3 text-white-50 small flex-wrap" style="font-size: 11.5px;">
+                        <span><i class="bi bi-shield-lock text-success me-1"></i> SSL 256-Bit TLS</span>
+                        <span><i class="bi bi-lightning-charge text-warning me-1"></i> Rate-Limited</span>
+                        <span><i class="bi bi-robot text-danger me-1"></i> Anti-Bot Honeypot</span>
                     </div>
                 </div>
 
@@ -375,22 +365,19 @@
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    function fillRole(email) {
-        document.getElementById('emailInput').value = email;
-        document.getElementById('passwordInput').value = 'Password@123';
-    }
-
     // Toggle password visibility
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('passwordInput');
     const eyeIcon = document.getElementById('eyeIcon');
 
-    togglePassword.addEventListener('click', function () {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        eyeIcon.classList.toggle('bi-eye');
-        eyeIcon.classList.toggle('bi-eye-slash');
-    });
+    if (togglePassword && passwordInput && eyeIcon) {
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            eyeIcon.classList.toggle('bi-eye');
+            eyeIcon.classList.toggle('bi-eye-slash');
+        });
+    }
     </script>
 </body>
 </html>

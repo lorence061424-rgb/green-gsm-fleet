@@ -56,8 +56,12 @@ class AuthController extends Controller
         $throttleKey = Str::transliterate($email . '|' . $request->ip());
         $maxAttempts = 3; // Strict 3 Failed Attempts Lockout Threshold
 
-        // 3. Check Rate Limiter Lockout (Max 3 Attempts)
-        if (RateLimiter::tooManyAttempts($throttleKey, $maxAttempts)) {
+        // 3. Check if target account is Superadmin (Superadmins have lockout immunity)
+        $user = User::where('email', $email)->first();
+        $isAdminAccount = ($email === 'admin@hirna.ph') || ($user && ($user->role === 'admin'));
+
+        // 4. Check Rate Limiter Lockout (Max 3 Attempts for non-admin accounts)
+        if (!$isAdminAccount && RateLimiter::tooManyAttempts($throttleKey, $maxAttempts)) {
             $seconds = RateLimiter::availableIn($throttleKey);
             
             SecurityLog::create([
@@ -73,8 +77,7 @@ class AuthController extends Controller
             return back()->with('error', "🚨 Security Lockout: Too many failed login attempts (3/3). Your account has been temporarily locked for {$seconds} seconds. You can wait or request a Superadmin unlock at /admin/security.");
         }
 
-        // 4. Authenticate Against Database User Records
-        $user = User::where('email', $email)->first();
+        // 5. Authenticate Against Database User Records
         $authenticated = false;
         $userName = '';
         $userRole = 'admin';
@@ -83,7 +86,7 @@ class AuthController extends Controller
         if ($user && Hash::check($request->password, $user->password)) {
             $authenticated = true;
             $userName = $user->name;
-            $userRole = $user->role ?? 'admin';
+            $userRole = $user->role ?: 'admin';
             $userId = $user->id;
         } else {
             // Fallback for demo role accounts
@@ -103,7 +106,7 @@ class AuthController extends Controller
             }
         }
 
-        // 5. Successful Authentication
+        // 6. Successful Authentication
         if ($authenticated) {
             // Clear brute-force rate limiter on success
             RateLimiter::clear($throttleKey);
@@ -132,8 +135,10 @@ class AuthController extends Controller
             return redirect()->route('dashboard')->with('success', "Signed in as {$userName} ({$roleTitle}).");
         }
 
-        // 6. Failed Login Attempt: Record Strike in RateLimiter
-        RateLimiter::hit($throttleKey, 60); // 60-second decay timer
+        // 7. Failed Login Attempt: Record Strike in RateLimiter (Excluding Superadmins)
+        if (!$isAdminAccount) {
+            RateLimiter::hit($throttleKey, 60); // 60-second decay timer
+        }
         $attemptsLeft = RateLimiter::remaining($throttleKey, $maxAttempts);
 
         SecurityLog::create([

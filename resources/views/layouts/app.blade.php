@@ -429,18 +429,11 @@
                             <div class="px-3 py-2 border-bottom">
                                 <strong class="d-block text-dark">{{ $currentName }}</strong>
                                 <small class="text-muted">{{ $currentEmail }}</small>
-                                <span class="badge bg-success-subtle text-success d-block mt-1">Active: {{ $activeRoleTitle }}</span>
+                                <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 d-block mt-2 py-1"><i class="bi bi-shield-check me-1"></i> Role: {{ $activeRoleTitle }}</span>
                             </div>
                         </li>
-                        <li><h6 class="dropdown-header mt-1">Switch Team 7 Perspective</h6></li>
-                        <li><a class="dropdown-item {{ $currentRole == 'admin' ? 'active' : '' }}" href="{{ route('switch-role', ['role' => 'admin']) }}"><i class="bi bi-shield-check me-2"></i> System Administrator</a></li>
-                        <li><a class="dropdown-item {{ $currentRole == 'fleet_manager' ? 'active' : '' }}" href="{{ route('switch-role', ['role' => 'fleet_manager']) }}"><i class="bi bi-truck me-2"></i> Fleet Manager</a></li>
-                        <li><a class="dropdown-item {{ $currentRole == 'dispatcher' ? 'active' : '' }}" href="{{ route('switch-role', ['role' => 'dispatcher']) }}"><i class="bi bi-calendar-event me-2"></i> Dispatcher</a></li>
-                        <li><a class="dropdown-item {{ $currentRole == 'finance' ? 'active' : '' }}" href="{{ route('switch-role', ['role' => 'finance']) }}"><i class="bi bi-graph-up-arrow me-2"></i> Finance Officer (TCAO)</a></li>
-                        <li><a class="dropdown-item {{ $currentRole == 'operations' ? 'active' : '' }}" href="{{ route('switch-role', ['role' => 'operations']) }}"><i class="bi bi-speedometer2 me-2"></i> Operations Manager</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <button type="button" class="dropdown-item text-danger fw-semibold" data-bs-toggle="modal" data-bs-target="#logoutConfirmationModal">
+                        <li class="p-1">
+                            <button type="button" class="dropdown-item text-danger fw-semibold rounded-2" data-bs-toggle="modal" data-bs-target="#logoutConfirmationModal">
                                 <i class="bi bi-box-arrow-right me-2"></i> Logout
                             </button>
                         </li>

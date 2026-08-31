@@ -27,6 +27,7 @@ Route::middleware(['role'])->group(function () {
     // Superadmin Security & User Access Control Center
     Route::get('/admin/security', [\App\Http\Controllers\SecurityController::class, 'index'])->middleware('role:admin')->name('admin.security.index');
     Route::post('/admin/security/unlock', [\App\Http\Controllers\SecurityController::class, 'unlockUser'])->middleware('role:admin')->name('admin.security.unlock');
+    Route::post('/admin/security/users', [\App\Http\Controllers\SecurityController::class, 'storeUser'])->middleware('role:admin')->name('admin.security.users.store');
     Route::post('/admin/security/clear-logs', [\App\Http\Controllers\SecurityController::class, 'clearLogs'])->middleware('role:admin')->name('admin.security.clear-logs');
 
     // Fleet Management (FVM)

@@ -8,9 +8,12 @@
             <span class="text-muted" style="font-size: 12px;"><i class="bi bi-shield-lock-fill text-danger me-1"></i> Native ISO 25010 System Security</span>
         </div>
         <h2 class="page-header-title mt-1">Superadmin Security & User Access Control Center</h2>
-        <p class="page-header-subtitle">Monitor brute-force rate-limiting, view live security incident feeds, manage RBAC role permissions, and perform one-click user unlocks.</p>
+        <p class="page-header-subtitle">Monitor brute-force rate-limiting, unlock locked users, create system accounts, and inspect security audit logs.</p>
     </div>
     <div class="col-auto d-flex gap-2 flex-wrap">
+        <button class="btn btn-success rounded-3 fw-bold" data-bs-toggle="modal" data-bs-target="#createUserModal">
+            <i class="bi bi-person-plus-fill me-1"></i> Create New User
+        </button>
         <button class="btn btn-danger rounded-3 fw-bold" data-bs-toggle="modal" data-bs-target="#quickUnlockModal" style="background: #CE2029 !important;">
             <i class="bi bi-unlock-fill me-1"></i> Unlock Account / IP
         </button>
@@ -37,6 +40,17 @@
     </div>
 @endif
 
+@if ($errors->any())
+    <div class="alert alert-danger border-0 rounded-4 shadow-sm mb-4 bg-danger bg-opacity-10 text-danger p-3" role="alert">
+        <div class="fw-bold mb-1"><i class="bi bi-exclamation-octagon-fill me-1"></i> User Creation Error:</div>
+        <ul class="mb-0 ps-3 small">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <!-- Inter-System Security Status Banner -->
 <div class="alert alert-dark bg-dark text-white border-0 rounded-4 p-3 mb-4 shadow-sm">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -44,7 +58,7 @@
             <i class="bi bi-shield-fill-check text-success fs-3 me-3"></i>
             <div>
                 <span class="fw-bold d-block text-white small">NATIVE SECURITY DEFENSE SYSTEM ACTIVE</span>
-                <span class="text-white-50 fw-medium" style="font-size: 11px;">Zero third-party apps required. Protected by RateLimiter brute-force blocks, anti-bot honeypot, HTTP security headers, and Bcrypt hashing.</span>
+                <span class="text-white-50 fw-medium" style="font-size: 11px;">Protected by RateLimiter brute-force blocks (3 attempts), anti-bot honeypot, HTTP security headers, and Bcrypt hashing.</span>
             </div>
         </div>
         <div class="d-flex gap-2 flex-wrap">
@@ -85,7 +99,7 @@
                 </div>
             </div>
             <h3 class="fw-bold text-danger mb-1">{{ number_format($totalLockouts) }}</h3>
-            <small class="text-muted" style="font-size: 11px;">Max 5 Strikes / 60s Block</small>
+            <small class="text-muted" style="font-size: 11px;">Max 3 Strikes / 60s Block</small>
         </div>
     </div>
 
@@ -109,61 +123,49 @@
         <div class="card premium-card p-3 h-100 border-0 bg-white shadow-sm">
             <div class="d-flex align-items-center mb-2">
                 <div class="bg-success bg-opacity-10 text-success p-2 rounded-3 me-2">
-                    <i class="bi bi-shield-check fs-4"></i>
+                    <i class="bi bi-person-check-fill fs-4"></i>
                 </div>
                 <div>
-                    <span class="fw-bold d-block text-dark small">Superadmin Unlocker</span>
-                    <small class="text-muted" style="font-size: 10px;">Manual Bypass</small>
+                    <span class="fw-bold d-block text-dark small">Registered Users</span>
+                    <small class="text-muted" style="font-size: 10px;">System Accounts</small>
                 </div>
             </div>
-            <h3 class="fw-bold text-success mb-1">Ready</h3>
-            <small class="text-muted" style="font-size: 11px;">1-Click Instant Lockout Reset</small>
+            <h3 class="fw-bold text-success mb-1">{{ number_format(count($users)) }}</h3>
+            <small class="text-muted" style="font-size: 11px;">Active Roles & Accounts</small>
         </div>
     </div>
 </div>
 
 <!-- Lockout Management & Live Audit Trail Table Container -->
 <div class="row g-4 mb-4">
-    <!-- User Roles & Restriction Summary Panel -->
+    <!-- User Roles & Accounts Roster Panel -->
     <div class="col-lg-4">
         <div class="card premium-card p-4 h-100">
-            <h5 class="fw-bold mb-3"><i class="bi bi-people-fill text-danger me-2"></i> System Roles & RBAC Matrix</h5>
-            <div class="list-group list-group-flush" style="font-size: 12.5px;">
-                <div class="list-group-item px-0 py-2 border-0 border-bottom">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <strong class="text-dark"><i class="bi bi-shield-check text-danger me-1"></i> System Admin</strong>
-                        <span class="badge bg-danger">Full Control</span>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-people-fill text-danger me-2"></i> User Roster & Roles</h5>
+                <button class="btn btn-sm btn-outline-success rounded-3" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                    <i class="bi bi-plus-circle me-1"></i> Add
+                </button>
+            </div>
+            <div class="list-group list-group-flush" style="font-size: 12.5px; max-height: 480px; overflow-y: auto;">
+                @foreach($users as $usr)
+                    <div class="list-group-item px-0 py-2 border-0 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-dark">{{ $usr->name }}</strong>
+                            <span class="badge bg-dark" style="font-size: 10px;">{{ ucfirst($usr->role ?? 'User') }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted" style="font-size: 11px;">{{ $usr->email }}</small>
+                            <form action="{{ route('admin.security.unlock') }}" method="POST" class="d-inline">
+                                @csrf
+                                <input type="hidden" name="email" value="{{ $usr->email }}">
+                                <button type="submit" class="btn btn-xs btn-outline-danger py-0 px-2 rounded-2" style="font-size: 10px;" title="Reset rate limit & unlock account">
+                                    🔓 Unlock
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                    <small class="text-muted d-block">Unrestricted access, user unlocks & security audit logs.</small>
-                </div>
-                <div class="list-group-item px-0 py-2 border-0 border-bottom">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <strong class="text-dark"><i class="bi bi-truck text-warning me-1"></i> Fleet Manager</strong>
-                        <span class="badge bg-warning text-dark">Fleet & PMS</span>
-                    </div>
-                    <small class="text-muted d-block">Vehicle roster, driver assignment, and maintenance logs.</small>
-                </div>
-                <div class="list-group-item px-0 py-2 border-0 border-bottom">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <strong class="text-dark"><i class="bi bi-compass text-primary me-1"></i> Dispatcher</strong>
-                        <span class="badge bg-primary">Dispatch</span>
-                    </div>
-                    <small class="text-muted d-block">Trip dispatches, route preview, and live GPS simulator.</small>
-                </div>
-                <div class="list-group-item px-0 py-2 border-0 border-bottom">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <strong class="text-dark"><i class="bi bi-cash-stack text-success me-1"></i> Finance Officer</strong>
-                        <span class="badge bg-success">Financials</span>
-                    </div>
-                    <small class="text-muted d-block">Cost-Per-KM ledgers, fuel charging AP, and tariff savings.</small>
-                </div>
-                <div class="list-group-item px-0 py-2 border-0">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <strong class="text-dark"><i class="bi bi-speedometer2 text-info me-1"></i> Operations Manager</strong>
-                        <span class="badge bg-info text-dark">Operations</span>
-                    </div>
-                    <small class="text-muted d-block">Terminal charging draw, driver safety ratings & operational queue.</small>
-                </div>
+                @endforeach
             </div>
         </div>
     </div>
@@ -185,42 +187,57 @@
                             <th>TARGET ACCOUNT / EMAIL</th>
                             <th>CLIENT IP</th>
                             <th>DETAILS & REASON</th>
+                            <th>ACTION</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($securityLogs as $log)
                             <tr>
-                                <td style="font-size: 12px; white-space: nowrap;">
+                                <td style="font-size: 11.5px; white-space: nowrap;">
                                     {{ \Carbon\Carbon::parse($log->created_at)->format('Y-m-d H:i:s') }}
                                 </td>
                                 <td>
                                     @if($log->event_type === 'successful_login')
-                                        <span class="badge bg-success rounded-pill px-3 py-1"><i class="bi bi-check-circle me-1"></i> Login Success</span>
+                                        <span class="badge bg-success rounded-pill px-2 py-1" style="font-size: 10px;"><i class="bi bi-check-circle me-1"></i> Success</span>
                                     @elseif($log->event_type === 'failed_login')
-                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-1"><i class="bi bi-exclamation-triangle me-1"></i> Password Fail</span>
+                                        <span class="badge bg-warning text-dark rounded-pill px-2 py-1" style="font-size: 10px;"><i class="bi bi-exclamation-triangle me-1"></i> Password Fail</span>
                                     @elseif($log->event_type === 'account_lockout')
-                                        <span class="badge bg-danger rounded-pill px-3 py-1"><i class="bi bi-lock-fill me-1"></i> Account Lockout</span>
+                                        <span class="badge bg-danger rounded-pill px-2 py-1" style="font-size: 10px;"><i class="bi bi-lock-fill me-1"></i> Lockout</span>
                                     @elseif($log->event_type === 'admin_unlock')
-                                        <span class="badge bg-primary rounded-pill px-3 py-1"><i class="bi bi-unlock-fill me-1"></i> Admin Unlock</span>
+                                        <span class="badge bg-primary rounded-pill px-2 py-1" style="font-size: 10px;"><i class="bi bi-unlock-fill me-1"></i> Admin Unlock</span>
+                                    @elseif($log->event_type === 'admin_create_user')
+                                        <span class="badge bg-info text-dark rounded-pill px-2 py-1" style="font-size: 10px;"><i class="bi bi-person-plus me-1"></i> User Created</span>
                                     @elseif($log->event_type === 'bot_honeypot_blocked')
-                                        <span class="badge bg-dark text-white rounded-pill px-3 py-1"><i class="bi bi-robot me-1"></i> Bot Trapped</span>
+                                        <span class="badge bg-dark text-white rounded-pill px-2 py-1" style="font-size: 10px;"><i class="bi bi-robot me-1"></i> Bot Trapped</span>
                                     @else
-                                        <span class="badge bg-secondary rounded-pill">{{ $log->event_type }}</span>
+                                        <span class="badge bg-secondary rounded-pill" style="font-size: 10px;">{{ $log->event_type }}</span>
                                     @endif
                                 </td>
                                 <td>
                                     <strong class="text-dark small d-block">{{ $log->email ?: 'N/A' }}</strong>
                                 </td>
                                 <td>
-                                    <code class="bg-light text-danger px-2 py-1 rounded small">{{ $log->ip_address ?: '127.0.0.1' }}</code>
+                                    <code class="bg-light text-danger px-2 py-1 rounded small" style="font-size: 11px;">{{ $log->ip_address ?: '127.0.0.1' }}</code>
                                 </td>
-                                <td style="font-size: 12px; max-width: 250px;">
+                                <td style="font-size: 11.5px; max-width: 220px;">
                                     <span class="text-muted d-block text-truncate">{{ $log->details }}</span>
+                                </td>
+                                <td>
+                                    @if($log->email)
+                                        <form action="{{ route('admin.security.unlock') }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <input type="hidden" name="email" value="{{ $log->email }}">
+                                            <input type="hidden" name="ip_address" value="{{ $log->ip_address }}">
+                                            <button type="submit" class="btn btn-xs btn-outline-danger fw-bold rounded-2 px-2 py-1" style="font-size: 10.5px;">
+                                                🔓 Unlock
+                                            </button>
+                                        </form>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-5">
+                                <td colspan="6" class="text-center text-muted py-5">
                                     <i class="bi bi-shield-check fs-1 d-block mb-2 text-success"></i>
                                     No security incidents logged yet. All system authentication attempts are clean.
                                 </td>
@@ -241,7 +258,57 @@
     </div>
 </div>
 
-<!-- Modal Quick Unlock Account / Reset Rate Limiter -->
+<!-- Modal 1: Create New User Account -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered rounded-4 overflow-hidden">
+        <div class="modal-content border-0 shadow">
+            <form action="{{ route('admin.security.users.store') }}" method="POST">
+                @csrf
+                <div class="modal-header text-white border-0" style="background: linear-gradient(135deg, #10B981 0%, #064E3B 100%);">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-person-plus-fill me-2"></i> Create New User Account</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Full Name</label>
+                        <input type="text" name="name" class="form-control rounded-3" placeholder="e.g. Maria Clara Santos" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email Address</label>
+                        <input type="email" name="email" class="form-control rounded-3" placeholder="e.g. maria.santos@hirna.ph" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Initial Password</label>
+                        <input type="text" name="password" class="form-control rounded-3" value="Password@123" required>
+                        <small class="text-muted">Must include 8+ chars, 1 Capital [A-Z], 1 Lowercase [a-z], 1 Digit [0-9], and 1 Special Char.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">System Role & Permissions</label>
+                        <select name="role" class="form-select rounded-3" required>
+                            <option value="fleet_manager" selected>🚛 Fleet Manager (Fleet & PMS Controls)</option>
+                            <option value="dispatcher">📡 Dispatcher (Trip Scheduling & GPS Telematics)</option>
+                            <option value="finance">💰 Finance Officer (Cost Per KM & Ledger Export)</option>
+                            <option value="operations">⚡ Operations Manager (Depot Charging & Safety)</option>
+                            <option value="driver">🚕 Field Driver (Driver Console)</option>
+                            <option value="admin">👑 System Administrator (Superadmin Access)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 bg-light">
+                    <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success rounded-3 fw-bold px-4">
+                        <i class="bi bi-check-circle-fill me-1"></i> Save & Create User Account
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 2: Quick Unlock Account / Reset Rate Limiter -->
 <div class="modal fade" id="quickUnlockModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered rounded-4 overflow-hidden">
         <div class="modal-content border-0 shadow">
@@ -253,16 +320,22 @@
                 </div>
                 <div class="modal-body p-4">
                     <p class="text-muted small mb-3">
-                        Enter the email address and/or IP address of the locked-out user to clear their rate-limiter strikes and immediately restore system access.
+                        Select a user from the dropdown <strong>OR type any email address</strong> below to reset their brute-force rate-limiter strikes and restore immediate login access.
                     </p>
+                    
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Target User Email Address</label>
-                        <select name="email" class="form-select rounded-3" required>
-                            <option value="" disabled selected>-- Select User to Unlock --</option>
+                        <label class="form-label fw-bold">Select User from System Roster</label>
+                        <select id="selectUnlockUser" class="form-select rounded-3" onchange="document.getElementById('manualEmailInput').value = this.value;">
+                            <option value="" selected>-- Select User to Unlock --</option>
                             @foreach($users as $usr)
                                 <option value="{{ $usr->email }}">{{ $usr->name }} ({{ $usr->email }} &bull; Role: {{ ucfirst($usr->role ?? 'User') }})</option>
                             @endforeach
                         </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">OR Type Email Address directly</label>
+                        <input type="email" id="manualEmailInput" name="email" class="form-control rounded-3" placeholder="e.g. fleetmanager@hirna.ph" value="fleetmanager@hirna.ph" required>
                     </div>
 
                     <div class="mb-3">

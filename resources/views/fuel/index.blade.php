@@ -152,7 +152,7 @@
     </div>
 </div>
 
-<!-- SECTION 2: Enterprise EV Energy Analytics (Tariff Optimizer, Depot Load Balancing & ESG Carbon Avoidance) -->
+<!-- SECTION 2: Enterprise EV Energy Analytics (Simplified Language) -->
 <div class="row g-4 mb-4">
     <!-- Peak vs Off-Peak Electricity Tariff Analyzer -->
     <div class="col-md-3">
@@ -162,24 +162,24 @@
                     <i class="bi bi-clock-history fs-5"></i>
                 </div>
                 <div>
-                    <span class="fw-bold d-block text-dark small">Grid Tariff Optimizer</span>
-                    <small class="text-muted" style="font-size: 10px;">MERALCO Off-Peak Charging</small>
+                    <span class="fw-bold d-block text-dark small">Electricity Rates & Savings</span>
+                    <small class="text-muted" style="font-size: 10px;">Cheapest Overnight Charging</small>
                 </div>
             </div>
             <div class="my-2 border-top border-bottom py-2">
                 <div class="d-flex justify-content-between small mb-1">
-                    <span class="text-muted">Peak Daytime Rate</span>
+                    <span class="text-muted">Daytime Rate (Peak)</span>
                     <strong class="text-danger">₱13.20 / kWh</strong>
                 </div>
                 <div class="d-flex justify-content-between small">
-                    <span class="text-muted">Off-Peak Overnight Rate</span>
+                    <span class="text-muted">Overnight Rate (Off-Peak)</span>
                     <strong class="text-success">₱8.50 / kWh</strong>
                 </div>
             </div>
             <div class="mt-1">
                 <small class="text-muted d-block" style="font-size: 11px;">ESTIMATED MONTHLY SAVINGS</small>
                 <strong class="text-success fs-5">₱18,450.00</strong>
-                <small class="text-success d-block" style="font-size: 10px;"><i class="bi bi-arrow-down-right-circle me-1"></i> 35.6% Smart Tariff Shift</small>
+                <small class="text-success d-block" style="font-size: 10px;"><i class="bi bi-arrow-down-right-circle me-1"></i> 35.6% Saved by Charging at Night</small>
             </div>
         </div>
     </div>
@@ -192,24 +192,24 @@
                     <i class="bi bi-lightning-charge fs-5"></i>
                 </div>
                 <div>
-                    <span class="fw-bold d-block text-dark small">Depot Power Load Balancer</span>
-                    <small class="text-muted" style="font-size: 10px;">Active Charging Bays</small>
+                    <span class="fw-bold d-block text-dark small">Charging Station Power</span>
+                    <small class="text-muted" style="font-size: 10px;">Active Charging Slots</small>
                 </div>
             </div>
             <div class="my-2">
                 <div class="d-flex justify-content-between small mb-1">
-                    <span class="text-muted">Current Power Draw</span>
+                    <span class="text-muted">Electricity Currently Used</span>
                     <strong class="text-dark">142 kW / 200 kW</strong>
                 </div>
                 <div class="progress rounded-pill mb-2" style="height: 8px;">
                     <div class="progress-bar bg-warning" style="width: 71%;"></div>
                 </div>
                 <div class="d-flex justify-content-between text-muted" style="font-size: 11px;">
-                    <span>AC Slow: 22 kW</span>
-                    <span>DC Fast: 120 kW</span>
+                    <span>Slow Chargers: 22 kW</span>
+                    <span>Fast Chargers: 120 kW</span>
                 </div>
             </div>
-            <span class="badge bg-success text-white mt-1 small"><i class="bi bi-shield-check me-1"></i> Peak Demand Surge Avoided</span>
+            <span class="badge bg-success text-white mt-1 small"><i class="bi bi-shield-check me-1"></i> Safe Power Level Maintained</span>
         </div>
     </div>
 
@@ -221,22 +221,22 @@
                     <i class="bi bi-battery-charging fs-5"></i>
                 </div>
                 <div>
-                    <span class="fw-bold d-block text-dark small">Battery Lifecycle Forecaster</span>
-                    <small class="text-muted" style="font-size: 10px;">State-of-Health Curve</small>
+                    <span class="fw-bold d-block text-dark small">Battery Health & Lifespan</span>
+                    <small class="text-muted" style="font-size: 10px;">Condition Tracker</small>
                 </div>
             </div>
             <div class="my-2 border-top border-bottom py-2">
                 <div class="d-flex justify-content-between small mb-1">
-                    <span class="text-muted">Current Pack SoH</span>
+                    <span class="text-muted">Current Battery Health</span>
                     <strong class="text-success">98.4% Health</strong>
                 </div>
                 <div class="d-flex justify-content-between small">
-                    <span class="text-muted">Charge Cycle Count</span>
+                    <span class="text-muted">Total Times Charged</span>
                     <strong class="text-dark">342 / 1,500 Cycles</strong>
                 </div>
             </div>
             <div class="mt-1">
-                <small class="text-muted d-block" style="font-size: 11px;">ESTIMATED REMAINING LIFE</small>
+                <small class="text-muted d-block" style="font-size: 11px;">ESTIMATED BATTERY LIFE LEFT</small>
                 <strong class="text-primary fs-6">6.8 Years (185,000 km)</strong>
             </div>
         </div>
@@ -250,23 +250,23 @@
                     <i class="bi bi-tree fs-5 text-success"></i>
                 </div>
                 <div>
-                    <span class="fw-bold d-block text-dark small">ESG CO₂ Sustainability</span>
-                    <small class="text-muted" style="font-size: 10px;">Emissions Offset Metrics</small>
+                    <span class="fw-bold d-block text-dark small">Clean Air & Eco Savings</span>
+                    <small class="text-muted" style="font-size: 10px;">Pollution Reduced</small>
                 </div>
             </div>
             <div class="my-2">
-                <small class="text-muted d-block" style="font-size: 11px;">CO₂ EMISSIONS AVOIDED</small>
+                <small class="text-muted d-block" style="font-size: 11px;">GAS SMOKE & CO₂ SAVED</small>
                 <h3 class="fw-bold text-success my-1">12.4 <small class="fs-6 text-dark">Tons CO₂</small></h3>
-                <small class="text-muted" style="font-size: 11px;">vs ICE Gasoline Fleet</small>
+                <small class="text-muted" style="font-size: 11px;">Compared to gas-powered vehicles</small>
             </div>
             <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-30 small mt-1">
-                <i class="bi bi-tree-fill me-1"></i> Equivalent to 540 Trees Planted
+                <i class="bi bi-tree-fill me-1"></i> Equal to Planting 540 Trees
             </span>
         </div>
     </div>
 </div>
 
-<!-- Recent Charging & Energy Logs Table -->
+<!-- Recent Charging & Energy Logs Table with Pagination -->
 <div class="card premium-card p-4">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h5 class="fw-bold mb-0"><i class="bi bi-fuel-pump-fill text-danger me-2"></i> Hirna Fleet Refueling & EV Charging Logs</h5>
@@ -274,7 +274,7 @@
     </div>
 
     <div class="table-responsive">
-        <table class="table table-hover align-middle" id="fuelLogsTable">
+        <table class="table table-hover align-middle mb-0" id="fuelLogsTable">
             <thead>
                 <tr class="text-muted" style="font-size: 12px; font-weight: 700; text-transform: uppercase;">
                     <th>DATE</th>
@@ -330,6 +330,18 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Pagination Controls (Page 1, Page 2, Next, Prev) -->
+    @if(method_exists($logs, 'hasPages') && $logs->hasPages())
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3 border-top mt-3">
+            <div class="small text-muted">
+                Showing <span class="fw-bold text-dark">{{ $logs->firstItem() }}</span> to <span class="fw-bold text-dark">{{ $logs->lastItem() }}</span> of <span class="fw-bold text-dark">{{ $logs->total() }}</span> total fuel logs
+            </div>
+            <div>
+                {{ $logs->links('pagination::bootstrap-5') }}
+            </div>
+        </div>
+    @endif
 </div>
 
 <!-- Modal Log Refill -->

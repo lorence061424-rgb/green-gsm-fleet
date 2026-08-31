@@ -19,7 +19,7 @@ class FuelController extends Controller
 
     public function index()
     {
-        $logs = FuelLog::with(['vehicle', 'trip.driver.user'])->latest()->get();
+        $logs = FuelLog::with(['vehicle', 'trip.driver.user'])->latest()->paginate(8);
         $vehicles = Vehicle::all();
         $drivers = Driver::with('user')->get();
         $weights = $this->fuelPredictionService->getWeights();

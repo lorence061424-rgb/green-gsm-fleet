@@ -194,7 +194,7 @@
         <div class="tab-pane fade" id="pms-pane" role="tabpanel" aria-labelledby="pms-tab" tabindex="0">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="fw-bold text-dark mb-0"><i class="bi bi-wrench-adjustable text-primary me-2"></i> Vehicle Maintenance & Tune-up History</h6>
-                <button class="btn btn-sm btn-primary rounded-3" data-bs-toggle="modal" data-bs-target="#schedulePMSModal">
+                <button class="btn btn-sm btn-primary rounded-3" data-bs-toggle="modal" data-bs-target="#schedulePMSModal" onclick="openScheduleModal();">
                     <i class="bi bi-plus-circle me-1"></i> Schedule Maintenance Service
                 </button>
             </div>
@@ -425,6 +425,13 @@ function exportVehiclesToCSV() {
     downloadLink.click();
     document.body.removeChild(downloadLink);
 }
+
+function openScheduleModal() {
+    const modalEl = document.getElementById('schedulePMSModal');
+    if (modalEl) {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    }
 }
 </script>
 
@@ -451,46 +458,60 @@ function exportVehiclesToCSV() {
                     <button type="submit" class="btn btn-primary rounded-3"><i class="bi bi-cloud-upload me-1"></i> Import Fleet CSV</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
 <!-- Schedule Maintenance Modal -->
 <div class="modal fade" id="schedulePMSModal" tabindex="-1" aria-labelledby="schedulePMSModalLabel" aria-hidden="true">
-    <div class="modal-dialog rounded-4 overflow-hidden">
-        <div class="modal-content border-0">
+    <div class="modal-dialog modal-dialog-centered modal-lg rounded-4 overflow-hidden">
+        <div class="modal-content border-0 shadow">
             <form action="{{ route('maintenance.store') }}" method="POST">
                 @csrf
-                <div class="modal-header bg-primary text-white border-0">
-                    <h5 class="modal-title fw-bold" id="schedulePMSModalLabel"><i class="bi bi-wrench-adjustable me-2"></i> Schedule Vehicle Maintenance</h5>
+                <div class="modal-header text-white border-0" style="background: linear-gradient(135deg, #CE2029 0%, #7F1D1D 100%);">
+                    <h5 class="modal-title fw-bold" id="schedulePMSModalLabel"><i class="bi bi-wrench-adjustable me-2"></i> Schedule Preventive Maintenance Service</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label" style="font-weight: 500;">Select Hirna Vehicle Unit</label>
-                        <select name="vehicle_id" class="form-select rounded-3" required>
-                            @foreach($vehicles as $v)
-                                <option value="{{ $v->id }}">{{ $v->make }} {{ $v->model }} ({{ $v->license_plate }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label" style="font-weight: 500;">Service Type</label>
-                        <select name="service_type" class="form-select rounded-3" required>
-                            <option value="Engine Tune-up">Battery Health & System Tune-up</option>
-                            <option value="Tire Rotation">Tire Rotation & Alignment</option>
-                            <option value="Brake Inspection">Brake Inspection & Fluid Check</option>
-                            <option value="General PMS">General PMS Inspection</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label" style="font-weight: 500;">Scheduled Date</label>
-                        <input type="date" name="scheduled_date" value="{{ date('Y-m-d', strtotime('+3 days')) }}" class="form-control rounded-3" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label" style="font-weight: 500;">Estimated Cost (PHP)</label>
-                        <input type="number" name="cost" value="1500" step="0.01" class="form-control rounded-3" required>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Select Hirna Vehicle Unit</label>
+                            <select name="vehicle_id" class="form-select rounded-3" required>
+                                <option value="" disabled selected>-- Select Vehicle from Fleet --</option>
+                                @foreach($vehicles as $v)
+                                    <option value="{{ $v->id }}">{{ $v->make }} {{ $v->model }} (Plate: {{ $v->license_plate }} &bull; Status: {{ ucfirst($v->status) }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Service Type</label>
+                            <input type="text" name="service_type" placeholder="e.g. Battery Health & System Tune-up, Oil Change, Tire Alignment, Brake Inspection" class="form-control rounded-3" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Scheduled Service Date</label>
+                            <input type="date" name="scheduled_date" value="{{ date('Y-m-d', strtotime('+3 days')) }}" class="form-control rounded-3" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Estimated Cost (₱)</label>
+                            <input type="number" name="cost" value="1500" step="0.01" class="form-control rounded-3" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Initial Maintenance Status</label>
+                            <select name="status" class="form-select rounded-3" required>
+                                <option value="scheduled" selected>📅 Scheduled (Pending Service)</option>
+                                <option value="in_progress">⚙️ In Progress (Sets vehicle offline to Maintenance)</option>
+                                <option value="completed">✅ Completed (Releases vehicle to Active)</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Service Notes / Details</label>
+                            <textarea name="description" rows="3" placeholder="Specify symptoms, spare parts requisitions, or technician notes..." class="form-control rounded-3"></textarea>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-3 bg-light">
                     <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary rounded-3"><i class="bi bi-check-circle me-1"></i> Schedule Service</button>
+                    <button type="submit" class="btn btn-danger rounded-3 fw-bold" style="background: #CE2029 !important;"><i class="bi bi-calendar-check me-1"></i> Confirm & Schedule PMS</button>
                 </div>
             </form>
         </div>

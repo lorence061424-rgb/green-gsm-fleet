@@ -20,7 +20,7 @@
         <button class="btn btn-outline-dark rounded-3" onclick="window.print();">
             <i class="bi bi-printer me-1"></i> Print / PDF
         </button>
-        <button type="button" class="btn btn-premium d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#schedulePMSModal">
+        <button type="button" class="btn btn-premium d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#schedulePMSModal" onclick="openScheduleModal();">
             <i class="bi bi-calendar-plus me-1"></i> Schedule Maintenance
         </button>
     </div>
@@ -261,6 +261,14 @@
 
 @section('scripts')
 <script>
+    function openScheduleModal() {
+        const modalEl = document.getElementById('schedulePMSModal');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    }
+
     function toggleCompletionDate(recordId) {
         const select = document.getElementById('statusSelect' + recordId);
         const div = document.getElementById('completionDateDiv' + recordId);

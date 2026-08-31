@@ -41,9 +41,10 @@ Route::middleware(['role'])->group(function () {
     // Trip Scheduling & Dispatch / Telemetry Monitoring
     Route::get('/trips', [TripController::class, 'index'])->name('trips.index');
     Route::post('/trips/plan-preview', [TripController::class, 'planRoutePreview'])->name('trips.plan-preview');
-    Route::post('/trips', [TripController::class, 'store'])->middleware('role:dispatcher')->name('trips.store');
-    Route::post('/trips/{trip}/start', [TripController::class, 'startTrip'])->middleware('role:dispatcher,operations')->name('trips.start');
-    Route::post('/trips/{trip}/complete', [TripController::class, 'completeTrip'])->middleware('role:dispatcher,operations')->name('trips.complete');
+    Route::post('/trips', [TripController::class, 'store'])->middleware('role:dispatcher,fleet_manager,admin')->name('trips.store');
+    Route::post('/trips/{trip}/start', [TripController::class, 'startTrip'])->middleware('role:dispatcher,operations,fleet_manager,admin')->name('trips.start');
+    Route::post('/trips/{trip}/complete', [TripController::class, 'completeTrip'])->middleware('role:dispatcher,operations,fleet_manager,admin,finance')->name('trips.complete');
+    Route::post('/trips/complete-demo', [TripController::class, 'completeDemoTrip'])->name('trips.complete-demo');
     Route::post('/trips/{trip}/simulate-gps', [TripController::class, 'simulateTelemetry'])->name('trips.simulate-gps');
 
     // Fuel Management & AI Predictions

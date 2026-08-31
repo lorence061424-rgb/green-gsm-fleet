@@ -162,7 +162,7 @@ class TripController extends Controller
     public function completeTrip(Request $request, Trip $trip)
     {
         $validated = $request->validate([
-            'actual_fuel_liters' => 'required|numeric|min:0.1',
+            'actual_fuel_liters' => 'required|numeric|min:0.01',
             'actual_duration_minutes' => 'required|integer|min:1',
         ]);
 
@@ -198,6 +198,62 @@ class TripController extends Controller
         }
 
         return redirect()->route('trips.index')->with('success', 'Trip completed! Energy logs and driver records updated.');
+    }
+
+    /**
+     * Complete and log demo telemetry ride into database.
+     */
+    public function completeDemoTrip(Request $request)
+    {
+        $validated = $request->validate([
+            'actual_fuel_liters' => 'required|numeric|min:0.01',
+            'actual_duration_minutes' => 'required|integer|min:1',
+            'start_location' => 'nullable|string',
+            'end_location' => 'nullable|string',
+            'distance_km' => 'nullable|numeric',
+        ]);
+
+        $vehicle = Vehicle::first();
+        $driver = Driver::first();
+
+        $startLocation = $validated['start_location'] ?? 'Manila Hub (Port Area)';
+        $endLocation = $validated['end_location'] ?? 'Makati Hub (Ayala Ave)';
+        $distance = (float)($validated['distance_km'] ?? 9.5);
+
+        $trip = Trip::create([
+            'booking_reference_id' => 'BKG-LIVE-' . strtoupper(bin2hex(random_bytes(3))),
+            'start_location' => $startLocation,
+            'end_location' => $endLocation,
+            'start_lat' => 14.5880,
+            'start_lng' => 120.9650,
+            'end_lat' => 14.5547,
+            'end_lng' => 121.0244,
+            'distance_km' => $distance,
+            'estimated_duration_minutes' => $validated['actual_duration_minutes'],
+            'actual_duration_minutes' => $validated['actual_duration_minutes'],
+            'estimated_fuel_liters' => $validated['actual_fuel_liters'],
+            'actual_fuel_liters' => $validated['actual_fuel_liters'],
+            'vehicle_id' => $vehicle ? $vehicle->id : 1,
+            'driver_id' => $driver ? $driver->id : 1,
+            'status' => 'completed',
+            'started_at' => now()->subMinutes($validated['actual_duration_minutes']),
+            'completed_at' => now(),
+        ]);
+
+        if ($vehicle) {
+            $latestOdometer = FuelLog::where('vehicle_id', $vehicle->id)->max('odometer_reading') ?: 12500.00;
+            FuelLog::create([
+                'vehicle_id' => $vehicle->id,
+                'trip_id' => $trip->id,
+                'amount_liters' => $validated['actual_fuel_liters'],
+                'cost' => $validated['actual_fuel_liters'] * 11.50,
+                'odometer_reading' => round($latestOdometer + $distance, 2),
+                'fuel_type' => 'Electric (kWh)',
+                'date' => now()->toDateString(),
+            ]);
+        }
+
+        return redirect()->route('trips.index')->with('success', 'Live ride telemetry completed! Dispatch receipt and fuel log saved.');
     }
 
     /**

@@ -818,27 +818,36 @@
 <!-- Modal complete trip forms -->
 <div class="modal fade" id="completeTripModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog rounded-4 overflow-hidden">
-        <div class="modal-content border-0">
+        <div class="modal-content border-0 shadow">
             <form id="completeTripForm" method="POST">
                 @csrf
-                <div class="modal-header bg-success text-white border-0">
+                <input type="hidden" name="start_location" id="finalStartLocation" value="Manila Hub (Port Area)">
+                <input type="hidden" name="end_location" id="finalEndLocation" value="Makati Hub (Ayala Ave)">
+                <input type="hidden" name="distance_km" id="finalDistanceKm" value="9.5">
+                
+                <div class="modal-header text-white border-0" style="background: linear-gradient(135deg, #10B981 0%, #064E3B 100%);">
                     <h5 class="modal-title fw-bold"><i class="bi bi-check-circle-fill me-2"></i> Finalize and Complete Ride</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <p class="text-muted" style="font-size: 13.5px;">
-                        The ride has successfully completed the simulated coordinate path. Please review and log the final fuel details.
-                    </p>
+                    <div class="alert alert-success bg-success bg-opacity-10 border-0 rounded-3 mb-3 p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small fw-bold text-success"><i class="bi bi-geo-alt-fill me-1"></i> Destination Reached:</span>
+                            <span class="badge bg-success" id="finalRouteBadge">Completed</span>
+                        </div>
+                    </div>
                     <div class="mb-3">
-                        <label class="form-label" style="font-weight: 500;">Actual Fuel Consumed (Liters)</label>
+                        <label class="form-label fw-bold">Actual Energy Consumed (kWh)</label>
                         <input type="number" step="0.01" name="actual_fuel_liters" id="finalFuelLiters" class="form-control rounded-3" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label" style="font-weight: 500;">Actual Duration (Minutes)</label>
+                        <label class="form-label fw-bold">Actual Trip Duration (Minutes)</label>
                         <input type="number" name="actual_duration_minutes" id="finalDurationMinutes" class="form-control rounded-3" required>
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-3 bg-light">
-                    <button type="submit" class="btn btn-success w-100 rounded-3">
+                    <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success rounded-3 fw-bold px-4" style="background: #10B981 !important;">
                         <i class="bi bi-flag-fill me-1"></i> Save Log & Complete Trip
                     </button>
                 </div>
@@ -1551,7 +1560,7 @@
 
         // Call backend API to record logs dynamically
         if (simTripId && simTripId !== 999) {
-            fetch(`/trips/${simTripId}/simulate-gps`, {
+            fetch(`{{ url('/') }}/trips/${simTripId}/simulate-gps`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -1625,14 +1634,35 @@
 
         // Populate and open complete trip modal
         const finalFuel = Math.max(0.2, computedTripFuel);
-        const finalDuration = Math.round((simDistance / 45) * 60) + Math.round(totalIdleSeconds / 60);
+        const finalDuration = Math.max(1, Math.round((simDistance / 45) * 60) + Math.round(totalIdleSeconds / 60));
 
-        document.getElementById('finalFuelLiters').value = finalFuel.toFixed(2);
-        document.getElementById('finalDurationMinutes').value = finalDuration;
+        const fuelInput = document.getElementById('finalFuelLiters');
+        if (fuelInput) fuelInput.value = finalFuel.toFixed(2);
+        
+        const durationInput = document.getElementById('finalDurationMinutes');
+        if (durationInput) durationInput.value = finalDuration;
 
-        // Set action route on form dynamically
+        const startInput = document.getElementById('finalStartLocation');
+        if (startInput) startInput.value = simStart || 'Manila Hub (Port Area)';
+
+        const endInput = document.getElementById('finalEndLocation');
+        if (endInput) endInput.value = simEnd || 'Makati Hub (Ayala Ave)';
+
+        const distInput = document.getElementById('finalDistanceKm');
+        if (distInput) distInput.value = simDistance || 9.5;
+
+        const routeBadge = document.getElementById('finalRouteBadge');
+        if (routeBadge) routeBadge.innerText = (simStart || 'Origin') + ' → ' + (simEnd || 'Destination');
+
+        // Set action route on form dynamically with full base URL
         const form = document.getElementById('completeTripForm');
-        form.action = `/trips/${simTripId}/complete`;
+        if (form) {
+            if (simTripId && simTripId !== 999) {
+                form.action = `{{ url('/') }}/trips/${simTripId}/complete`;
+            } else {
+                form.action = "{{ route('trips.complete-demo') }}";
+            }
+        }
 
         const completeModalElement = document.getElementById('completeTripModal');
         if (completeModalElement && completeModalElement.parentNode !== document.body) {

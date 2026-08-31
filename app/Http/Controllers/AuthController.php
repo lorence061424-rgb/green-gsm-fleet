@@ -93,11 +93,6 @@ class AuthController extends Controller
                 'dispatcher@hirna.ph' => ['name' => 'Sarah Dispatcher', 'role' => 'dispatcher'],
                 'finance@hirna.ph' => ['name' => 'Marcus Finance Officer', 'role' => 'finance'],
                 'operations@hirna.ph' => ['name' => 'Elena Operations Manager', 'role' => 'operations'],
-                'admin@greengsm.com' => ['name' => 'Hirna System Admin', 'role' => 'admin'],
-                'fleetmanager@greengsm.com' => ['name' => 'Alex Fleet Manager', 'role' => 'fleet_manager'],
-                'dispatcher@greengsm.com' => ['name' => 'Sarah Dispatcher', 'role' => 'dispatcher'],
-                'finance@greengsm.com' => ['name' => 'Marcus Finance Officer', 'role' => 'finance'],
-                'operations@greengsm.com' => ['name' => 'Elena Operations Manager', 'role' => 'operations'],
             ];
 
             if (isset($roleMap[$email]) && $request->password === 'Password@123') {

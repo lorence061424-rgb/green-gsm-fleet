@@ -142,27 +142,61 @@
     <div class="col-lg-4">
         <div class="card premium-card p-4 h-100">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold mb-0"><i class="bi bi-people-fill text-danger me-2"></i> User Roster & Roles</h5>
+                <h5 class="fw-bold mb-0"><i class="bi bi-people-fill text-danger me-2"></i> User Roster & Status</h5>
                 <button class="btn btn-sm btn-outline-success rounded-3" data-bs-toggle="modal" data-bs-target="#createUserModal">
                     <i class="bi bi-plus-circle me-1"></i> Add
                 </button>
             </div>
+
+            <!-- Active Lockout Notice -->
+            @if($lockedUsersCount > 0)
+                <div class="alert alert-danger bg-danger bg-opacity-15 border border-danger border-opacity-30 rounded-3 p-3 mb-3">
+                    <div class="d-flex align-items-center text-danger fw-bold mb-1">
+                        <i class="bi bi-exclamation-octagon-fill fs-5 me-2"></i> {{ $lockedUsersCount }} Account(s) Currently Locked Out!
+                    </div>
+                    <small class="text-dark d-block">System rate limiter has blocked login attempts due to 3 failed password strikes.</small>
+                </div>
+            @endif
+
             <div class="list-group list-group-flush" style="font-size: 12.5px; max-height: 480px; overflow-y: auto;">
                 @foreach($users as $usr)
                     <div class="list-group-item px-0 py-2 border-0 border-bottom">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <strong class="text-dark">{{ $usr->name }}</strong>
+                            <div>
+                                <strong class="text-dark d-block">{{ $usr->name }}</strong>
+                                <small class="text-muted" style="font-size: 11px;">{{ $usr->email }}</small>
+                            </div>
                             <span class="badge bg-dark" style="font-size: 10px;">{{ ucfirst($usr->role ?? 'User') }}</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted" style="font-size: 11px;">{{ $usr->email }}</small>
-                            <form action="{{ route('admin.security.unlock') }}" method="POST" class="d-inline">
-                                @csrf
-                                <input type="hidden" name="email" value="{{ $usr->email }}">
-                                <button type="submit" class="btn btn-xs btn-outline-danger py-0 px-2 rounded-2" style="font-size: 10px;" title="Reset rate limit & unlock account">
-                                    🔓 Unlock
-                                </button>
-                            </form>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            @if($usr->is_locked)
+                                <span class="badge bg-danger text-white rounded-pill px-2 py-1" style="font-size: 10px;">
+                                    <i class="bi bi-lock-fill me-1"></i> LOCKED OUT (3/3)
+                                </span>
+                                <form action="{{ route('admin.security.unlock') }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <input type="hidden" name="email" value="{{ $usr->email }}">
+                                    <button type="submit" class="btn btn-sm btn-danger fw-bold rounded-3 px-3 py-1" style="font-size: 11px; background: #CE2029 !important;">
+                                        🔓 Unlock User
+                                    </button>
+                                </form>
+                            @elseif(($usr->attempts_count ?? 0) > 0)
+                                <span class="badge bg-warning text-dark rounded-pill px-2 py-1" style="font-size: 10px;">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ $usr->attempts_count }}/3 Strikes
+                                </span>
+                                <form action="{{ route('admin.security.unlock') }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <input type="hidden" name="email" value="{{ $usr->email }}">
+                                    <button type="submit" class="btn btn-xs btn-outline-warning text-dark fw-bold rounded-2 px-2 py-0" style="font-size: 10px;">
+                                        Reset Strikes
+                                    </button>
+                                </form>
+                            @else
+                                <span class="badge bg-success-subtle text-success border border-success border-opacity-25 rounded-pill px-2 py-1" style="font-size: 10px;">
+                                    <i class="bi bi-shield-check me-1"></i> Active / Clean
+                                </span>
+                                <span class="text-muted small" style="font-size: 10px;">No Lockout</span>
+                            @endif
                         </div>
                     </div>
                 @endforeach

@@ -21,20 +21,47 @@ class SecurityController extends Controller
         
         $dbUsers = User::all();
         
-        // Comprehensive user list combining DB users and default system role accounts
+        // Hirna Mobility official system role accounts
         $defaultUsers = collect([
             (object)['id' => 1, 'name' => 'Hirna System Admin', 'email' => 'admin@hirna.ph', 'role' => 'admin', 'status' => 'active'],
             (object)['id' => 2, 'name' => 'Alex Fleet Manager', 'email' => 'fleetmanager@hirna.ph', 'role' => 'fleet_manager', 'status' => 'active'],
             (object)['id' => 3, 'name' => 'Sarah Dispatcher', 'email' => 'dispatcher@hirna.ph', 'role' => 'dispatcher', 'status' => 'active'],
             (object)['id' => 4, 'name' => 'Marcus Finance Officer', 'email' => 'finance@hirna.ph', 'role' => 'finance', 'status' => 'active'],
             (object)['id' => 5, 'name' => 'Elena Operations Manager', 'email' => 'operations@hirna.ph', 'role' => 'operations', 'status' => 'active'],
-            (object)['id' => 6, 'name' => 'Green GSM System Admin', 'email' => 'admin@greengsm.com', 'role' => 'admin', 'status' => 'active'],
-            (object)['id' => 7, 'name' => 'Green GSM Fleet Manager', 'email' => 'fleetmanager@greengsm.com', 'role' => 'fleet_manager', 'status' => 'active'],
-            (object)['id' => 8, 'name' => 'Green GSM Dispatcher', 'email' => 'dispatcher@greengsm.com', 'role' => 'dispatcher', 'status' => 'active'],
         ]);
 
-        $users = $dbUsers->concat($defaultUsers)->unique('email');
+        $allUsers = $dbUsers->concat($defaultUsers)->unique('email');
 
+        // Dynamically evaluate lockout status for each user account
+        $users = $allUsers->map(function ($usr) {
+            $email = Str::lower($usr->email);
+            $key1 = Str::transliterate($email . '|' . request()->ip());
+            $key2 = Str::transliterate($email . '|127.0.0.1');
+            $key3 = Str::transliterate($email);
+
+            $attempts1 = RateLimiter::attempts($key1);
+            $attempts2 = RateLimiter::attempts($key2);
+            $attempts3 = RateLimiter::attempts($key3);
+
+            $maxAttempts = max($attempts1, $attempts2, $attempts3);
+            $isLocked = RateLimiter::tooManyAttempts($key1, 3) || RateLimiter::tooManyAttempts($key2, 3) || RateLimiter::tooManyAttempts($key3, 3);
+
+            // Also check latest audit log for un-cleared lockout
+            $lastLog = SecurityLog::where('email', $email)->latest()->first();
+            if ($lastLog && $lastLog->event_type === 'account_lockout') {
+                $isLocked = true;
+                $maxAttempts = 3;
+            } elseif ($lastLog && in_array($lastLog->event_type, ['admin_unlock', 'successful_login'])) {
+                $isLocked = false;
+                $maxAttempts = 0;
+            }
+
+            $usr->is_locked = $isLocked;
+            $usr->attempts_count = $maxAttempts;
+            return $usr;
+        });
+
+        $lockedUsersCount = $users->where('is_locked', true)->count();
         $totalFailedAttempts = SecurityLog::where('event_type', 'failed_login')->count();
         $totalLockouts = SecurityLog::where('event_type', 'account_lockout')->count();
         $totalHoneypotBlocks = SecurityLog::where('event_type', 'bot_honeypot_blocked')->count();
@@ -43,6 +70,7 @@ class SecurityController extends Controller
         return view('admin.security', compact(
             'securityLogs',
             'users',
+            'lockedUsersCount',
             'totalFailedAttempts',
             'totalLockouts',
             'totalHoneypotBlocks',

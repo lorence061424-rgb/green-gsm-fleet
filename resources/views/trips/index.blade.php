@@ -979,37 +979,88 @@
     let carMarkerModal = null;
     let polylineTrailModal = null;
 
+    // Comprehensive Philippine Transit Hubs Database
     const hubCoords = {
-        'Manila Hub (Port Area)': [14.5995, 120.9842],
+        // Metro Manila Hubs
+        'Manila Hub (Port Area)': [14.5880, 120.9650],
         'Manila': [14.5995, 120.9842],
+        'Intramuros': [14.5895, 120.9750],
+        'Ermita': [14.5800, 120.9830],
+        'Malate': [14.5700, 120.9900],
         'Makati Hub (Ayala Ave)': [14.5547, 121.0244],
         'Makati': [14.5547, 121.0244],
         'BGC Taguig Hub (9th Ave)': [14.5515, 121.0510],
         'BGC': [14.5515, 121.0510],
+        'Taguig': [14.5176, 121.0509],
         'Pasay Hub (MOA Complex)': [14.5352, 120.9820],
-        'Pasay': [14.5352, 120.9820],
+        'Pasay': [14.5378, 120.9993],
+        'MOA': [14.5352, 120.9820],
         'Quezon City Hub (Cubao)': [14.6178, 121.0572],
-        'Quezon City': [14.6178, 121.0572],
+        'Quezon City': [14.6760, 121.0437],
+        'Cubao': [14.6178, 121.0572],
+        'Diliman': [14.6538, 121.0685],
         'NAIA Terminal 3 Hub': [14.5186, 121.0125],
-        'NAIA': [14.5186, 121.0125],
+        'NAIA Terminal 1': [14.5086, 121.0025],
+        'NAIA': [14.5204, 121.0134],
+        'Airport': [14.5204, 121.0134],
         'Alabang Hub (Filinvest)': [14.4170, 121.0410],
-        'Alabang': [14.4170, 121.0410],
+        'Alabang': [14.4172, 121.0408],
+        'Muntinlupa': [14.4081, 121.0415],
         'Ortigas Hub (Ortigas Center)': [14.5869, 121.0614],
-        'Ortigas': [14.5869, 121.0614]
+        'Ortigas': [14.5869, 121.0614],
+        'Pasig': [14.5764, 121.0851],
+        'Mandaluyong': [14.5794, 121.0359],
+        'San Juan': [14.6019, 121.0355],
+        'Greenhills': [14.6019, 121.0515],
+        'Caloocan': [14.6571, 120.9841],
+        'Monumento': [14.6571, 120.9841],
+        'Marikina': [14.6507, 121.1029],
+        'Paranaque': [14.4793, 121.0198],
+        'Las Pinas': [14.4445, 120.9939],
+        'Valenzuela': [14.7011, 120.9830],
+        
+        // Metro Davao Hubs (Hirna Origin Hubs)
+        'Davao City Hub': [7.0707, 125.6087],
+        'Davao': [7.0707, 125.6087],
+        'Davao Airport': [7.1253, 125.6456],
+        'Ecoland Davao': [7.0543, 125.5925],
+        'Matina Hub': [7.0601, 125.5872],
+        'Bajada Davao': [7.0864, 125.6148],
+        'Lanang Hub': [7.1039, 125.6367],
+        
+        // Metro Cebu Hubs
+        'Cebu City Hub': [10.3157, 123.8854],
+        'Cebu': [10.3157, 123.8854],
+        'IT Park Cebu': [10.3298, 123.9061],
+        'Mactan Airport': [10.3075, 123.9794]
     };
 
     function getLatLng(name, fallback) {
         if (!name) return fallback || [14.5995, 120.9842];
-        if (hubCoords[name]) return hubCoords[name];
+        const trimmed = name.trim();
+        if (hubCoords[trimmed]) return hubCoords[trimmed];
+        
+        // Substring / fuzzy search
+        const lower = trimmed.toLowerCase();
         for (let key in hubCoords) {
-            if (name.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(name.toLowerCase())) {
+            if (lower.includes(key.toLowerCase()) || key.toLowerCase().includes(lower)) {
                 return hubCoords[key];
             }
         }
-        return fallback || [14.5995, 120.9842];
+        
+        // Deterministic hash fallback to guarantee distinct realistic coordinates for any custom location
+        let hash = 0;
+        for (let i = 0; i < lower.length; i++) {
+            hash = (hash << 5) - hash + lower.charCodeAt(i);
+            hash |= 0;
+        }
+        const latOffset = ((Math.abs(hash) % 100) / 100) * 0.12 - 0.06; // +/- 0.06 deg
+        const lngOffset = (((Math.abs(hash >> 3)) % 100) / 100) * 0.12 - 0.06;
+        
+        return [14.5500 + latOffset, 121.0200 + lngOffset];
     }
 
-    // Simulated path arrays (simple latitude/longitude interpolation arrays)
+    // Simulated path arrays
     let simulatedPath = [];
     let currentStepIndex = 0;
     let activeSimulationInterval = null;
@@ -1083,7 +1134,6 @@
             leafletMap = null;
         }
 
-        // Reset Leaflet internal container flag
         mapContainer._leaflet_id = null;
 
         try {
@@ -1098,23 +1148,28 @@
             L.circleMarker(startLatLng, { color: '#10B981', radius: 8, fillColor: '#10B981', fillOpacity: 0.9 }).addTo(leafletMap).bindPopup("<b>Start Hub:</b> " + startName);
             L.circleMarker(endLatLng, { color: '#EF4444', radius: 8, fillColor: '#EF4444', fillOpacity: 0.9 }).addTo(leafletMap).bindPopup("<b>Destination:</b> " + endName);
 
-            // Polyline Trail
-            polylineTrail = L.polyline([startLatLng, endLatLng], { color: '#10B981', weight: 4, opacity: 0.85, dashArray: '6, 6' }).addTo(leafletMap);
+            // Progressive Polyline Trail
+            polylineTrail = L.polyline([startLatLng], { color: '#10B981', weight: 4, opacity: 0.9 }).addTo(leafletMap);
 
             // Custom Leaflet EV Icon
             const carIcon = L.divIcon({
                 className: 'custom-ev-marker',
-                html: `<div style="background:#064E3B; border:2px solid #10B981; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 12px rgba(16,185,129,0.8);"><i class="bi bi-ev-front-fill text-white fs-6"></i></div>`,
-                iconSize: [32, 32],
-                iconAnchor: [16, 16]
+                html: `<div style="background:#064E3B; border:2px solid #10B981; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 14px rgba(16,185,129,0.9);"><i class="bi bi-ev-front-fill text-white fs-6"></i></div>`,
+                iconSize: [34, 34],
+                iconAnchor: [17, 17]
             });
 
             carMarker = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMap).bindPopup("<b>Hirna Vehicle Live Position</b>");
 
-            [100, 300, 500, 800, 1200].forEach(delay => {
+            try {
+                leafletMap.fitBounds([startLatLng, endLatLng], { padding: [35, 35] });
+            } catch(e) {}
+
+            [100, 300, 500, 800].forEach(delay => {
                 setTimeout(() => {
                     if (leafletMap) {
                         leafletMap.invalidateSize();
+                        try { leafletMap.fitBounds([startLatLng, endLatLng], { padding: [35, 35] }); } catch(e) {}
                     }
                 }, delay);
             });
@@ -1128,14 +1183,12 @@
         const mapContainer = document.getElementById('liveGpsMapModal');
         if (!mapContainer) return;
 
-        // Ensure container is styled and visible before Leaflet initialization
         mapContainer.style.height = '230px';
         mapContainer.style.minHeight = '230px';
 
         const startLatLng = getLatLng(startName) || [14.5995, 120.9842];
         const endLatLng = getLatLng(endName) || [14.5547, 121.0244];
 
-        // Destroy previous modal map instance if exists
         if (leafletMapModal) {
             try { leafletMapModal.remove(); } catch(e) {}
             leafletMapModal = null;
@@ -1155,7 +1208,7 @@
             L.circleMarker(endLatLng, { color: '#EF4444', radius: 8, fillColor: '#EF4444', fillOpacity: 0.9 }).addTo(leafletMapModal).bindPopup("<b>Destination:</b> " + endName);
 
             // Polyline Trail (Progressive breadcrumbs)
-            polylineTrailModal = L.polyline([startLatLng], { color: '#10B981', weight: 5, opacity: 0.9 }).addTo(leafletMapModal);
+            polylineTrailModal = L.polyline([startLatLng], { color: '#10B981', weight: 5, opacity: 0.95 }).addTo(leafletMapModal);
 
             // Custom Leaflet EV Icon with Pulsing Radar Effect
             const carIcon = L.divIcon({
@@ -1172,17 +1225,15 @@
 
             carMarkerModal = L.marker(startLatLng, { icon: carIcon }).addTo(leafletMapModal).bindPopup("<b>Hirna Vehicle Live Position</b>");
 
-            // Fit map camera to frame entire route
             try {
                 leafletMapModal.fitBounds([startLatLng, endLatLng], { padding: [30, 30] });
             } catch(e) {}
 
-            // Recalculate tile sizes once modal transition settles
-            [100, 250, 500, 800, 1200].forEach(delay => {
+            [100, 250, 500, 800].forEach(delay => {
                 setTimeout(() => {
                     if (leafletMapModal) {
                         leafletMapModal.invalidateSize();
-                        leafletMapModal.fitBounds([startLatLng, endLatLng], { padding: [30, 30] });
+                        try { leafletMapModal.fitBounds([startLatLng, endLatLng], { padding: [30, 30] }); } catch(e) {}
                     }
                 }, delay);
             });
@@ -1276,11 +1327,9 @@
         // Generate coordinate path for simulation
         generateSimulatedPathCoordinates(simStart, simEnd);
 
-        // If modal is already shown (e.g., calling from within modal), initialize modal map directly
-        const modalEl = document.getElementById('telemetrySimulatorModal');
-        if (modalEl && modalEl.classList.contains('show')) {
-            initModalMap(simStart, simEnd);
-        }
+        // Re-initialize both maps with the new route
+        initLeafletGpsMap(simStart, simEnd);
+        initModalMap(simStart, simEnd);
     }
 
     function generateSimulatedPathCoordinates(startName, endName) {
@@ -1288,19 +1337,29 @@
         let startLatLng = getLatLng(startName, [14.5995, 120.9842]);
         let endLatLng = getLatLng(endName, [14.5547, 121.0244]);
 
-        // Guarantee start and destination coordinates are distinct points across Metro Manila
-        if (Math.abs(startLatLng[0] - endLatLng[0]) < 0.002 && Math.abs(startLatLng[1] - endLatLng[1]) < 0.002) {
-            endLatLng = [14.5547, 121.0244]; // Fallback destination: Makati Hub (Ayala Ave)
+        // Guarantee start and destination coordinates are distinct points
+        if (Math.abs(startLatLng[0] - endLatLng[0]) < 0.004 && Math.abs(startLatLng[1] - endLatLng[1]) < 0.004) {
+            endLatLng = [startLatLng[0] - 0.042, startLatLng[1] + 0.038];
         }
         
-        const points = 20;
+        const steps = 28; // 28 realistic road progression steps
 
-        for (let i = 0; i <= points; i++) {
-            let f = i / points;
-            simulatedPath.push({
-                lat: startLatLng[0] + (endLatLng[0] - startLatLng[0]) * f + (Math.random() - 0.5) * 0.0012,
-                lng: startLatLng[1] + (endLatLng[1] - startLatLng[1]) * f + (Math.random() - 0.5) * 0.0012
-            });
+        // Midpoint curve for natural road trajectory (Bezier curve)
+        const midLat = (startLatLng[0] + endLatLng[0]) / 2 + (startLatLng[1] - endLatLng[1]) * 0.12;
+        const midLng = (startLatLng[1] + endLatLng[1]) / 2 + (endLatLng[0] - startLatLng[0]) * 0.12;
+
+        for (let i = 0; i <= steps; i++) {
+            let t = i / steps;
+            let lat = (1 - t) * (1 - t) * startLatLng[0] + 2 * (1 - t) * t * midLat + t * t * endLatLng[0];
+            let lng = (1 - t) * (1 - t) * startLatLng[1] + 2 * (1 - t) * t * midLng + t * t * endLatLng[1];
+
+            // Micro-jitter for real GPS noise (except at exact start and end)
+            if (i > 0 && i < steps) {
+                lat += (Math.sin(i * 1.8) * 0.00025);
+                lng += (Math.cos(i * 1.8) * 0.00025);
+            }
+
+            simulatedPath.push({ lat: lat, lng: lng });
         }
     }
 
@@ -1346,18 +1405,18 @@
             }
 
             streamTelemetryStep(); // Immediately execute step 1!
-            activeSimulationInterval = setInterval(streamTelemetryStep, 1200); // send GPS logs every 1.2s
+            activeSimulationInterval = setInterval(streamTelemetryStep, 1000); // send GPS logs every 1.0s
         }
     }
 
     function triggerAggressiveAction() {
         aggressiveSpeedTrigger = true;
-        addSimFeedEvent("Dispatcher triggered: Aggressive Throttle (Speeding Alert)", "danger");
+        addSimFeedEvent("🚨 Dispatcher trigger: Aggressive Throttle (Speeding Alert)", "danger");
     }
 
     function triggerHarshBrakeAction() {
         harshBrakeTrigger = true;
-        addSimFeedEvent("Dispatcher triggered: Harsh Braking Event", "warning");
+        addSimFeedEvent("⚠️ Dispatcher trigger: Sudden Harsh Braking Event", "warning");
     }
 
     function addSimFeedEvent(message, statusClass) {
@@ -1392,7 +1451,13 @@
                 }
             });
 
-            addSimFeedEvent(`🏁 Route Completed! Destination ${simEnd} reached. Safety Score: ${safetyScoreTracker}%.`, "success");
+            // Set progress to 100%
+            ['simProgressBar', 'simProgressBarM'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.width = "100%";
+            });
+
+            addSimFeedEvent(`🏁 Route Completed! Destination ${simEnd} reached successfully. Final Safety Score: ${safetyScoreTracker}%.`, "success");
 
             if (simTripId && simTripId !== 999) {
                 setTimeout(showCompleteFormModal, 1500);
@@ -1402,35 +1467,49 @@
 
         const point = simulatedPath[currentStepIndex];
 
-        // Update MAIN PAGE Leaflet Map Marker Position & Polyline safely
+        // Update MAIN PAGE Leaflet Map Marker Position & Polyline smoothly
         try {
-            if (carMarker) carMarker.setLatLng([point.lat, point.lng]);
-            if (polylineTrail) polylineTrail.addLatLng([point.lat, point.lng]);
+            if (carMarker) {
+                carMarker.setLatLng([point.lat, point.lng]);
+                if (leafletMap && currentStepIndex % 3 === 0) {
+                    leafletMap.panTo([point.lat, point.lng], { animate: true, duration: 0.4 });
+                }
+            }
+            if (polylineTrail) {
+                polylineTrail.addLatLng([point.lat, point.lng]);
+            }
         } catch (e) {
             console.warn("Main map animation frame bypassed:", e);
         }
 
-        // Update MODAL Leaflet Map Marker Position & Polyline safely
+        // Update MODAL Leaflet Map Marker Position & Polyline smoothly
         try {
-            if (carMarkerModal) carMarkerModal.setLatLng([point.lat, point.lng]);
-            if (polylineTrailModal) polylineTrailModal.addLatLng([point.lat, point.lng]);
+            if (carMarkerModal) {
+                carMarkerModal.setLatLng([point.lat, point.lng]);
+                if (leafletMapModal && currentStepIndex % 3 === 0) {
+                    leafletMapModal.panTo([point.lat, point.lng], { animate: true, duration: 0.4 });
+                }
+            }
+            if (polylineTrailModal) {
+                polylineTrailModal.addLatLng([point.lat, point.lng]);
+            }
         } catch (e) {
             console.warn("Modal map animation frame bypassed:", e);
         }
 
         // Randomize speed based on triggers
-        let speed = 40 + Math.floor(Math.random() * 20); // standard
+        let speed = 42 + Math.floor(Math.random() * 22); // standard: 42-64 km/h
         let idleSec = 0;
         let isHarsh = false;
 
         if (aggressiveSpeedTrigger) {
-            speed = 95 + Math.floor(Math.random() * 15); // speeding
+            speed = 92 + Math.floor(Math.random() * 18); // speeding: 92-110 km/h
             aggressiveSpeedTrigger = false;
         } else if (harshBrakeTrigger) {
-            speed = 10; // braking
+            speed = 8 + Math.floor(Math.random() * 8); // harsh braking: 8-16 km/h
             isHarsh = true;
             harshBrakeTrigger = false;
-        } else if (Math.random() > 0.85) {
+        } else if (Math.random() > 0.88) {
             // Idle event
             speed = 0;
             idleSec = 15;
@@ -1464,7 +1543,7 @@
         });
 
         // Progress update on both
-        const pct = Math.round((currentStepIndex / (simulatedPath.length - 1)) * 100);
+        const pct = Math.round(((currentStepIndex + 1) / simulatedPath.length) * 100);
         ['simProgressBar', 'simProgressBarM'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.width = pct + "%";
@@ -1493,13 +1572,13 @@
                     updateSafetyScoreBoth(safetyScoreTracker);
 
                     if (speed > 80) {
-                        addSimFeedEvent(`Speed Violation: ${speed} km/h recorded. Safety score: ${safetyScoreTracker}%.`, "danger");
+                        addSimFeedEvent(`🚨 Speed Violation: ${speed} km/h recorded. Safety score: ${safetyScoreTracker}%.`, "danger");
                     } else if (isHarsh) {
-                        addSimFeedEvent(`Safety Trigger: Harsh Braking detected. Safety score: ${safetyScoreTracker}%.`, "warning");
+                        addSimFeedEvent(`⚠️ Safety Trigger: Harsh Braking detected. Safety score: ${safetyScoreTracker}%.`, "warning");
                     } else if (speed === 0) {
-                        addSimFeedEvent(`Idle State: Hirna Vehicle idling at traffic intersection.`, "warning");
+                        addSimFeedEvent(`🚦 Traffic Idle: Hirna Vehicle idling at intersection (+15s).`, "warning");
                     } else {
-                        addSimFeedEvent(`GPS broadcast: Lat ${point.lat.toFixed(4)}, Lng ${point.lng.toFixed(4)}. Cruising smoothly.`, "secondary");
+                        addSimFeedEvent(`📡 GPS: Lat ${point.lat.toFixed(4)}, Lng ${point.lng.toFixed(4)} | Speed ${speed} km/h`, "secondary");
                     }
                 } else {
                     logDemoStepFeed(speed, isHarsh, idleSec, point);
@@ -1512,6 +1591,8 @@
             logDemoStepFeed(speed, isHarsh, idleSec, point);
         }
 
+        // CRITICAL FIX: Increment step counter to advance the car marker!
+        currentStepIndex++;
     }
 
     // Helper to update safety score on both main-page and modal
@@ -1525,14 +1606,14 @@
     function logDemoStepFeed(speed, isHarsh, idleSec, point) {
         if (speed > 80) {
             safetyScoreTracker = Math.max(60, safetyScoreTracker - 5);
-            addSimFeedEvent(`Speed Violation: ${speed} km/h recorded. Safety score: ${safetyScoreTracker}%.`, "danger");
+            addSimFeedEvent(`🚨 Speed Violation: ${speed} km/h recorded. Safety score: ${safetyScoreTracker}%.`, "danger");
         } else if (isHarsh) {
             safetyScoreTracker = Math.max(60, safetyScoreTracker - 3);
-            addSimFeedEvent(`Harsh Braking Event: Sudden deceleration recorded.`, "warning");
+            addSimFeedEvent(`⚠️ Harsh Braking Event: Sudden deceleration recorded.`, "warning");
         } else if (speed === 0) {
-            addSimFeedEvent(`Idle State: Hirna Vehicle idling at traffic intersection (+15s).`, "warning");
+            addSimFeedEvent(`🚦 Traffic Idle: Hirna Vehicle idling at intersection (+15s).`, "warning");
         } else {
-            addSimFeedEvent(`GPS broadcast: Lat ${point.lat.toFixed(4)}, Lng ${point.lng.toFixed(4)} | Speed ${speed} km/h`, "secondary");
+            addSimFeedEvent(`📡 GPS: Lat ${point.lat.toFixed(4)}, Lng ${point.lng.toFixed(4)} | Speed ${speed} km/h`, "secondary");
         }
         updateSafetyScoreBoth(safetyScoreTracker);
     }

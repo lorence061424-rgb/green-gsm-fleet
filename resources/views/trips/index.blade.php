@@ -505,7 +505,14 @@
                     </h5>
                     <p class="small text-muted mb-0">Detailed performance logs, mileage completed, energy consumed (kWh), and trip receipts for driver dispatches.</p>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <!-- Search Input & Button for Registry Logs -->
+                    <div class="input-group" style="max-width: 290px;">
+                        <input type="text" id="completedTripsSearchInput" class="form-control form-control-sm rounded-start-3 border-secondary-subtle" placeholder="Search logs, driver, ref..." onkeyup="filterCompletedTripsTable()">
+                        <button class="btn btn-sm btn-danger rounded-end-3 fw-bold" type="button" onclick="filterCompletedTripsTable()" style="background: #CE2029 !important;">
+                            <i class="bi bi-search me-1"></i> Search
+                        </button>
+                    </div>
                     <span class="badge bg-success text-white px-3 py-2 rounded-pill shadow-sm">
                         <i class="bi bi-check-circle-fill me-1"></i> {{ $totalTripsCompleted }} Total Successful Trips
                     </span>
@@ -648,6 +655,18 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Registry Table Pagination Footer -->
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top flex-wrap gap-2">
+                <div class="small text-muted">
+                    Showing Page <span id="completedTripsCurrentPage" class="fw-bold text-dark">1</span> of <span id="completedTripsTotalPages" class="fw-bold text-dark">2</span> (<span id="completedTripsTotalCount">0</span> registry logs)
+                </div>
+                <nav aria-label="Registry Pagination">
+                    <ul class="pagination pagination-sm mb-0 gap-1" id="completedTripsPaginationList">
+                        <!-- Dynamic Page 1 and Page 2 buttons rendered via JS -->
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
@@ -1789,13 +1808,87 @@
         modal.show();
     }
 
-    function filterTripsTable() {
-    const input = document.getElementById('tripSearchInput').value.toLowerCase();
-    const rows = document.querySelectorAll('table tbody tr');
-    rows.forEach(row => {
-        const text = row.innerText.toLowerCase();
-        row.style.display = text.includes(input) ? '' : 'none';
+    // Dedicated Search & 2-Page Pagination Controller for Completed Dispatches Registry
+    let currentCompletedPage = 1;
+    const completedRowsPerPage = 3;
+
+    function renderCompletedTripsTable() {
+        const table = document.getElementById('completedTripsTable');
+        if (!table) return;
+        const searchInput = document.getElementById('completedTripsSearchInput');
+        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        
+        // Filter rows by search input
+        const visibleRows = rows.filter(row => {
+            if (!query) return true;
+            return row.textContent.toLowerCase().includes(query);
+        });
+
+        // Compute total pages (minimum 1, e.g. Page 1 & Page 2)
+        const totalPages = Math.max(1, Math.ceil(visibleRows.length / completedRowsPerPage));
+        if (currentCompletedPage > totalPages) currentCompletedPage = totalPages;
+        if (currentCompletedPage < 1) currentCompletedPage = 1;
+
+        // Hide all rows initially
+        rows.forEach(r => r.style.display = 'none');
+
+        // Show rows for current active page
+        const startIndex = (currentCompletedPage - 1) * completedRowsPerPage;
+        const endIndex = startIndex + completedRowsPerPage;
+        const pageRows = visibleRows.slice(startIndex, endIndex);
+        pageRows.forEach(r => r.style.display = '');
+
+        // Update info text
+        const currPageEl = document.getElementById('completedTripsCurrentPage');
+        const totalPagesEl = document.getElementById('completedTripsTotalPages');
+        const totalCountEl = document.getElementById('completedTripsTotalCount');
+        if (currPageEl) currPageEl.textContent = currentCompletedPage;
+        if (totalPagesEl) totalPagesEl.textContent = totalPages;
+        if (totalCountEl) totalCountEl.textContent = visibleRows.length;
+
+        // Render Page 1 / Page 2 pagination buttons
+        const pagList = document.getElementById('completedTripsPaginationList');
+        if (pagList) {
+            let pagesHtml = `<li class="page-item ${currentCompletedPage === 1 ? 'disabled' : ''}">
+                <button class="btn btn-sm btn-outline-secondary rounded-2 px-2 me-1" onclick="changeCompletedTripsPage(-1)" ${currentCompletedPage === 1 ? 'disabled' : ''}><i class="bi bi-chevron-left"></i> Prev</button>
+            </li>`;
+            for (let i = 1; i <= totalPages; i++) {
+                const activeStyle = i === currentCompletedPage ? 'background-color: #CE2029; border-color: #CE2029; color: white;' : '';
+                const activeClass = i === currentCompletedPage ? 'btn-danger text-white fw-bold shadow-sm' : 'btn-outline-secondary';
+                pagesHtml += `<li class="page-item">
+                    <button class="btn btn-sm ${activeClass} rounded-2 px-3 mx-1" onclick="goToCompletedTripsPage(${i})" style="${activeStyle}">Page ${i}</button>
+                </li>`;
+            }
+            pagesHtml += `<li class="page-item ${currentCompletedPage === totalPages ? 'disabled' : ''}">
+                <button class="btn btn-sm btn-outline-secondary rounded-2 px-2 ms-1" onclick="changeCompletedTripsPage(1)" ${currentCompletedPage === totalPages ? 'disabled' : ''}>Next <i class="bi bi-chevron-right"></i></button>
+            </li>`;
+            pagList.innerHTML = pagesHtml;
+        }
+    }
+
+    function filterCompletedTripsTable() {
+        currentCompletedPage = 1;
+        renderCompletedTripsTable();
+    }
+
+    function goToCompletedTripsPage(page) {
+        currentCompletedPage = page;
+        renderCompletedTripsTable();
+    }
+
+    function changeCompletedTripsPage(delta) {
+        currentCompletedPage += delta;
+        renderCompletedTripsTable();
+    }
+
+    // Initialize pagination on load and PJAX module navigation
+    document.addEventListener('DOMContentLoaded', function() {
+        renderCompletedTripsTable();
     });
-}
+    window.addEventListener('pjax:loaded', function() {
+        renderCompletedTripsTable();
+    });
+    setTimeout(renderCompletedTripsTable, 100);
 </script>
 @endsection

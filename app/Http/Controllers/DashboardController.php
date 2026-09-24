@@ -14,100 +14,112 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // 1. Vehicle counts
-        $totalVehicles = Vehicle::count();
-        $activeVehicles = Vehicle::where('status', 'active')->count();
-        $maintenanceVehicles = Vehicle::where('status', 'maintenance')->count();
-        $offlineVehicles = Vehicle::where('status', 'offline')->count();
+        $metrics = \Illuminate\Support\Facades\Cache::remember('dashboard_metrics_v2', 30, function() {
+            // 1. Vehicle counts
+            $totalVehicles = Vehicle::count();
+            $activeVehicles = Vehicle::where('status', 'active')->count();
+            $maintenanceVehicles = Vehicle::where('status', 'maintenance')->count();
+            $offlineVehicles = Vehicle::where('status', 'offline')->count();
 
-        // 2. Trip counts
-        $totalTrips = Trip::count();
-        $completedTrips = Trip::where('status', 'completed')->count();
-        $activeTrips = Trip::where('status', 'active')->count();
+            // 2. Trip counts
+            $totalTrips = Trip::count();
+            $completedTrips = Trip::where('status', 'completed')->count();
+            $activeTrips = Trip::where('status', 'active')->count();
 
-        // 3. Dual Energy & Fuel Metrics (Gasoline / Diesel + EV Electric Charging)
-        $gasolineLogs = FuelLog::where(function($q) {
-            $q->where('fuel_type', 'LIKE', '%Gasoline%')
-              ->orWhere('fuel_type', 'LIKE', '%Diesel%')
-              ->orWhere('fuel_type', 'LIKE', '%Liters%');
-        });
-        $gasolineCost = (float)$gasolineLogs->sum('cost');
-        $gasolineLiters = (float)$gasolineLogs->sum('amount_liters');
+            // 3. Dual Energy & Fuel Metrics (Gasoline / Diesel + EV Electric Charging)
+            $gasolineCost = (float) FuelLog::where(function($q) {
+                $q->where('fuel_type', 'LIKE', '%Gasoline%')
+                  ->orWhere('fuel_type', 'LIKE', '%Diesel%')
+                  ->orWhere('fuel_type', 'LIKE', '%Liters%');
+            })->sum('cost');
 
-        $evLogs = FuelLog::where(function($q) {
-            $q->where('fuel_type', 'LIKE', '%EV%')
-              ->orWhere('fuel_type', 'LIKE', '%kWh%')
-              ->orWhere('fuel_type', 'LIKE', '%Electric%');
-        });
-        $evCost = (float)$evLogs->sum('cost');
-        $evKwh = (float)$evLogs->sum('amount_liters');
+            $gasolineLiters = (float) FuelLog::where(function($q) {
+                $q->where('fuel_type', 'LIKE', '%Gasoline%')
+                  ->orWhere('fuel_type', 'LIKE', '%Diesel%')
+                  ->orWhere('fuel_type', 'LIKE', '%Liters%');
+            })->sum('amount_liters');
 
-        $totalFuelCost = (float)FuelLog::sum('cost');
-        $totalFuelLiters = (float)FuelLog::sum('amount_liters');
-        $totalDistance = (float)Trip::where('status', 'completed')->sum('distance_km');
+            $evCost = (float) FuelLog::where(function($q) {
+                $q->where('fuel_type', 'LIKE', '%EV%')
+                  ->orWhere('fuel_type', 'LIKE', '%kWh%')
+                  ->orWhere('fuel_type', 'LIKE', '%Electric%');
+            })->sum('cost');
 
-        $gasolineEfficiency = ($totalDistance > 0 && $gasolineLiters > 0) ? ($gasolineLiters / $totalDistance) * 100 : 0;
-        $evEfficiency = ($totalDistance > 0 && $evKwh > 0) ? ($evKwh / $totalDistance) * 100 : 0;
-        $avgEfficiency = ($totalDistance > 0 && $totalFuelLiters > 0) ? ($totalFuelLiters / $totalDistance) * 100 : 0;
+            $evKwh = (float) FuelLog::where(function($q) {
+                $q->where('fuel_type', 'LIKE', '%EV%')
+                  ->orWhere('fuel_type', 'LIKE', '%kWh%')
+                  ->orWhere('fuel_type', 'LIKE', '%Electric%');
+            })->sum('amount_liters');
 
-        // 4. Maintenance Expense & Records
-        $totalMaintenanceCost = (float)MaintenanceRecord::sum('cost');
-        $pendingMaintenance = MaintenanceRecord::whereIn('status', ['scheduled', 'in_progress'])
-            ->with('vehicle')
-            ->orderBy('scheduled_date', 'asc')
-            ->get();
-        $maintenanceLogs = MaintenanceRecord::with('vehicle')
-            ->latest()
-            ->take(10)
-            ->get();
+            $totalFuelCost = (float) FuelLog::sum('cost');
+            $totalFuelLiters = (float) FuelLog::sum('amount_liters');
+            $totalDistance = (float) Trip::where('status', 'completed')->sum('distance_km');
 
-        // 5. Driver Standings
-        $topDrivers = Driver::with('user')
-            ->orderBy('performance_score', 'desc')
-            ->limit(5)
-            ->get();
+            $gasolineEfficiency = ($totalDistance > 0 && $gasolineLiters > 0) ? ($gasolineLiters / $totalDistance) * 100 : 0;
+            $evEfficiency = ($totalDistance > 0 && $evKwh > 0) ? ($evKwh / $totalDistance) * 100 : 0;
+            $avgEfficiency = ($totalDistance > 0 && $totalFuelLiters > 0) ? ($totalFuelLiters / $totalDistance) * 100 : 0;
 
-        // 6. Hirna Vehicle Fleet Breakdown
-        $vinfastFleet = Vehicle::orderBy('id', 'asc')->get();
-
-        // 7. Chart 1: Energy & Fuel Usage by Vehicle Category
-        $fuelByType = FuelLog::join('vehicles', 'fuel_logs.vehicle_id', '=', 'vehicles.id')
-            ->select('vehicles.type', DB::raw('COALESCE(SUM(fuel_logs.amount_liters), 0) as total_liters'))
-            ->groupBy('vehicles.type')
-            ->get();
-
-        if ($fuelByType->isEmpty()) {
-            $fuelByType = Vehicle::select('type', DB::raw('0 as total_liters'))
-                ->groupBy('type')
+            // 4. Maintenance Expense & Records
+            $totalMaintenanceCost = (float) MaintenanceRecord::sum('cost');
+            $pendingMaintenance = MaintenanceRecord::whereIn('status', ['scheduled', 'in_progress'])
+                ->with('vehicle')
+                ->orderBy('scheduled_date', 'asc')
                 ->get();
-        }
+            $maintenanceLogs = MaintenanceRecord::with('vehicle')
+                ->latest()
+                ->take(10)
+                ->get();
 
-        // 8. Chart 2: Daily Fuel & Energy Expense History
-        $costHistory = FuelLog::select(
-                DB::raw('DATE(date) as log_date'), 
-                DB::raw('COALESCE(SUM(cost), 0) as daily_cost'), 
-                DB::raw('COALESCE(SUM(amount_liters), 0) as daily_liters')
-            )
-            ->groupBy(DB::raw('DATE(date)'))
-            ->orderBy('log_date', 'asc')
-            ->limit(10)
-            ->get()
-            ->map(function($item) {
-                return (object)[
-                    'date' => \Carbon\Carbon::parse($item->log_date)->format('M d'),
-                    'daily_cost' => (float)$item->daily_cost,
-                    'daily_liters' => (float)$item->daily_liters,
-                ];
-            });
+            // 5. Driver Standings
+            $topDrivers = Driver::with('user')
+                ->orderBy('performance_score', 'desc')
+                ->limit(5)
+                ->get();
 
-        return view('dashboard', compact(
-            'totalVehicles', 'activeVehicles', 'maintenanceVehicles', 'offlineVehicles',
-            'totalTrips', 'completedTrips', 'activeTrips',
-            'gasolineCost', 'gasolineLiters', 'evCost', 'evKwh',
-            'totalFuelCost', 'totalFuelLiters', 'gasolineEfficiency', 'evEfficiency', 'avgEfficiency',
-            'totalMaintenanceCost', 'pendingMaintenance', 'maintenanceLogs',
-            'topDrivers', 'vinfastFleet', 'fuelByType', 'costHistory'
-        ));
+            // 6. Hirna Vehicle Fleet Breakdown
+            $vinfastFleet = Vehicle::orderBy('id', 'asc')->get();
+
+            // 7. Chart 1: Energy & Fuel Usage by Vehicle Category
+            $fuelByType = FuelLog::join('vehicles', 'fuel_logs.vehicle_id', '=', 'vehicles.id')
+                ->select('vehicles.type', DB::raw('COALESCE(SUM(fuel_logs.amount_liters), 0) as total_liters'))
+                ->groupBy('vehicles.type')
+                ->get();
+
+            if ($fuelByType->isEmpty()) {
+                $fuelByType = Vehicle::select('type', DB::raw('0 as total_liters'))
+                    ->groupBy('type')
+                    ->get();
+            }
+
+            // 8. Chart 2: Daily Fuel & Energy Expense History
+            $costHistory = FuelLog::select(
+                    DB::raw('DATE(date) as log_date'), 
+                    DB::raw('COALESCE(SUM(cost), 0) as daily_cost'), 
+                    DB::raw('COALESCE(SUM(amount_liters), 0) as daily_liters')
+                )
+                ->groupBy(DB::raw('DATE(date)'))
+                ->orderBy('log_date', 'asc')
+                ->limit(10)
+                ->get()
+                ->map(function($item) {
+                    return (object)[
+                        'date' => \Carbon\Carbon::parse($item->log_date)->format('M d'),
+                        'daily_cost' => (float)$item->daily_cost,
+                        'daily_liters' => (float)$item->daily_liters,
+                    ];
+                });
+
+            return compact(
+                'totalVehicles', 'activeVehicles', 'maintenanceVehicles', 'offlineVehicles',
+                'totalTrips', 'completedTrips', 'activeTrips',
+                'gasolineCost', 'gasolineLiters', 'evCost', 'evKwh',
+                'totalFuelCost', 'totalFuelLiters', 'gasolineEfficiency', 'evEfficiency', 'avgEfficiency',
+                'totalMaintenanceCost', 'pendingMaintenance', 'maintenanceLogs',
+                'topDrivers', 'vinfastFleet', 'fuelByType', 'costHistory'
+            );
+        });
+
+        return view('dashboard', $metrics);
     }
 
     /**

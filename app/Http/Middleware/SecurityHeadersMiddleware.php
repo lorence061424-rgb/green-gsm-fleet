@@ -31,8 +31,8 @@ class SecurityHeadersMiddleware
         // Permissions Policy (restrict sensitive hardware access)
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
 
-        // Prevent browser back-button caching of authenticated pages post-logout
-        $response->headers->set('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate');
+        // Prevent browser caching of stale authenticated pages while allowing asset revalidation
+        $response->headers->set('Cache-Control', 'private, no-cache, must-revalidate');
         $response->headers->set('Pragma', 'no-cache');
 
         return $response;

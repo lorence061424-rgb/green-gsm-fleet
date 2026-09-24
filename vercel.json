@@ -26,6 +26,12 @@
     "APP_ENV": "production",
     "APP_KEY": "base64:Si7TpMsNGYcjbLy7O5NJosGafRS33mu9xNlCtvMnXZo=",
     "LOG_CHANNEL": "stderr",
-    "VIEW_COMPILED_PATH": "/tmp/storage/framework/views"
+    "VIEW_COMPILED_PATH": "/tmp/storage/framework/views",
+    "DB_CONNECTION": "mysql",
+    "DB_HOST": "gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
+    "DB_PORT": "4000",
+    "DB_DATABASE": "hirna_fleet",
+    "DB_USERNAME": "47KsTdme6q6U9GE.root",
+    "DB_PASSWORD": "6yBtdWupZAsahP1S"
   }
 }

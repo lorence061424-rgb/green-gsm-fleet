@@ -54,9 +54,12 @@ try {
 
         \Illuminate\Support\Facades\DB::connection()->getPdo();
         config(['cache.default' => 'database']);
+        @header('X-DB-Status: mysql-connected');
     } catch (\Throwable $e) {
         // If primary DB connection fails (missing driver or unreachable DB), fallback safely to /tmp SQLite
         \Illuminate\Support\Facades\Log::warning("PRIMARY DB CONNECT FAILED: " . $e->getMessage() . ". Falling back to local SQLite.");
+        @header('X-DB-Status: fallback-sqlite');
+        @header('X-DB-Error: ' . rawurlencode(substr($e->getMessage(), 0, 200)));
         
         $dbFile = '/tmp/database.sqlite';
         if (!file_exists($dbFile)) {

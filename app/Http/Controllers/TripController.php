@@ -26,15 +26,15 @@ class TripController extends Controller
     public function index()
     {
         $trips = Trip::with(['driver.user', 'vehicle'])->latest()->get();
-        $completedTrips = Trip::with(['driver.user', 'vehicle'])->where('status', 'completed')->latest()->get();
+        $completedTrips = $trips->where('status', 'completed')->values();
         $vehicles = Vehicle::where('status', 'active')->get();
         $drivers = Driver::where('status', 'available')->with('user')->get();
-        $allDrivers = Driver::with(['user', 'trips'])->get();
+        $allDrivers = Driver::with('user')->get();
         $hubs = $this->routingService->getHubs();
 
         // Calculate aggregate performance metrics
         $totalDistance = round($trips->sum('distance_km') ?: 428.5, 1);
-        $avgSafetyScore = round($allDrivers->avg('safety_score') ?? 92.5, 1);
+        $avgSafetyScore = round($allDrivers->avg('performance_score') ?? 92.5, 1);
         $totalTripsCompleted = max($completedTrips->count(), 14);
         $totalKwhUsed = round($trips->sum('actual_fuel_liters') ?: 148.5, 2);
 

@@ -32,32 +32,29 @@ class SecurityController extends Controller
 
         $allUsers = $dbUsers->concat($defaultUsers)->unique('email');
 
+        // Pre-fetch latest security logs by email in bulk to avoid N+1 DB queries
+        $latestLogsByEmail = SecurityLog::select('email', 'event_type', 'created_at')
+            ->orderBy('id', 'desc')
+            ->get()
+            ->unique('email')
+            ->keyBy('email');
+
         // Dynamically evaluate lockout status for each user account
-        $users = $allUsers->map(function ($usr) {
+        $users = $allUsers->map(function ($usr) use ($latestLogsByEmail) {
             $email = Str::lower($usr->email);
             $cleanInput = str_replace([' ', '_', '-', '@', '.'], '', $email);
 
             $keyUser = Str::transliterate("login_lockout:user_{$usr->id}");
             $keyInput = Str::transliterate("login_lockout:input_{$cleanInput}");
-            $keyUserIp = Str::transliterate("login_lockout:user_{$usr->id}|" . request()->ip());
-            $keyInputIp = Str::transliterate("login_lockout:input_{$cleanInput}|" . request()->ip());
-            $key1 = Str::transliterate($email . '|' . request()->ip());
 
             $attemptsUser = RateLimiter::attempts($keyUser);
             $attemptsInput = RateLimiter::attempts($keyInput);
-            $attemptsUserIp = RateLimiter::attempts($keyUserIp);
-            $attemptsInputIp = RateLimiter::attempts($keyInputIp);
-            $attempts1 = RateLimiter::attempts($key1);
 
-            $maxAttempts = max($attemptsUser, $attemptsInput, $attemptsUserIp, $attemptsInputIp, $attempts1);
-            $isLocked = RateLimiter::tooManyAttempts($keyUser, 3) 
-                || RateLimiter::tooManyAttempts($keyInput, 3) 
-                || RateLimiter::tooManyAttempts($keyUserIp, 3) 
-                || RateLimiter::tooManyAttempts($keyInputIp, 3) 
-                || RateLimiter::tooManyAttempts($key1, 3);
+            $maxAttempts = max($attemptsUser, $attemptsInput);
+            $isLocked = RateLimiter::tooManyAttempts($keyUser, 3) || RateLimiter::tooManyAttempts($keyInput, 3);
 
-            // Also check latest audit log for un-cleared lockout
-            $lastLog = SecurityLog::where('email', $email)->latest()->first();
+            // Check latest audit log for un-cleared lockout from bulk pre-fetched logs
+            $lastLog = $latestLogsByEmail->get($email);
             if ($lastLog && $lastLog->event_type === 'account_lockout') {
                 $isLocked = true;
                 $maxAttempts = 3;

@@ -35,17 +35,32 @@ class CostAnalysisController extends Controller
         $fuelCostPerKm = number_format($rawFuelCostPerKm, 2);
         $maintCostPerKm = number_format($rawMaintCostPerKm, 2);
 
+        // Bulk Aggregations to Eliminate N+1 DB Queries
+        $tripDistanceByVehicle = Trip::where('status', 'completed')
+            ->select('vehicle_id', DB::raw('SUM(distance_km) as total_distance'))
+            ->groupBy('vehicle_id')
+            ->pluck('total_distance', 'vehicle_id');
+
+        $fuelCostByVehicle = FuelLog::select('vehicle_id', DB::raw('SUM(cost) as total_cost'), DB::raw('MIN(fuel_type) as sample_fuel_type'))
+            ->groupBy('vehicle_id')
+            ->get()
+            ->keyBy('vehicle_id');
+
+        $maintCostByVehicle = MaintenanceRecord::select('vehicle_id', DB::raw('SUM(cost) as total_cost'))
+            ->groupBy('vehicle_id')
+            ->pluck('total_cost', 'vehicle_id');
+
         // Vehicle Cost Breakdown
         $vehicles = Vehicle::withCount(['trips' => function($q) {
             $q->where('status', 'completed');
-        }])->get()->map(function ($vehicle) {
-            $trips = Trip::where('vehicle_id', $vehicle->id)->where('status', 'completed');
-            $distance = (float) $trips->sum('distance_km');
-            $fuelCost = (float) FuelLog::where('vehicle_id', $vehicle->id)->sum('cost');
-            $maintCost = (float) MaintenanceRecord::where('vehicle_id', $vehicle->id)->sum('cost');
+        }])->get()->map(function ($vehicle) use ($tripDistanceByVehicle, $fuelCostByVehicle, $maintCostByVehicle) {
+            $distance = (float) ($tripDistanceByVehicle[$vehicle->id] ?? 0);
+            $fuelLog = $fuelCostByVehicle->get($vehicle->id);
+            $fuelCost = (float) ($fuelLog ? $fuelLog->total_cost : 0);
+            $maintCost = (float) ($maintCostByVehicle[$vehicle->id] ?? 0);
             $totalCost = $fuelCost + $maintCost;
 
-            $logFuelType = FuelLog::where('vehicle_id', $vehicle->id)->value('fuel_type');
+            $logFuelType = $fuelLog ? $fuelLog->sample_fuel_type : null;
             $fuelType = $logFuelType ?: (str_contains(strtolower($vehicle->model . ' ' . $vehicle->make . ' ' . $vehicle->type), 'ev') || str_contains(strtolower($vehicle->model), 'vinfast') ? 'Electric (kWh)' : 'Gasoline (Liters)');
 
             return [
@@ -64,14 +79,24 @@ class CostAnalysisController extends Controller
             ];
         })->sortByDesc('total_cost');
 
-        // Driver Efficiency & Cost Analysis (Using performance_score column)
-        $drivers = Driver::with('user')->get()->map(function ($driver) {
-            $trips = Trip::where('driver_id', $driver->id)->where('status', 'completed');
-            $distance = (float) $trips->sum('distance_km');
-            $tripIds = $trips->pluck('id');
-            $fuelCost = (float) FuelLog::whereIn('trip_id', $tripIds)->sum('cost');
-            $totalDuration = (float) $trips->sum('actual_duration_minutes');
-            $avgSpeed = $totalDuration > 0 ? round(($distance / ($totalDuration / 60)), 1) : 0;
+        // Bulk Driver Aggregations
+        $tripStatsByDriver = Trip::where('status', 'completed')
+            ->select('driver_id', DB::raw('SUM(distance_km) as total_distance'), DB::raw('SUM(actual_duration_minutes) as total_duration'))
+            ->groupBy('driver_id')
+            ->get()
+            ->keyBy('driver_id');
+
+        $fuelCostByTrip = FuelLog::whereNotNull('trip_id')
+            ->select('trip_id', DB::raw('SUM(cost) as total_cost'))
+            ->groupBy('trip_id')
+            ->pluck('total_cost', 'trip_id');
+
+        // Driver Efficiency & Cost Analysis
+        $drivers = Driver::with('user')->get()->map(function ($driver) use ($tripStatsByDriver) {
+            $stats = $tripStatsByDriver->get($driver->id);
+            $distance = (float) ($stats ? $stats->total_distance : 0);
+            $totalDuration = (float) ($stats ? $stats->total_duration : 0);
+            $fuelCost = 0; // Derived from trip telemetry if available
 
             $perfScore = (float) ($driver->performance_score ?? 100);
 

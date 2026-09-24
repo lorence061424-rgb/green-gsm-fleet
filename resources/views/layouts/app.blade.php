@@ -459,8 +459,10 @@
                     $currentName = session('user_name', 'Hirna System Admin');
                     $currentEmail = session('user_email', 'admin@hirna.ph');
                     
-                    $authUser = \App\Models\User::where('email', \Illuminate\Support\Str::lower($currentEmail))->first();
-                    $userAvatarUrl = $authUser ? $authUser->avatar_url : session('user_avatar', 'https://ui-avatars.com/api/?name='.urlencode($currentName).'&background=CE2029&color=ffffff&bold=true');
+                    $userAvatarUrl = session('user_avatar') ?: \Illuminate\Support\Facades\Cache::remember('user_avatar_' . \Illuminate\Support\Str::slug($currentEmail), 3600, function() use ($currentEmail, $currentName) {
+                        $u = \App\Models\User::where('email', \Illuminate\Support\Str::lower($currentEmail))->first();
+                        return $u ? $u->avatar_url : 'https://ui-avatars.com/api/?name='.urlencode($currentName).'&background=CE2029&color=ffffff&bold=true';
+                    });
 
                     $roleTitles = [
                         'admin' => 'System Administrator',
@@ -549,13 +551,124 @@
             @yield('content')
         </div>
     </div>
-
-    <!-- Bootstrap 5 Bundle JS -->
+    <!-- Vendor JavaScript Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Chart.js (for analytics rendering) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Leaflet Interactive GPS Map Engine JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- High-Performance Instant Module Switcher & Button Response Engine -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 1. Instant Button Click Feedback & Multi-submit Lock
+            document.body.addEventListener('click', function (e) {
+                const btn = e.target.closest('button, .btn, input[type="submit"]');
+                if (btn && !btn.disabled) {
+                    btn.classList.add('active');
+                    setTimeout(() => btn.classList.remove('active'), 250);
+                    
+                    const form = btn.closest('form');
+                    if (form && btn.type === 'submit' && !form.dataset.submitting) {
+                        form.dataset.submitting = 'true';
+                        setTimeout(() => delete form.dataset.submitting, 2000);
+                    }
+                }
+            });
+
+            // 2. High-Speed Sub-Second Module Switcher Engine
+            const mainBody = document.getElementById('mainContentBody');
+            const progressBar = document.getElementById('tabLoadingProgress');
+
+            function executeScriptsInContainer(container) {
+                const scripts = container.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+            }
+
+            async function loadModule(url, targetLink) {
+                if (!mainBody || !url || url.includes('#') || url.startsWith('javascript:')) return;
+
+                // Close mobile offcanvas if open
+                const mobileSidebar = document.getElementById('mobileSidebar');
+                if (mobileSidebar && window.bootstrap && bootstrap.Offcanvas.getInstance(mobileSidebar)) {
+                    bootstrap.Offcanvas.getInstance(mobileSidebar).hide();
+                }
+
+                // Visual feedback: Update active link states instantly across desktop and mobile sidebars
+                document.querySelectorAll('.sidebar-nav-link').forEach(el => {
+                    if (el.getAttribute('href') === url) {
+                        el.classList.add('active');
+                    } else {
+                        el.classList.remove('active');
+                    }
+                });
+
+                if (progressBar) {
+                    progressBar.style.width = '35%';
+                }
+                mainBody.classList.add('tab-fade-out');
+
+                try {
+                    const response = await fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-PJAX': 'true'
+                        }
+                    });
+
+                    if (!response.ok) throw new Error('Module fetch failed');
+
+                    if (progressBar) progressBar.style.width = '75%';
+
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newContent = doc.getElementById('mainContentBody');
+                    const newTitle = doc.querySelector('title');
+
+                    if (newContent) {
+                        if (newTitle) document.title = newTitle.innerText;
+                        window.history.pushState({}, '', url);
+
+                        setTimeout(() => {
+                            mainBody.innerHTML = newContent.innerHTML;
+                            executeScriptsInContainer(mainBody);
+                            mainBody.classList.remove('tab-fade-out');
+                            if (progressBar) {
+                                progressBar.style.width = '100%';
+                                setTimeout(() => { progressBar.style.width = '0%'; }, 200);
+                            }
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            window.dispatchEvent(new Event('pjax:loaded'));
+                        }, 90);
+                    } else {
+                        window.location.href = url;
+                    }
+                } catch (err) {
+                    if (progressBar) progressBar.style.width = '0%';
+                    window.location.href = url;
+                }
+            }
+
+            document.body.addEventListener('click', function (e) {
+                const link = e.target.closest('.sidebar-nav-link');
+                if (link && link.href && !e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
+                    const url = link.href;
+                    if (url !== window.location.href) {
+                        e.preventDefault();
+                        loadModule(url, link);
+                    }
+                }
+            });
+
+            window.addEventListener('popstate', function () {
+                window.location.reload();
+            });
+        });
+    </script>
     
     @yield('scripts')
 </body>

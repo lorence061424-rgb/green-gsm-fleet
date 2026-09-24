@@ -44,6 +44,7 @@ try {
     $kernel->bootstrap();
 
     // 5. Test & Validate Database Connection & Safe Fallback
+    $dbConnected = false;
     try {
         $currentDefault = config('database.default');
         $connDriver = config("database.connections.{$currentDefault}.driver", $currentDefault);
@@ -53,6 +54,7 @@ try {
         }
 
         \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $dbConnected = true;
         config(['cache.default' => 'database']);
         @header('X-DB-Status: mysql-connected');
     } catch (\Throwable $e) {
@@ -71,15 +73,17 @@ try {
         config(['cache.default' => 'array']);
     }
 
-    // 6. Safe Non-Destructive Schema Migration Bootstrapping
-    try {
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-        
-        if (\Illuminate\Support\Facades\Schema::hasTable('users') && \App\Models\User::count() === 0) {
-            \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+    // 6. Non-blocking DB verification (migrations run out-of-band to maximize performance)
+    if (!$dbConnected) {
+        try {
+            $dbFile = '/tmp/database.sqlite';
+            if (file_exists($dbFile) && filesize($dbFile) === 0) {
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+                \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+            }
+        } catch (\Throwable $e) {
+            // Ignore fallback seeding exception
         }
-    } catch (\Throwable $e) {
-        \Illuminate\Support\Facades\Log::error("DB MIGRATION BOOTSTRAP EXCEPTION: " . $e->getMessage());
     }
 
     // 7. Handle Serverless HTTP Request and send response

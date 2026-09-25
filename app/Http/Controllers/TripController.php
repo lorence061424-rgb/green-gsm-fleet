@@ -357,39 +357,44 @@ class TripController extends Controller
      */
     public function team3PerformanceFeed(Request $request)
     {
-        $drivers = Driver::with(['user', 'trips' => function($q) {
-            $q->whereNotNull('rating');
+        $hasRatingCol = \Illuminate\Support\Facades\Schema::hasColumn('trips', 'rating');
+        $drivers = Driver::with(['user', 'trips' => function($q) use ($hasRatingCol) {
+            if ($hasRatingCol) {
+                $q->whereNotNull('rating');
+            }
         }])->get();
 
         $data = $drivers->map(function($driver) {
-            $trips = $driver->trips;
-            $avgRating = $trips->count() > 0 ? round($trips->avg('rating'), 1) : 5.0;
-            $lowRatingsCount = $trips->where('rating', '<=', 2.0)->count();
+            $trips = $driver->trips ?? collect();
+            $hasRatings = $trips->count() > 0 && isset($trips->first()->rating);
+            $avgRating = $hasRatings ? round($trips->avg('rating'), 1) : 5.0;
+            $lowRatingsCount = $hasRatings ? $trips->where('rating', '<=', 2.0)->count() : 0;
 
             $statusLabel = 'NORMAL / COMPLIANT';
-            if ($lowRatingsCount >= 3 || $driver->performance_score < 75.0) {
+            $perfScore = $driver->performance_score ?? 95.0;
+            if ($lowRatingsCount >= 3 || $perfScore < 75.0) {
                 $statusLabel = 'SUSPENDED - SAFETY & CONDUCT REVIEW REQUIRED';
-            } elseif ($lowRatingsCount >= 1 || $driver->performance_score < 85.0) {
+            } elseif ($lowRatingsCount >= 1 || $perfScore < 85.0) {
                 $statusLabel = 'WARNING - ELEVATED INFRACTION RISK';
             }
 
             return [
                 'driver_id' => $driver->id,
-                'name' => $driver->user->name ?? 'Driver #' . $driver->id,
-                'email' => $driver->user->email ?? 'driver@hirna.ph',
-                'license_number' => $driver->license_number,
-                'safety_score' => round($driver->performance_score, 1),
+                'name' => $driver->user?->name ?? 'Driver #' . $driver->id,
+                'email' => $driver->user?->email ?? 'driver@hirna.ph',
+                'license_number' => $driver->license_number ?? 'N/A',
+                'safety_score' => round($perfScore, 1),
                 'average_star_rating' => $avgRating,
                 'low_ratings_count' => $lowRatingsCount,
-                'total_trips' => $driver->total_trips,
-                'total_distance_km' => $driver->total_distance_km,
+                'total_trips' => $driver->total_trips ?? 0,
+                'total_distance_km' => $driver->total_distance_km ?? 0,
                 'hr_compliance_status' => $statusLabel,
                 'recent_feedback_logs' => $trips->take(5)->map(function($t) {
                     return [
                         'trip_id' => $t->id,
-                        'rating' => (float)$t->rating,
-                        'category' => $t->feedback_category,
-                        'customer_feedback' => $t->customer_feedback,
+                        'rating' => (float)($t->rating ?? 5.0),
+                        'category' => $t->feedback_category ?? 'compliment',
+                        'customer_feedback' => $t->customer_feedback ?? 'Satisfactory trip execution.',
                         'date' => $t->created_at ? $t->created_at->toDateTimeString() : null,
                     ];
                 }),
@@ -409,27 +414,32 @@ class TripController extends Controller
      */
     public function team5PayrollDeductionsFeed(Request $request)
     {
-        $drivers = Driver::with(['user', 'trips' => function($q) {
-            $q->whereNotNull('rating');
+        $hasRatingCol = \Illuminate\Support\Facades\Schema::hasColumn('trips', 'rating');
+        $drivers = Driver::with(['user', 'trips' => function($q) use ($hasRatingCol) {
+            if ($hasRatingCol) {
+                $q->whereNotNull('rating');
+            }
         }])->get();
 
         $data = $drivers->map(function($driver) {
-            $trips = $driver->trips;
-            $oneStarCount = $trips->where('rating', '<=', 1.0)->count();
-            $twoStarCount = $trips->where('rating', '>', 1.0)->where('rating', '<=', 2.0)->count();
+            $trips = $driver->trips ?? collect();
+            $hasRatings = $trips->count() > 0 && isset($trips->first()->rating);
+            $oneStarCount = $hasRatings ? $trips->where('rating', '<=', 1.0)->count() : 0;
+            $twoStarCount = $hasRatings ? $trips->where('rating', '>', 1.0)->where('rating', '<=', 2.0)->count() : 0;
 
             // Financial Penalty Calculation Matrix
             $oneStarPenalty = $oneStarCount * 300.00; // ₱300 per 1-star infraction
             $twoStarPenalty = $twoStarCount * 150.00; // ₱150 per 2-star complaint
-            $safetyReviewFee = ($driver->performance_score < 80.0) ? 500.00 : 0.00; // ₱500 safety review penalty fee
+            $perfScore = $driver->performance_score ?? 95.0;
+            $safetyReviewFee = ($perfScore < 80.0) ? 500.00 : 0.00; // ₱500 safety review penalty fee
 
             $totalDeductions = $oneStarPenalty + $twoStarPenalty + $safetyReviewFee;
 
             return [
                 'driver_id' => $driver->id,
-                'driver_name' => $driver->user->name ?? 'Driver #' . $driver->id,
-                'license_number' => $driver->license_number,
-                'safety_score' => round($driver->performance_score, 1),
+                'driver_name' => $driver->user?->name ?? 'Driver #' . $driver->id,
+                'license_number' => $driver->license_number ?? 'N/A',
+                'safety_score' => round($perfScore, 1),
                 'one_star_infractions' => $oneStarCount,
                 'two_star_complaints' => $twoStarCount,
                 'one_star_penalty_php' => $oneStarPenalty,

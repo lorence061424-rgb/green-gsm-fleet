@@ -212,7 +212,7 @@
                     <select name="driver_id" class="form-select rounded-3" required>
                         <option value="" disabled selected>-- Select Driver --</option>
                         @foreach($drivers as $driver)
-                            <option value="{{ $driver->id }}">{{ $driver->user->name ?? 'Driver #'.$driver->id }} (License: {{ $driver->license_number }})</option>
+                            <option value="{{ $driver->id }}">{{ $driver->user?->name ?? 'Driver #'.$driver->id }} (License: {{ $driver->license_number ?? 'N/A' }})</option>
                         @endforeach
                     </select>
                 </div>
@@ -246,7 +246,7 @@
                                     Distance: <strong>{{ $trip->distance_km }} km</strong> | Est. Fuel/Energy: <strong class="text-success">{{ $trip->estimated_fuel_liters }} {{ $fuelUnit }}</strong>
                                 </p>
                                 <p class="mb-0 text-muted" style="font-size: 12px;">
-                                    Vehicle: {{ $trip->vehicle ? $trip->vehicle->license_plate . ' (' . $trip->vehicle->make . ' ' . $trip->vehicle->model . ' - ' . ($tripIsEv ? '⚡ EV' : '⛽ Gas') . ')' : 'None' }} | Driver: {{ $trip->driver->user->name ?? 'None' }}
+                                    Vehicle: {{ $trip->vehicle ? $trip->vehicle->license_plate . ' (' . $trip->vehicle->make . ' ' . $trip->vehicle->model . ' - ' . ($tripIsEv ? '⚡ EV' : '⛽ Gas') . ')' : 'None' }} | Driver: {{ $trip->driver?->user?->name ?? 'None' }}
                                 </p>
                             </div>
 
@@ -420,11 +420,11 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="avatar bg-primary bg-opacity-10 text-primary fw-bold rounded-circle p-2 me-2" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
-                                            {{ strtoupper(substr($drv->user->name ?? 'D', 0, 1)) }}
+                                            {{ strtoupper(substr($drv->user?->name ?? 'D', 0, 1)) }}
                                         </div>
                                         <div>
-                                            <strong class="d-block text-dark small">{{ $drv->user->name ?? 'Driver #'.$drv->id }}</strong>
-                                            <small class="text-muted" style="font-size: 11px;">License: {{ $drv->license_number }}</small>
+                                            <strong class="d-block text-dark small">{{ $drv->user?->name ?? 'Driver #'.$drv->id }}</strong>
+                                            <small class="text-muted" style="font-size: 11px;">License: {{ $drv->license_number ?? 'N/A' }}</small>
                                         </div>
                                     </div>
                                 </td>
@@ -592,12 +592,12 @@
                                     <small class="d-block text-muted" style="font-size: 11px;">{{ $ctrip->updated_at ? $ctrip->updated_at->format('Y-m-d H:i') : now()->format('Y-m-d H:i') }}</small>
                                 </td>
                                 <td>
-                                    <strong class="d-block text-dark small">{{ $ctrip->driver->user->name ?? 'Driver #'.$ctrip->driver_id }}</strong>
-                                    <small class="text-muted" style="font-size: 11px;">License: {{ $ctrip->driver->license_number ?? 'N/A' }}</small>
+                                    <strong class="d-block text-dark small">{{ $ctrip->driver?->user?->name ?? 'Driver #'.$ctrip->driver_id }}</strong>
+                                    <small class="text-muted" style="font-size: 11px;">License: {{ $ctrip->driver?->license_number ?? 'N/A' }}</small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-dark text-white mb-1" style="font-size: 10px;">{{ $ctrip->vehicle->make ?? 'Hirna' }} {{ $ctrip->vehicle->model ?? 'EV' }}</span>
-                                    <small class="d-block text-muted" style="font-size: 11px;">Plate: {{ $ctrip->vehicle->license_plate ?? 'N/A' }}</small>
+                                    <span class="badge bg-dark text-white mb-1" style="font-size: 10px;">{{ $ctrip->vehicle?->make ?? 'Hirna' }} {{ $ctrip->vehicle?->model ?? 'EV' }}</span>
+                                    <small class="d-block text-muted" style="font-size: 11px;">Plate: {{ $ctrip->vehicle?->license_plate ?? 'N/A' }}</small>
                                 </td>
                                 <td>
                                     <div class="fw-bold small text-dark">
@@ -614,11 +614,11 @@
                                 </td>
                                 <td>
                                     <span class="badge bg-success text-white px-2 py-1 rounded-pill" style="font-size: 11px;">
-                                        <i class="bi bi-shield-check me-1"></i> {{ $ctrip->driver->safety_score ?? 96 }}% Eco-Score
+                                        <i class="bi bi-shield-check me-1"></i> {{ $ctrip->driver?->safety_score ?? $ctrip->driver?->performance_score ?? 96 }}% Eco-Score
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-outline-primary rounded-3 px-3" onclick="showCompletedTripModal('{{ $ctrip->booking_reference_id }}', '{{ $ctrip->driver->user->name ?? 'Driver' }}', '{{ $ctrip->vehicle->model ?? 'Hirna Vehicle' }}', '{{ $ctrip->vehicle->license_plate ?? 'N/A' }}', '{{ $ctrip->start_location }}', '{{ $ctrip->end_location }}', '{{ $ctrip->distance_km }} km', '{{ $ctrip->actual_duration_minutes ?? $ctrip->estimated_duration_minutes }} mins', '{{ $ctrip->actual_fuel_liters ?? $ctrip->estimated_fuel_liters }} kWh', '{{ $ctrip->driver->safety_score ?? 96 }}%');">
+                                    <button class="btn btn-sm btn-outline-primary rounded-3 px-3" onclick="showCompletedTripModal('{{ $ctrip->booking_reference_id }}', '{{ addslashes($ctrip->driver?->user?->name ?? 'Driver') }}', '{{ addslashes($ctrip->vehicle?->model ?? 'Hirna Vehicle') }}', '{{ addslashes($ctrip->vehicle?->license_plate ?? 'N/A') }}', '{{ addslashes($ctrip->start_location) }}', '{{ addslashes($ctrip->end_location) }}', '{{ $ctrip->distance_km }} km', '{{ $ctrip->actual_duration_minutes ?? $ctrip->estimated_duration_minutes }} mins', '{{ $ctrip->actual_fuel_liters ?? $ctrip->estimated_fuel_liters }} kWh', '{{ $ctrip->driver?->safety_score ?? $ctrip->driver?->performance_score ?? 96 }}%');">
                                         <i class="bi bi-receipt me-1"></i> Audit Receipt
                                     </button>
                                 </td>
@@ -756,7 +756,10 @@
                             </thead>
                             <tbody>
                                 @php
-                                    $feedbackTrips = \App\Models\Trip::with('driver.user')->whereNotNull('rating')->latest()->get();
+                                    $hasRatingCol = \Illuminate\Support\Facades\Schema::hasColumn('trips', 'rating');
+                                    $feedbackTrips = $hasRatingCol 
+                                        ? \App\Models\Trip::with('driver.user')->whereNotNull('rating')->latest()->get() 
+                                        : collect();
                                 @endphp
                                 @forelse($feedbackTrips as $ft)
                                     <tr>
@@ -765,32 +768,32 @@
                                             <small class="text-muted" style="font-size: 11px;">{{ $ft->created_at ? $ft->created_at->format('Y-m-d H:i') : now()->format('Y-m-d H:i') }}</small>
                                         </td>
                                         <td>
-                                            <strong class="d-block text-dark small">{{ $ft->driver->user->name ?? 'Hirna Driver' }}</strong>
-                                            <small class="text-muted" style="font-size: 11px;">License: {{ $ft->driver->license_number ?? 'N/A' }}</small>
+                                            <strong class="d-block text-dark small">{{ $ft->driver?->user?->name ?? 'Hirna Driver' }}</strong>
+                                            <small class="text-muted" style="font-size: 11px;">License: {{ $ft->driver?->license_number ?? 'N/A' }}</small>
                                         </td>
                                         <td>
-                                            @if($ft->rating >= 4.5)
-                                                <span class="badge bg-success text-white px-2 py-1 rounded-pill" style="font-size: 11px;">⭐ {{ number_format($ft->rating, 1) }} / 5.0</span>
-                                            @elseif($ft->rating >= 3.0)
-                                                <span class="badge bg-warning text-dark px-2 py-1 rounded-pill" style="font-size: 11px;">⭐ {{ number_format($ft->rating, 1) }} / 5.0</span>
+                                            @if(($ft->rating ?? 5) >= 4.5)
+                                                <span class="badge bg-success text-white px-2 py-1 rounded-pill" style="font-size: 11px;">⭐ {{ number_format($ft->rating ?? 5, 1) }} / 5.0</span>
+                                            @elseif(($ft->rating ?? 5) >= 3.0)
+                                                <span class="badge bg-warning text-dark px-2 py-1 rounded-pill" style="font-size: 11px;">⭐ {{ number_format($ft->rating ?? 5, 1) }} / 5.0</span>
                                             @else
-                                                <span class="badge bg-danger text-white px-2 py-1 rounded-pill" style="font-size: 11px;">⚠️ {{ number_format($ft->rating, 1) }} / 5.0</span>
+                                                <span class="badge bg-danger text-white px-2 py-1 rounded-pill" style="font-size: 11px;">⚠️ {{ number_format($ft->rating ?? 5, 1) }} / 5.0</span>
                                             @endif
                                         </td>
                                         <td>
                                             <span class="small text-dark fw-medium d-block" style="max-width: 380px;">{{ $ft->customer_feedback ?: 'Satisfactory trip execution.' }}</span>
                                         </td>
                                         <td>
-                                            <span class="badge rounded-pill {{ $ft->rating <= 2.0 ? 'bg-danger-subtle text-danger border border-danger' : 'bg-success-subtle text-success border border-success' }}" style="font-size: 10px;">
+                                            <span class="badge rounded-pill {{ ($ft->rating ?? 5) <= 2.0 ? 'bg-danger-subtle text-danger border border-danger' : 'bg-success-subtle text-success border border-success' }}" style="font-size: 10px;">
                                                 {{ ucfirst(str_replace('_', ' ', $ft->feedback_category ?: 'compliment')) }}
                                             </span>
                                         </td>
                                         <td>
-                                            @if($ft->rating <= 1.0)
+                                            @if(($ft->rating ?? 5) <= 1.0)
                                                 <span class="badge bg-danger text-white">-7.0% Score Deduction</span>
-                                            @elseif($ft->rating <= 2.0)
+                                            @elseif(($ft->rating ?? 5) <= 2.0)
                                                 <span class="badge bg-danger bg-opacity-75 text-white">-3.5% Score Deduction</span>
-                                            @elseif($ft->rating <= 3.0)
+                                            @elseif(($ft->rating ?? 5) <= 3.0)
                                                 <span class="badge bg-warning text-dark">-1.0% Score Deduction</span>
                                             @else
                                                 <span class="badge bg-success text-white">Satisfactory (0%)</span>
@@ -828,19 +831,21 @@
                                 @foreach($allDrivers as $d)
                                     @php
                                         $dTrips = $trips->where('driver_id', $d->id);
-                                        $lowCount = $dTrips->where('rating', '<=', 2.0)->count();
-                                        $isSuspended = $lowCount >= 3 || $d->performance_score < 75.0;
-                                        $isWarning = $lowCount >= 1 || $d->performance_score < 85.0;
+                                        $hasRatingsInTrips = $hasRatingCol && $dTrips->count() > 0 && isset($dTrips->first()->rating);
+                                        $lowCount = $hasRatingsInTrips ? $dTrips->where('rating', '<=', 2.0)->count() : 0;
+                                        $dPerf = $d->performance_score ?? 95.0;
+                                        $isSuspended = $lowCount >= 3 || $dPerf < 75.0;
+                                        $isWarning = $lowCount >= 1 || $dPerf < 85.0;
                                     @endphp
                                     <tr>
                                         <td>
-                                            <strong class="d-block text-dark small">{{ $d->user->name ?? 'Driver' }}</strong>
-                                            <small class="text-muted" style="font-size: 11px;">{{ $d->user->email ?? 'driver@hirna.ph' }}</small>
+                                            <strong class="d-block text-dark small">{{ $d->user?->name ?? 'Driver' }}</strong>
+                                            <small class="text-muted" style="font-size: 11px;">{{ $d->user?->email ?? 'driver@hirna.ph' }}</small>
                                         </td>
-                                        <td class="fw-bold">{{ $d->license_number }}</td>
+                                        <td class="fw-bold">{{ $d->license_number ?? 'N/A' }}</td>
                                         <td>
-                                            <span class="badge rounded-pill fs-6 {{ $d->performance_score >= 90 ? 'bg-success' : ($d->performance_score >= 80 ? 'bg-warning text-dark' : 'bg-danger') }}">
-                                                {{ round($d->performance_score, 1) }}%
+                                            <span class="badge rounded-pill fs-6 {{ $dPerf >= 90 ? 'bg-success' : ($dPerf >= 80 ? 'bg-warning text-dark' : 'bg-danger') }}">
+                                                {{ round($dPerf, 1) }}%
                                             </span>
                                         </td>
                                         <td>
@@ -865,11 +870,11 @@
                                         </td>
                                         <td>
                                             @if($isSuspended)
-                                                <button class="btn btn-sm btn-danger rounded-3 fw-bold" onclick="alert('⚠️ Team 3 Action Triggered:\nDriver {{ $d->user->name }} has been flagged for administrative safety re-training and 7-day dispatch suspension.');">
+                                                <button class="btn btn-sm btn-danger rounded-3 fw-bold" onclick="alert('⚠️ Team 3 Action Triggered:\nDriver {{ addslashes($d->user?->name ?? 'Driver') }} has been flagged for administrative safety re-training and 7-day dispatch suspension.');">
                                                     <i class="bi bi-slash-circle me-1"></i> Issue Suspension Notice
                                                 </button>
                                             @elseif($isWarning)
-                                                <button class="btn btn-sm btn-outline-warning text-dark rounded-3 fw-bold" onclick="alert('🟡 Team 3 Action Triggered:\nWritten counseling warning issued to Driver {{ $d->user->name }}.');">
+                                                <button class="btn btn-sm btn-outline-warning text-dark rounded-3 fw-bold" onclick="alert('🟡 Team 3 Action Triggered:\nWritten counseling warning issued to Driver {{ addslashes($d->user?->name ?? 'Driver') }}.');">
                                                     <i class="bi bi-envelope-exclamation me-1"></i> Issue Counseling Warning
                                                 </button>
                                             @else
@@ -904,18 +909,20 @@
                                 @foreach($allDrivers as $d)
                                     @php
                                         $dTrips = $trips->where('driver_id', $d->id);
-                                        $oneStar = $dTrips->where('rating', '<=', 1.0)->count();
-                                        $twoStar = $dTrips->where('rating', '>', 1.0)->where('rating', '<=', 2.0)->count();
+                                        $hasRatingsInTrips = $hasRatingCol && $dTrips->count() > 0 && isset($dTrips->first()->rating);
+                                        $oneStar = $hasRatingsInTrips ? $dTrips->where('rating', '<=', 1.0)->count() : 0;
+                                        $twoStar = $hasRatingsInTrips ? $dTrips->where('rating', '>', 1.0)->where('rating', '<=', 2.0)->count() : 0;
                                         $pOne = $oneStar * 300;
                                         $pTwo = $twoStar * 150;
-                                        $pFee = ($d->performance_score < 80.0) ? 500 : 0;
+                                        $dPerf = $d->performance_score ?? 95.0;
+                                        $pFee = ($dPerf < 80.0) ? 500 : 0;
                                         $pTotal = $pOne + $pTwo + $pFee;
                                     @endphp
                                     <tr>
                                         <td>
-                                            <strong class="d-block text-dark small">{{ $d->user->name ?? 'Driver' }}</strong>
+                                            <strong class="d-block text-dark small">{{ $d->user?->name ?? 'Driver' }}</strong>
                                         </td>
-                                        <td class="fw-bold">{{ $d->license_number }}</td>
+                                        <td class="fw-bold">{{ $d->license_number ?? 'N/A' }}</td>
                                         <td><span class="fw-bold text-danger">₱{{ number_format($pOne, 2) }}</span> <small class="text-muted">({{ $oneStar }}x)</small></td>
                                         <td><span class="fw-bold text-warning">₱{{ number_format($pTwo, 2) }}</span> <small class="text-muted">({{ $twoStar }}x)</small></td>
                                         <td><span class="fw-bold text-danger">₱{{ number_format($pFee, 2) }}</span></td>

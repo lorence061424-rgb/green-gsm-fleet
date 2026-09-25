@@ -82,6 +82,10 @@ Route::middleware(['role'])->group(function () {
     Route::post('/trips/complete-demo', [TripController::class, 'completeDemoTrip'])->middleware('role:admin,fleet_manager,dispatcher,operations,finance')->name('trips.complete-demo');
     Route::post('/trips/{trip}/simulate-gps', [TripController::class, 'simulateTelemetry'])->middleware('role:admin,fleet_manager,dispatcher,operations')->name('trips.simulate-gps');
 
+    // Inter-System Integration Feeds (Team 3 HR Performance & Team 5 Financial Payroll Deductions)
+    Route::get('/api/v1/team3/driver-performance-feed', [TripController::class, 'team3PerformanceFeed'])->name('api.team3.performance-feed');
+    Route::get('/api/v1/team5/driver-payroll-deductions', [TripController::class, 'team5PayrollDeductionsFeed'])->name('api.team5.deductions-feed');
+
     // Fuel Management & AI Predictions (Admin, Fleet Manager, Finance)
     Route::get('/fuel', [FuelController::class, 'index'])->middleware('role:admin,fleet_manager,finance')->name('fuel.index');
     Route::post('/fuel', [FuelController::class, 'store'])->middleware('role:admin,fleet_manager,finance')->name('fuel.store');

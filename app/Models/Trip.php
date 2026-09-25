@@ -27,6 +27,9 @@ class Trip extends Model
         'actual_fuel_liters',
         'start_time',
         'end_time',
+        'rating',
+        'customer_feedback',
+        'feedback_category',
     ];
 
     protected $casts = [

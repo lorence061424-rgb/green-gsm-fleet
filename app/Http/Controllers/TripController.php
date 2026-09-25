@@ -351,4 +351,99 @@ class TripController extends Controller
             'log' => $tripLog,
         ]);
     }
+
+    /**
+     * Inter-System Data Feed for Team 3 (HR & Driver Performance Management System)
+     */
+    public function team3PerformanceFeed(Request $request)
+    {
+        $drivers = Driver::with(['user', 'trips' => function($q) {
+            $q->whereNotNull('rating');
+        }])->get();
+
+        $data = $drivers->map(function($driver) {
+            $trips = $driver->trips;
+            $avgRating = $trips->count() > 0 ? round($trips->avg('rating'), 1) : 5.0;
+            $lowRatingsCount = $trips->where('rating', '<=', 2.0)->count();
+
+            $statusLabel = 'NORMAL / COMPLIANT';
+            if ($lowRatingsCount >= 3 || $driver->performance_score < 75.0) {
+                $statusLabel = 'SUSPENDED - SAFETY & CONDUCT REVIEW REQUIRED';
+            } elseif ($lowRatingsCount >= 1 || $driver->performance_score < 85.0) {
+                $statusLabel = 'WARNING - ELEVATED INFRACTION RISK';
+            }
+
+            return [
+                'driver_id' => $driver->id,
+                'name' => $driver->user->name ?? 'Driver #' . $driver->id,
+                'email' => $driver->user->email ?? 'driver@hirna.ph',
+                'license_number' => $driver->license_number,
+                'safety_score' => round($driver->performance_score, 1),
+                'average_star_rating' => $avgRating,
+                'low_ratings_count' => $lowRatingsCount,
+                'total_trips' => $driver->total_trips,
+                'total_distance_km' => $driver->total_distance_km,
+                'hr_compliance_status' => $statusLabel,
+                'recent_feedback_logs' => $trips->take(5)->map(function($t) {
+                    return [
+                        'trip_id' => $t->id,
+                        'rating' => (float)$t->rating,
+                        'category' => $t->feedback_category,
+                        'customer_feedback' => $t->customer_feedback,
+                        'date' => $t->created_at ? $t->created_at->toDateTimeString() : null,
+                    ];
+                }),
+            ];
+        });
+
+        return response()->json([
+            'source_system' => 'Team 7: Hirna Fleet & Telemetry System (FVM/VRDS)',
+            'target_system' => 'Team 3: Driver Performance & HR Management System',
+            'timestamp' => now()->toDateTimeString(),
+            'driver_performance_records' => $data,
+        ]);
+    }
+
+    /**
+     * Inter-System Data Feed for Team 5 (Financial Payroll & Penalty Deductions)
+     */
+    public function team5PayrollDeductionsFeed(Request $request)
+    {
+        $drivers = Driver::with(['user', 'trips' => function($q) {
+            $q->whereNotNull('rating');
+        }])->get();
+
+        $data = $drivers->map(function($driver) {
+            $trips = $driver->trips;
+            $oneStarCount = $trips->where('rating', '<=', 1.0)->count();
+            $twoStarCount = $trips->where('rating', '>', 1.0)->where('rating', '<=', 2.0)->count();
+
+            // Financial Penalty Calculation Matrix
+            $oneStarPenalty = $oneStarCount * 300.00; // ₱300 per 1-star infraction
+            $twoStarPenalty = $twoStarCount * 150.00; // ₱150 per 2-star complaint
+            $safetyReviewFee = ($driver->performance_score < 80.0) ? 500.00 : 0.00; // ₱500 safety review penalty fee
+
+            $totalDeductions = $oneStarPenalty + $twoStarPenalty + $safetyReviewFee;
+
+            return [
+                'driver_id' => $driver->id,
+                'driver_name' => $driver->user->name ?? 'Driver #' . $driver->id,
+                'license_number' => $driver->license_number,
+                'safety_score' => round($driver->performance_score, 1),
+                'one_star_infractions' => $oneStarCount,
+                'two_star_complaints' => $twoStarCount,
+                'one_star_penalty_php' => $oneStarPenalty,
+                'two_star_penalty_php' => $twoStarPenalty,
+                'safety_score_review_penalty_php' => $safetyReviewFee,
+                'total_payroll_deduction_php' => $totalDeductions,
+            ];
+        });
+
+        return response()->json([
+            'source_system' => 'Team 7: Hirna Fleet & Telemetry System (FVM/VRDS)',
+            'target_system' => 'Team 5: Financial Systems & Payroll Deductions Module',
+            'timestamp' => now()->toDateTimeString(),
+            'payroll_deduction_summary' => $data,
+        ]);
+    }
 }

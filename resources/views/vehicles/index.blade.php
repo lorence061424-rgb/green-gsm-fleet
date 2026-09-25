@@ -288,13 +288,6 @@
                                         <a href="{{ route('maintenance.index') }}" class="btn btn-sm btn-outline-primary rounded-2 px-2 py-1" style="font-size: 11px;">
                                             <i class="bi bi-pencil-square me-1"></i> Edit
                                         </a>
-                                        <form action="{{ route('maintenance.destroy', $pms) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this maintenance record?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-2 px-2 py-1" style="font-size: 11px;">
-                                                <i class="bi bi-trash-fill me-1"></i> Delete
-                                            </button>
-                                        </form>
                                     </div>
                                 </td>
                             </tr>

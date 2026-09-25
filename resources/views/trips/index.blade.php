@@ -683,6 +683,258 @@
     </div>
 </div>
 
+<!-- SECTION 4: Team 10 Customer Ride-Hailing Feedback & Multi-Team Integration Center -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card premium-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark">
+                        <i class="bi bi-star-fill text-warning me-2"></i> Team 10 Customer Ride-Hailing Ratings & Multi-Team Integration Pipeline
+                    </h5>
+                    <p class="small text-muted mb-0">Real-time passenger 1-5 star feedback from Team 10. Automated safety score deductions feed directly to <strong>Team 3 (HR & Performance)</strong> and <strong>Team 5 (Financial Payroll Deductions)</strong>.</p>
+                </div>
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <a href="{{ route('api.team3.performance-feed') }}" target="_blank" class="btn btn-sm btn-outline-primary fw-bold rounded-3 shadow-sm">
+                        <i class="bi bi-person-workspace me-1"></i> Team 3 HR API Feed JSON
+                    </a>
+                    <a href="{{ route('api.team5.deductions-feed') }}" target="_blank" class="btn btn-sm btn-outline-danger fw-bold rounded-3 shadow-sm">
+                        <i class="bi bi-currency-dollar me-1"></i> Team 5 Financial Deductions API Feed JSON
+                    </a>
+                </div>
+            </div>
+
+            <!-- Inter-System Pipeline Alert Banner -->
+            <div class="alert alert-warning bg-warning bg-opacity-10 border-warning border-opacity-25 rounded-4 p-3 mb-4">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-shield-exclamation text-warning fs-3 me-3"></i>
+                        <div>
+                            <strong class="text-dark d-block small text-uppercase">AUTOMATED DRIVER INFRACTION & PAYROLL DEDUCTION RULES</strong>
+                            <span class="text-dark small" style="font-size: 11px;">
+                                1-Star Rating = <strong>-7.0% Safety Score</strong> & <strong>₱300 Payroll Penalty</strong> &bull; 
+                                3+ Low Ratings (&le; 2.0 Stars) = <strong>-10.0% Extra Infraction Penalty</strong> & <strong>Team 3 HR Suspension Alert</strong> &bull; 
+                                Safety Score &lt; 80% = <strong>₱500 Safety Review Penalty Fee (Team 5 Payroll)</strong>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="nav nav-tabs border-bottom mb-3" id="feedbackTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active fw-bold text-dark border-0 border-bottom border-warning" id="passenger-ratings-tab" data-bs-toggle="tab" data-bs-target="#passenger-ratings-pane" type="button" role="tab">
+                        <i class="bi bi-chat-left-quote me-1"></i> Passenger Ratings & Reviews (Team 10 Feed)
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold text-muted border-0" id="team3-hr-tab" data-bs-toggle="tab" data-bs-target="#team3-hr-pane" type="button" role="tab">
+                        <i class="bi bi-person-badge me-1"></i> Team 3: HR Performance & Suspension Alerts
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold text-muted border-0" id="team5-payroll-tab" data-bs-toggle="tab" data-bs-target="#team5-payroll-pane" type="button" role="tab">
+                        <i class="bi bi-calculator me-1"></i> Team 5: Financial Payroll Penalty Deductions
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="feedbackTabsContent">
+                <!-- Tab 1: Passenger Ratings & Reviews -->
+                <div class="tab-pane fade show active" id="passenger-ratings-pane" role="tabpanel">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr class="small text-muted text-uppercase">
+                                    <th>TRIP & BOOKING REF</th>
+                                    <th>DRIVER & LICENSE</th>
+                                    <th>PASSENGER RATING</th>
+                                    <th>CUSTOMER FEEDBACK REVIEW</th>
+                                    <th>CATEGORY</th>
+                                    <th>SCORE IMPACT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $feedbackTrips = \App\Models\Trip::with('driver.user')->whereNotNull('rating')->latest()->get();
+                                @endphp
+                                @forelse($feedbackTrips as $ft)
+                                    <tr>
+                                        <td>
+                                            <strong class="d-block text-dark small">{{ $ft->booking_reference_id ?: '#TRP-' . $ft->id }}</strong>
+                                            <small class="text-muted" style="font-size: 11px;">{{ $ft->created_at ? $ft->created_at->format('Y-m-d H:i') : now()->format('Y-m-d H:i') }}</small>
+                                        </td>
+                                        <td>
+                                            <strong class="d-block text-dark small">{{ $ft->driver->user->name ?? 'Hirna Driver' }}</strong>
+                                            <small class="text-muted" style="font-size: 11px;">License: {{ $ft->driver->license_number ?? 'N/A' }}</small>
+                                        </td>
+                                        <td>
+                                            @if($ft->rating >= 4.5)
+                                                <span class="badge bg-success text-white px-2 py-1 rounded-pill" style="font-size: 11px;">⭐ {{ number_format($ft->rating, 1) }} / 5.0</span>
+                                            @elseif($ft->rating >= 3.0)
+                                                <span class="badge bg-warning text-dark px-2 py-1 rounded-pill" style="font-size: 11px;">⭐ {{ number_format($ft->rating, 1) }} / 5.0</span>
+                                            @else
+                                                <span class="badge bg-danger text-white px-2 py-1 rounded-pill" style="font-size: 11px;">⚠️ {{ number_format($ft->rating, 1) }} / 5.0</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <span class="small text-dark fw-medium d-block" style="max-width: 380px;">{{ $ft->customer_feedback ?: 'Satisfactory trip execution.' }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge rounded-pill {{ $ft->rating <= 2.0 ? 'bg-danger-subtle text-danger border border-danger' : 'bg-success-subtle text-success border border-success' }}" style="font-size: 10px;">
+                                                {{ ucfirst(str_replace('_', ' ', $ft->feedback_category ?: 'compliment')) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if($ft->rating <= 1.0)
+                                                <span class="badge bg-danger text-white">-7.0% Score Deduction</span>
+                                            @elseif($ft->rating <= 2.0)
+                                                <span class="badge bg-danger bg-opacity-75 text-white">-3.5% Score Deduction</span>
+                                            @elseif($ft->rating <= 3.0)
+                                                <span class="badge bg-warning text-dark">-1.0% Score Deduction</span>
+                                            @else
+                                                <span class="badge bg-success text-white">Satisfactory (0%)</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">No passenger ride-hailing ratings recorded yet.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Team 3 HR Performance & Suspension Alerts -->
+                <div class="tab-pane fade" id="team3-hr-pane" role="tabpanel">
+                    <div class="alert alert-info border-0 rounded-3 small mb-3">
+                        <i class="bi bi-info-circle-fill me-1"></i> Data in this view is automatically exported to <strong>Team 3 (TNVS Operations & Driver Management System)</strong> for performance evaluations, warnings, and safety suspensions.
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr class="small text-muted text-uppercase">
+                                    <th>DRIVER NAME</th>
+                                    <th>LICENSE NUMBER</th>
+                                    <th>SAFETY SCORE</th>
+                                    <th>LOW RATING INFRACTIONS (&le; 2.0★)</th>
+                                    <th>HR COMPLIANCE STATUS</th>
+                                    <th>REQUIRED ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($allDrivers as $d)
+                                    @php
+                                        $dTrips = $trips->where('driver_id', $d->id);
+                                        $lowCount = $dTrips->where('rating', '<=', 2.0)->count();
+                                        $isSuspended = $lowCount >= 3 || $d->performance_score < 75.0;
+                                        $isWarning = $lowCount >= 1 || $d->performance_score < 85.0;
+                                    @endphp
+                                    <tr>
+                                        <td>
+                                            <strong class="d-block text-dark small">{{ $d->user->name ?? 'Driver' }}</strong>
+                                            <small class="text-muted" style="font-size: 11px;">{{ $d->user->email ?? 'driver@hirna.ph' }}</small>
+                                        </td>
+                                        <td class="fw-bold">{{ $d->license_number }}</td>
+                                        <td>
+                                            <span class="badge rounded-pill fs-6 {{ $d->performance_score >= 90 ? 'bg-success' : ($d->performance_score >= 80 ? 'bg-warning text-dark' : 'bg-danger') }}">
+                                                {{ round($d->performance_score, 1) }}%
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold {{ $lowCount > 0 ? 'text-danger' : 'text-success' }}">
+                                                {{ $lowCount }} Infraction(s)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if($isSuspended)
+                                                <span class="badge bg-danger text-white px-3 py-2 rounded-pill fw-bold">
+                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> SUSPENDED - SAFETY & CONDUCT REVIEW
+                                                </span>
+                                            @elseif($isWarning)
+                                                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">
+                                                    <i class="bi bi-exclamation-circle-fill me-1"></i> WARNING - ELEVATED INFRACTION RISK
+                                                </span>
+                                            @else
+                                                <span class="badge bg-success text-white px-3 py-2 rounded-pill fw-bold">
+                                                    <i class="bi bi-check-circle-fill me-1"></i> NORMAL / COMPLIANT
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($isSuspended)
+                                                <button class="btn btn-sm btn-danger rounded-3 fw-bold" onclick="alert('⚠️ Team 3 Action Triggered:\nDriver {{ $d->user->name }} has been flagged for administrative safety re-training and 7-day dispatch suspension.');">
+                                                    <i class="bi bi-slash-circle me-1"></i> Issue Suspension Notice
+                                                </button>
+                                            @elseif($isWarning)
+                                                <button class="btn btn-sm btn-outline-warning text-dark rounded-3 fw-bold" onclick="alert('🟡 Team 3 Action Triggered:\nWritten counseling warning issued to Driver {{ $d->user->name }}.');">
+                                                    <i class="bi bi-envelope-exclamation me-1"></i> Issue Counseling Warning
+                                                </button>
+                                            @else
+                                                <span class="badge bg-light text-muted">No Action Required</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Team 5 Financial Payroll Penalty Deductions -->
+                <div class="tab-pane fade" id="team5-payroll-pane" role="tabpanel">
+                    <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-25 text-dark rounded-3 small mb-3">
+                        <i class="bi bi-cash-coin text-danger me-1"></i> Financial penalty deductions calculated by Team 7 rules are exported directly to <strong>Team 5 (Financial Systems & Payroll Module)</strong> for automatic monthly payroll deductions.
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr class="small text-muted text-uppercase">
+                                    <th>DRIVER NAME</th>
+                                    <th>LICENSE NUMBER</th>
+                                    <th>1-STAR PENALTY (&amp;#8369;300/EA)</th>
+                                    <th>2-STAR PENALTY (&amp;#8369;150/EA)</th>
+                                    <th>SAFETY REVIEW FEE (&amp;#8369;500)</th>
+                                    <th>TOTAL PAYROLL DEDUCTION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($allDrivers as $d)
+                                    @php
+                                        $dTrips = $trips->where('driver_id', $d->id);
+                                        $oneStar = $dTrips->where('rating', '<=', 1.0)->count();
+                                        $twoStar = $dTrips->where('rating', '>', 1.0)->where('rating', '<=', 2.0)->count();
+                                        $pOne = $oneStar * 300;
+                                        $pTwo = $twoStar * 150;
+                                        $pFee = ($d->performance_score < 80.0) ? 500 : 0;
+                                        $pTotal = $pOne + $pTwo + $pFee;
+                                    @endphp
+                                    <tr>
+                                        <td>
+                                            <strong class="d-block text-dark small">{{ $d->user->name ?? 'Driver' }}</strong>
+                                        </td>
+                                        <td class="fw-bold">{{ $d->license_number }}</td>
+                                        <td><span class="fw-bold text-danger">₱{{ number_format($pOne, 2) }}</span> <small class="text-muted">({{ $oneStar }}x)</small></td>
+                                        <td><span class="fw-bold text-warning">₱{{ number_format($pTwo, 2) }}</span> <small class="text-muted">({{ $twoStar }}x)</small></td>
+                                        <td><span class="fw-bold text-danger">₱{{ number_format($pFee, 2) }}</span></td>
+                                        <td>
+                                            <span class="badge bg-danger fs-6 px-3 py-1 rounded-pill">
+                                                ₱{{ number_format($pTotal, 2) }} Deducted
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Completed Trip Audit Receipt Modal -->
 <div class="modal fade" id="completedTripReceiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

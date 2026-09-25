@@ -23,6 +23,9 @@
         <button class="btn btn-danger rounded-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#telemetrySimulatorModal" onclick="launchTelemetrySimulator(999, 'Manila Hub (Port Area)', 'Makati Hub (Ayala Ave)', 'Sedan', 9.5, 3.8);" style="background: #CE2029 !important;">
             <i class="bi bi-radar me-1"></i> Live Telemetry Simulator
         </button>
+        <button class="btn btn-outline-info rounded-3 fw-bold shadow-sm" type="button" onclick="refreshTripGpsMap();" title="Instantly Re-render & Refresh Live GPS Map">
+            <i class="bi bi-arrow-clockwise me-1"></i> Refresh Map
+        </button>
     </div>
 </div>
 
@@ -292,6 +295,9 @@
                     <p class="small text-muted mb-0">Live Metro Manila GPS telemetry broadcast, speed tracking, and automated driver safety incident simulator.</p>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-sm btn-outline-info rounded-3 fw-bold" onclick="refreshTripGpsMap();">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Refresh Map
+                    </button>
                     <button class="btn btn-sm btn-outline-danger rounded-3" id="btnTriggerAggressiveMain" onclick="triggerAggressiveAction();">
                         <i class="bi bi-lightning-charge-fill me-1"></i> Trigger Speeding Alert
                     </button>
@@ -309,9 +315,14 @@
                 <div class="col-lg-7">
                     <div class="card border-0 rounded-4 overflow-hidden shadow-sm" style="height: 320px; position: relative;">
                         <div id="liveGpsMapMain" style="width: 100%; height: 320px; min-height: 320px; z-index: 1;"></div>
-                        <div class="position-absolute top-0 end-0 m-2 bg-dark bg-opacity-80 text-white px-3 py-1 rounded-pill small shadow-sm" style="z-index: 10; font-size: 11px; backdrop-filter: blur(4px);">
-                            <span class="spinner-grow spinner-grow-sm text-success me-1" role="status"></span>
-                            <span class="fw-bold text-success">LIVE METRO MANILA GPS</span>
+                        <div class="position-absolute top-0 end-0 m-2 d-flex gap-2 align-items-center" style="z-index: 10;">
+                            <button class="btn btn-xs text-white border-0 rounded-pill px-2.5 py-1 small shadow-sm" onclick="refreshTripGpsMap();" title="Force Re-render Leaflet Map" style="background: rgba(15, 23, 42, 0.85); font-size: 11px; backdrop-filter: blur(4px);">
+                                <i class="bi bi-arrow-clockwise text-info me-1"></i> Refresh Map
+                            </button>
+                            <div class="bg-dark bg-opacity-80 text-white px-3 py-1 rounded-pill small shadow-sm" style="font-size: 11px; backdrop-filter: blur(4px);">
+                                <span class="spinner-grow spinner-grow-sm text-success me-1" role="status"></span>
+                                <span class="fw-bold text-success">LIVE METRO MANILA GPS</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1895,6 +1906,17 @@
     function changeCompletedTripsPage(delta) {
         currentCompletedPage += delta;
         renderCompletedTripsTable();
+    }
+
+    // Manual trigger function to force Leaflet map re-render and tile refresh
+    function refreshTripGpsMap() {
+        triggerTripMapInit();
+        if (window.leafletMap) {
+            try {
+                window.leafletMap.invalidateSize();
+                window.dispatchEvent(new Event('resize'));
+            } catch(e) {}
+        }
     }
 
     // Initialize pagination & map on load and PJAX module navigation

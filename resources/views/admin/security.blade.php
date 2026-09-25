@@ -11,9 +11,6 @@
         <p class="page-header-subtitle">Monitor brute-force rate-limiting, unlock locked users, create system accounts, and inspect security audit logs.</p>
     </div>
     <div class="col-auto d-flex gap-2 flex-wrap">
-        <button class="btn btn-success rounded-3 fw-bold" data-bs-toggle="modal" data-bs-target="#createUserModal">
-            <i class="bi bi-person-plus-fill me-1"></i> Create New User
-        </button>
         <button class="btn btn-danger rounded-3 fw-bold" data-bs-toggle="modal" data-bs-target="#quickUnlockModal" style="background: #CE2029 !important;">
             <i class="bi bi-unlock-fill me-1"></i> Unlock Account / IP
         </button>

@@ -323,3 +323,4 @@ initTcaoModule();
 document.addEventListener('DOMContentLoaded', initTcaoModule);
 window.addEventListener('pjax:loaded', initTcaoModule);
 </script>
+@endsection

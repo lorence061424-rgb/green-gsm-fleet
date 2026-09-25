@@ -180,16 +180,16 @@
                             </div>
                             <span class="badge bg-dark" style="font-size: 10px;">{{ ucfirst($usr->role ?? 'User') }}</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-1">
                             @if($usr->is_locked)
                                 <span class="badge bg-danger text-white rounded-pill px-2 py-1" style="font-size: 10px;">
-                                    <i class="bi bi-lock-fill me-1"></i> LOCKED OUT (3/3)
+                                    <i class="bi bi-lock-fill me-1"></i> LOCKED OUT
                                 </span>
                                 <form action="{{ route('admin.security.unlock') }}" method="POST" class="d-inline">
                                     @csrf
                                     <input type="hidden" name="email" value="{{ $usr->email }}">
-                                    <button type="submit" class="btn btn-sm btn-danger fw-bold rounded-3 px-3 py-1" style="font-size: 11px; background: #CE2029 !important;">
-                                        🔓 Unlock User
+                                    <button type="submit" class="btn btn-xs btn-danger fw-bold rounded-2 px-2 py-1" style="font-size: 10.5px; background: #CE2029 !important;">
+                                        🔓 Unlock
                                     </button>
                                 </form>
                             @elseif(($usr->attempts_count ?? 0) > 0)
@@ -204,10 +204,42 @@
                                     </button>
                                 </form>
                             @else
-                                <span class="badge bg-success-subtle text-success border border-success border-opacity-25 rounded-pill px-2 py-1" style="font-size: 10px;">
-                                    <i class="bi bi-shield-check me-1"></i> Active / Clean
-                                </span>
-                                <span class="text-muted small" style="font-size: 10px;">No Lockout</span>
+                                @if(isset($usr->status) && ($usr->status === 'inactive' || $usr->status === 'deactivated'))
+                                    <span class="badge bg-secondary text-white rounded-pill px-2 py-1" style="font-size: 10px;">
+                                        <i class="bi bi-slash-circle me-1"></i> Deactivated
+                                    </span>
+                                @else
+                                    <span class="badge bg-success-subtle text-success border border-success border-opacity-25 rounded-pill px-2 py-1" style="font-size: 10px;">
+                                        <i class="bi bi-shield-check me-1"></i> Active
+                                    </span>
+                                @endif
+                            @endif
+
+                            @if(isset($usr->id) && is_numeric($usr->id))
+                                <div class="d-flex gap-1 ms-auto">
+                                    <!-- Toggle Active / Deactivate -->
+                                    <form action="{{ route('admin.security.users.toggle-status', $usr->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @if(isset($usr->status) && ($usr->status === 'inactive' || $usr->status === 'deactivated'))
+                                            <button type="submit" class="btn btn-xs btn-outline-success fw-bold rounded-2 px-2 py-1" style="font-size: 10px;" title="Activate User Account">
+                                                🟢 Activate
+                                            </button>
+                                        @else
+                                            <button type="submit" class="btn btn-xs btn-outline-warning text-dark fw-bold rounded-2 px-2 py-1" style="font-size: 10px;" title="Deactivate User Account">
+                                                ⛔ Deactivate
+                                            </button>
+                                        @endif
+                                    </form>
+                                    
+                                    <!-- Delete Account -->
+                                    <form action="{{ route('admin.security.users.destroy', $usr->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to permanently delete the user account {{ addslashes($usr->email) }}?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-xs btn-outline-danger fw-bold rounded-2 px-2 py-1" style="font-size: 10px;" title="Delete User Account">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             @endif
                         </div>
                     </div>

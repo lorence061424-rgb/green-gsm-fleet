@@ -1882,13 +1882,27 @@
         renderCompletedTripsTable();
     }
 
-    // Initialize pagination on load and PJAX module navigation
-    document.addEventListener('DOMContentLoaded', function() {
+    // Initialize pagination & map on load and PJAX module navigation
+    function triggerTripMapInit() {
         renderCompletedTripsTable();
+        if (typeof initLeafletGpsMap === 'function') {
+            try {
+                initLeafletGpsMap('Manila Hub (Port Area)', 'Makati Hub (Ayala Ave)');
+                if (window.leafletMap) {
+                    window.leafletMap.invalidateSize();
+                    window.dispatchEvent(new Event('resize'));
+                }
+            } catch(e) {}
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        triggerTripMapInit();
     });
     window.addEventListener('pjax:loaded', function() {
-        renderCompletedTripsTable();
+        triggerTripMapInit();
     });
-    setTimeout(renderCompletedTripsTable, 100);
+    setTimeout(triggerTripMapInit, 100);
+    setTimeout(triggerTripMapInit, 400);
 </script>
 @endsection

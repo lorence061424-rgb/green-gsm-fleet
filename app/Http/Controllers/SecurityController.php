@@ -218,6 +218,71 @@ class SecurityController extends Controller
     }
 
     /**
+     * Toggle user account status between Active and Deactivated.
+     */
+    public function toggleUserStatus(Request $request, $id)
+    {
+        $usr = User::find($id);
+        if (!$usr) {
+            return redirect()->back()->with('error', 'User account not found in database.');
+        }
+
+        $currentEmail = session('user_email', 'admin@hirna.ph');
+        if (Str::lower($usr->email) === Str::lower($currentEmail)) {
+            return redirect()->back()->with('error', 'Security Policy: You cannot deactivate your own active superadmin session.');
+        }
+
+        $newStatus = ($usr->status === 'inactive' || $usr->status === 'deactivated') ? 'active' : 'deactivated';
+        $usr->status = $newStatus;
+        $usr->save();
+
+        SecurityLog::create([
+            'event_type' => 'admin_toggle_status',
+            'email' => $usr->email,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'details' => "Superadmin (" . session('user_email', 'admin@hirna.ph') . ") changed account status for {$usr->name} to '{$newStatus}'",
+        ]);
+
+        Log::info("SECURITY AUDIT: Superadmin updated account status for {$usr->email} to {$newStatus}");
+
+        $statusBadge = $newStatus === 'active' ? 'Activated 🟢' : 'Deactivated ⛔';
+        return redirect()->back()->with('success', "User account '{$usr->name}' ({$usr->email}) status updated to {$statusBadge}.");
+    }
+
+    /**
+     * Permanently delete a user account from Superadmin Security Center.
+     */
+    public function deleteUser(Request $request, $id)
+    {
+        $usr = User::find($id);
+        if (!$usr) {
+            return redirect()->back()->with('error', 'User account not found in database.');
+        }
+
+        $currentEmail = session('user_email', 'admin@hirna.ph');
+        if (Str::lower($usr->email) === Str::lower($currentEmail)) {
+            return redirect()->back()->with('error', 'Security Policy Protection: You cannot delete your own active superadmin account.');
+        }
+
+        $deletedEmail = $usr->email;
+        $deletedName = $usr->name;
+        $usr->delete();
+
+        SecurityLog::create([
+            'event_type' => 'admin_delete_user',
+            'email' => $deletedEmail,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'details' => "Superadmin (" . session('user_email', 'admin@hirna.ph') . ") permanently deleted user account: {$deletedName} ({$deletedEmail})",
+        ]);
+
+        Log::info("SECURITY AUDIT: Superadmin deleted user account {$deletedEmail}");
+
+        return redirect()->back()->with('success', "🗑️ User account '{$deletedName}' ({$deletedEmail}) deleted successfully.");
+    }
+
+    /**
      * Clear old security logs.
      */
     public function clearLogs()

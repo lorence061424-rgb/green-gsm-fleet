@@ -1128,6 +1128,8 @@
 
     // Simulated path arrays
     let simulatedPath = [];
+    let plannedRoutePolyline = null;
+    let plannedRoutePolylineModal = null;
     let currentStepIndex = 0;
     let activeSimulationInterval = null;
     let safetyScoreTracker = 100;
@@ -1220,6 +1222,9 @@
             // Progressive Polyline Trail
             polylineTrail = L.polyline([startLatLng], { color: '#10B981', weight: 4, opacity: 0.9 }).addTo(leafletMap);
 
+            // Planned Street Route Line
+            drawFullPlannedRouteLines();
+
             // Custom Leaflet EV Icon
             const carIcon = L.divIcon({
                 className: 'custom-ev-marker',
@@ -1290,6 +1295,9 @@
 
             // Polyline Trail (Progressive breadcrumbs)
             polylineTrailModal = L.polyline([startLatLng], { color: '#10B981', weight: 5, opacity: 0.95 }).addTo(leafletMapModal);
+
+            // Planned Street Route Line
+            drawFullPlannedRouteLines();
 
             // Custom Leaflet EV Icon with Pulsing Radar Effect
             const carIcon = L.divIcon({
@@ -1413,7 +1421,44 @@
         initModalMap(simStart, simEnd);
     }
 
-    function generateSimulatedPathCoordinates(startName, endName) {
+    function drawFullPlannedRouteLines() {
+        if (!simulatedPath || simulatedPath.length === 0) return;
+        const latLngs = simulatedPath.map(pt => [pt.lat, pt.lng]);
+
+        if (leafletMap) {
+            if (plannedRoutePolyline) {
+                try { leafletMap.removeLayer(plannedRoutePolyline); } catch(e) {}
+            }
+            plannedRoutePolyline = L.polyline(latLngs, {
+                color: '#0284C7',
+                weight: 5,
+                opacity: 0.85,
+                dashArray: '7, 9',
+                lineCap: 'round',
+                lineJoin: 'round'
+            }).addTo(leafletMap);
+
+            try { leafletMap.fitBounds(latLngs, { padding: [35, 35] }); } catch(e) {}
+        }
+
+        if (leafletMapModal) {
+            if (plannedRoutePolylineModal) {
+                try { leafletMapModal.removeLayer(plannedRoutePolylineModal); } catch(e) {}
+            }
+            plannedRoutePolylineModal = L.polyline(latLngs, {
+                color: '#0284C7',
+                weight: 5,
+                opacity: 0.85,
+                dashArray: '7, 9',
+                lineCap: 'round',
+                lineJoin: 'round'
+            }).addTo(leafletMapModal);
+
+            try { leafletMapModal.fitBounds(latLngs, { padding: [30, 30] }); } catch(e) {}
+        }
+    }
+
+    function generateSimulatedPathCoordinates(startName, endName, onComplete) {
         simulatedPath = [];
         let startLatLng = getLatLng(startName, [14.5995, 120.9842]);
         let endLatLng = getLatLng(endName, [14.5547, 121.0244]);
@@ -1422,26 +1467,101 @@
         if (Math.abs(startLatLng[0] - endLatLng[0]) < 0.004 && Math.abs(startLatLng[1] - endLatLng[1]) < 0.004) {
             endLatLng = [startLatLng[0] - 0.042, startLatLng[1] + 0.038];
         }
-        
-        const steps = 28; // 28 realistic road progression steps
 
-        // Midpoint curve for natural road trajectory (Bezier curve)
-        const midLat = (startLatLng[0] + endLatLng[0]) / 2 + (startLatLng[1] - endLatLng[1]) * 0.12;
-        const midLng = (startLatLng[1] + endLatLng[1]) / 2 + (endLatLng[0] - startLatLng[0]) * 0.12;
+        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${startLatLng[1]},${startLatLng[0]};${endLatLng[1]},${endLatLng[0]}?overview=full&geometries=geojson`;
 
-        for (let i = 0; i <= steps; i++) {
-            let t = i / steps;
-            let lat = (1 - t) * (1 - t) * startLatLng[0] + 2 * (1 - t) * t * midLat + t * t * endLatLng[0];
-            let lng = (1 - t) * (1 - t) * startLatLng[1] + 2 * (1 - t) * t * midLng + t * t * endLatLng[1];
+        fetch(osrmUrl)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.routes && data.routes[0] && data.routes[0].geometry && data.routes[0].geometry.coordinates) {
+                    const rawCoords = data.routes[0].geometry.coordinates.map(pt => ({ lat: pt[1], lng: pt[0] }));
+                    simulatedPath = interpolateStreetPath(rawCoords, 36);
+                } else {
+                    simulatedPath = generateRealisticCityRoadPath(startLatLng, endLatLng, 36);
+                }
+                drawFullPlannedRouteLines();
+                if (typeof onComplete === 'function') onComplete(simulatedPath);
+            })
+            .catch(() => {
+                simulatedPath = generateRealisticCityRoadPath(startLatLng, endLatLng, 36);
+                drawFullPlannedRouteLines();
+                if (typeof onComplete === 'function') onComplete(simulatedPath);
+            });
+    }
 
-            // Micro-jitter for real GPS noise (except at exact start and end)
-            if (i > 0 && i < steps) {
-                lat += (Math.sin(i * 1.8) * 0.00025);
-                lng += (Math.cos(i * 1.8) * 0.00025);
-            }
+    function interpolateStreetPath(rawCoords, targetCount) {
+        if (!rawCoords || rawCoords.length === 0) return [];
+        if (rawCoords.length === 1) return [rawCoords[0]];
 
-            simulatedPath.push({ lat: lat, lng: lng });
+        let totalDist = 0;
+        const dists = [0];
+        for (let i = 1; i < rawCoords.length; i++) {
+            const d = calculateHaversineDistance(rawCoords[i-1].lat, rawCoords[i-1].lng, rawCoords[i].lat, rawCoords[i].lng);
+            totalDist += d;
+            dists.push(totalDist);
         }
+
+        if (totalDist === 0) return rawCoords;
+
+        const result = [];
+        const stepDist = totalDist / targetCount;
+
+        for (let s = 0; s <= targetCount; s++) {
+            const targetD = s * stepDist;
+            let idx = 0;
+            while (idx < dists.length - 1 && dists[idx + 1] < targetD) {
+                idx++;
+            }
+            if (idx >= rawCoords.length - 1) {
+                result.push(rawCoords[rawCoords.length - 1]);
+            } else {
+                const p1 = rawCoords[idx];
+                const p2 = rawCoords[idx + 1];
+                const segLen = dists[idx + 1] - dists[idx];
+                const t = segLen > 0 ? (targetD - dists[idx]) / segLen : 0;
+                result.push({
+                    lat: p1.lat + (p2.lat - p1.lat) * t,
+                    lng: p1.lng + (p2.lng - p1.lng) * t
+                });
+            }
+        }
+        return result;
+    }
+
+    function generateRealisticCityRoadPath(startLatLng, endLatLng, targetCount) {
+        const points = [];
+        const lat1 = startLatLng[0];
+        const lng1 = startLatLng[1];
+        const lat2 = endLatLng[0];
+        const lng2 = endLatLng[1];
+
+        // 4-segment street grid corridor (Main North-South Avenue, East-West Connector, Highway Ring Road, Destination Hub Avenue)
+        const waypoints = [
+            { lat: lat1, lng: lng1 },
+            { lat: lat1 + (lat2 - lat1) * 0.35, lng: lng1 + (lng2 - lng1) * 0.08 },
+            { lat: lat1 + (lat2 - lat1) * 0.50, lng: lng1 + (lng2 - lng1) * 0.70 },
+            { lat: lat1 + (lat2 - lat1) * 0.85, lng: lng1 + (lng2 - lng1) * 0.95 },
+            { lat: lat2, lng: lng2 }
+        ];
+
+        const segSteps = Math.max(2, Math.floor(targetCount / (waypoints.length - 1)));
+        for (let i = 0; i < waypoints.length - 1; i++) {
+            const wp1 = waypoints[i];
+            const wp2 = waypoints[i + 1];
+            for (let j = 0; j < segSteps; j++) {
+                const t = j / segSteps;
+                let lat = wp1.lat + (wp2.lat - wp1.lat) * t;
+                let lng = wp1.lng + (wp2.lng - wp1.lng) * t;
+
+                if (j > 0 && j < segSteps) {
+                    lat += (Math.sin(j * 2.2) * 0.00015);
+                    lng += (Math.cos(j * 2.2) * 0.00015);
+                }
+                points.push({ lat: lat, lng: lng });
+            }
+        }
+        points.push({ lat: lat2, lng: lng2 });
+        return points;
     }
 
     function startGpsStreaming() {

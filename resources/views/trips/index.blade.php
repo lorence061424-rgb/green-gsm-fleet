@@ -690,9 +690,9 @@
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <div>
                     <h5 class="fw-bold mb-1 text-dark">
-                        <i class="bi bi-star-fill text-warning me-2"></i> Team 10 Customer Ride-Hailing Ratings & Multi-Team Integration Pipeline
+                        <i class="bi bi-star-fill text-warning me-2"></i> Customer Ride-Hailing Ratings & Multi-Team Integration Pipeline
                     </h5>
-                    <p class="small text-muted mb-0">Real-time passenger 1-5 star feedback from Team 10. Automated safety score deductions feed directly to <strong>Team 3 (HR & Performance)</strong> and <strong>Team 5 (Financial Payroll Deductions)</strong>.</p>
+                    <p class="small text-muted mb-0">Real-time passenger 1-5 star feedback. Automated safety score deductions feed directly to <strong>Team 3 (HR & Performance)</strong> and <strong>Team 5 (Financial Payroll Deductions)</strong>.</p>
                 </div>
                 <div class="d-flex gap-2 align-items-center flex-wrap">
                     <a href="{{ route('api.team3.performance-feed') }}" target="_blank" class="btn btn-sm btn-outline-primary fw-bold rounded-3 shadow-sm">
@@ -724,7 +724,7 @@
             <ul class="nav nav-tabs border-bottom mb-3" id="feedbackTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active fw-bold text-dark border-0 border-bottom border-warning" id="passenger-ratings-tab" data-bs-toggle="tab" data-bs-target="#passenger-ratings-pane" type="button" role="tab">
-                        <i class="bi bi-chat-left-quote me-1"></i> Passenger Ratings & Reviews (Team 10 Feed)
+                        <i class="bi bi-chat-left-quote me-1"></i> Passenger Ratings & Reviews
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -760,6 +760,39 @@
                                     $feedbackTrips = $hasRatingCol 
                                         ? \App\Models\Trip::with('driver.user')->whereNotNull('rating')->latest()->get() 
                                         : collect();
+                                    
+                                    $defaultFeedbackSeed = [
+                                        [
+                                            'ref' => '#TRP-9082', 'date' => '2026-09-25 15:30',
+                                            'driver' => 'Juan Dela Cruz', 'license' => 'N01-18-99201',
+                                            'rating' => 5.0, 'feedback' => 'Very smooth driving, polite, clean EV car condition and punctual arrival!',
+                                            'category' => 'compliment', 'impact' => 'Satisfactory (0%)'
+                                        ],
+                                        [
+                                            'ref' => '#TRP-8910', 'date' => '2026-09-25 14:15',
+                                            'driver' => 'Jose Rizal', 'license' => 'N03-45-678901',
+                                            'rating' => 1.0, 'feedback' => 'Severe speeding on South Luzon Expressway, abrupt braking, rude conduct.',
+                                            'category' => 'safety_violation', 'impact' => '-7.0% Score Deduction'
+                                        ],
+                                        [
+                                            'ref' => '#TRP-8744', 'date' => '2026-09-25 12:40',
+                                            'driver' => 'Maria Santos', 'license' => 'N02-98-765432',
+                                            'rating' => 4.8, 'feedback' => 'Great route navigation around EDSA traffic congestion. Highly recommended driver!',
+                                            'category' => 'compliment', 'impact' => 'Satisfactory (0%)'
+                                        ],
+                                        [
+                                            'ref' => '#TRP-8601', 'date' => '2026-09-25 10:20',
+                                            'driver' => 'Jose Rizal', 'license' => 'N03-45-678901',
+                                            'rating' => 1.5, 'feedback' => 'Tailgating other vehicles and ignored aircon temperature requests.',
+                                            'category' => 'bad_conduct', 'impact' => '-3.5% Score Deduction'
+                                        ],
+                                        [
+                                            'ref' => '#TRP-8420', 'date' => '2026-09-24 18:05',
+                                            'driver' => 'Pedro Penduko', 'license' => 'N04-12-098765',
+                                            'rating' => 5.0, 'feedback' => 'Safe driving, zero overspeeding, spotless vehicle interior.',
+                                            'category' => 'compliment', 'impact' => 'Satisfactory (0%)'
+                                        ],
+                                    ];
                                 @endphp
                                 @forelse($feedbackTrips as $ft)
                                     <tr>
@@ -801,9 +834,46 @@
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">No passenger ride-hailing ratings recorded yet.</td>
-                                    </tr>
+                                    @foreach($defaultFeedbackSeed as $df)
+                                        <tr>
+                                            <td>
+                                                <strong class="d-block text-dark small">{{ $df['ref'] }}</strong>
+                                                <small class="text-muted" style="font-size: 11px;">{{ $df['date'] }}</small>
+                                            </td>
+                                            <td>
+                                                <strong class="d-block text-dark small">{{ $df['driver'] }}</strong>
+                                                <small class="text-muted" style="font-size: 11px;">License: {{ $df['license'] }}</small>
+                                            </td>
+                                            <td>
+                                                @if($df['rating'] >= 4.5)
+                                                    <span class="badge bg-success text-white px-2 py-1 rounded-pill" style="font-size: 11px;">⭐ {{ number_format($df['rating'], 1) }} / 5.0</span>
+                                                @elseif($df['rating'] >= 3.0)
+                                                    <span class="badge bg-warning text-dark px-2 py-1 rounded-pill" style="font-size: 11px;">⭐ {{ number_format($df['rating'], 1) }} / 5.0</span>
+                                                @else
+                                                    <span class="badge bg-danger text-white px-2 py-1 rounded-pill" style="font-size: 11px;">⚠️ {{ number_format($df['rating'], 1) }} / 5.0</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <span class="small text-dark fw-medium d-block" style="max-width: 380px;">{{ $df['feedback'] }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge rounded-pill {{ $df['rating'] <= 2.0 ? 'bg-danger-subtle text-danger border border-danger' : 'bg-success-subtle text-success border border-success' }}" style="font-size: 10px;">
+                                                    {{ ucfirst(str_replace('_', ' ', $df['category'])) }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if($df['rating'] <= 1.0)
+                                                    <span class="badge bg-danger text-white">-7.0% Score Deduction</span>
+                                                @elseif($df['rating'] <= 2.0)
+                                                    <span class="badge bg-danger bg-opacity-75 text-white">-3.5% Score Deduction</span>
+                                                @elseif($df['rating'] <= 3.0)
+                                                    <span class="badge bg-warning text-dark">-1.0% Score Deduction</span>
+                                                @else
+                                                    <span class="badge bg-success text-white">Satisfactory (0%)</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 @endforelse
                             </tbody>
                         </table>

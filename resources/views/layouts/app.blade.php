@@ -556,20 +556,51 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
     <!-- High-Performance Instant Module Switcher & Button Response Engine -->
     <script>
-        // Global Active Module Search Dispatcher
+        // Global Targeted Module Search Dispatcher
+        window.triggerTargetSearch = function(inputEl) {
+            if (!inputEl) {
+                window.executeActiveModuleSearch();
+                return;
+            }
+            const id = inputEl.id || '';
+            if (id === 'securityGlobalSearchInput') {
+                if (typeof window.filterSecurityRosterAndLogs === 'function') window.filterSecurityRosterAndLogs();
+            } else if (id === 'userRosterSearchInput') {
+                if (typeof window.filterUserRosterTable === 'function') window.filterUserRosterTable();
+            } else if (id === 'auditLogSearchInput' || id === 'archivedLogSearchInput') {
+                if (typeof window.filterAuditLogTable === 'function') window.filterAuditLogTable();
+            } else if (id === 'tripSearchInput') {
+                if (typeof window.filterTripsTable === 'function') window.filterTripsTable();
+            } else if (id === 'completedTripsSearchInput') {
+                if (typeof window.filterCompletedTripsTable === 'function') window.filterCompletedTripsTable();
+            } else if (id === 'routeSearchInput') {
+                if (typeof window.filterRoutesTable === 'function') window.filterRoutesTable();
+            } else if (id === 'vehicleSearchInput') {
+                if (typeof window.filterVehiclesTable === 'function') window.filterVehiclesTable();
+            } else if (id === 'pmsSearchInput') {
+                if (typeof window.filterPmsTable === 'function') window.filterPmsTable();
+            } else if (id === 'tcaoSearchInput') {
+                if (typeof window.filterTcaoTables === 'function') window.filterTcaoTables();
+            } else if (id === 'fuelSearchInput') {
+                if (typeof window.filterFuelLogsTable === 'function') window.filterFuelLogsTable();
+            } else if (id === 'reservationSearchInput') {
+                if (typeof window.filterReservationsTable === 'function') window.filterReservationsTable();
+            } else {
+                window.executeActiveModuleSearch();
+            }
+        };
+
         window.executeActiveModuleSearch = function() {
-            if (typeof window.filterSecurityRosterAndLogs === 'function' && document.getElementById('securityGlobalSearchInput')) {
-                window.filterSecurityRosterAndLogs();
+            if (document.getElementById('securityGlobalSearchInput')) {
+                if (typeof window.filterUserRosterTable === 'function') window.filterUserRosterTable();
+                if (typeof window.filterAuditLogTable === 'function') window.filterAuditLogTable();
+                return;
             }
-            if (typeof window.filterUserRosterTable === 'function' && document.getElementById('userRosterSearchInput')) {
-                window.filterUserRosterTable();
-            }
-            if (typeof window.filterAuditLogTable === 'function' && (document.getElementById('auditLogSearchInput') || document.getElementById('archivedLogSearchInput'))) {
-                window.filterAuditLogTable();
-            }
+
             if (typeof window.filterTripsTable === 'function' && document.getElementById('tripSearchInput')) {
                 window.filterTripsTable();
             }
@@ -614,19 +645,25 @@
                 // Global Delegated Search Button Handler
                 const searchBtn = e.target.closest('[data-search-btn], .btn-search, button[onclick*="filter"], button[onclick*="Search"]');
                 if (searchBtn) {
-                    window.executeActiveModuleSearch();
+                    const parentGroup = searchBtn.closest('.input-group');
+                    const searchInput = parentGroup ? parentGroup.querySelector('input') : null;
+                    if (searchInput) {
+                        window.triggerTargetSearch(searchInput);
+                    } else {
+                        window.executeActiveModuleSearch();
+                    }
                 }
             });
 
             // Global Delegated Search Input Handler
             document.body.addEventListener('keyup', function(e) {
                 if (e.target.matches('input[id*="SearchInput"], input[id*="search"], input[type="search"]')) {
-                    window.executeActiveModuleSearch();
+                    window.triggerTargetSearch(e.target);
                 }
             });
             document.body.addEventListener('input', function(e) {
                 if (e.target.matches('input[id*="SearchInput"], input[id*="search"], input[type="search"]')) {
-                    window.executeActiveModuleSearch();
+                    window.triggerTargetSearch(e.target);
                 }
             });
 
@@ -639,7 +676,11 @@
                 scripts.forEach(oldScript => {
                     const newScript = document.createElement('script');
                     Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    if (oldScript.src) {
+                        newScript.src = oldScript.src;
+                    } else {
+                        newScript.textContent = oldScript.textContent;
+                    }
                     try {
                         oldScript.parentNode.replaceChild(newScript, oldScript);
                     } catch(e) {}
@@ -697,7 +738,7 @@
                         window.history.pushState({}, '', url);
 
                         // Capture any scripts outside mainContentBody in fetched document
-                        const extraScripts = doc.querySelectorAll('body > script:not([src*="bootstrap"]):not([src*="chart"]):not([src*="leaflet"])');
+                        const extraScripts = doc.querySelectorAll('body > script:not([src*="bootstrap"]):not([src*="chart"]):not([src*="leaflet"]):not([src*="fullcalendar"])');
                         extraScripts.forEach(sc => {
                             newContent.appendChild(sc.cloneNode(true));
                         });
@@ -722,6 +763,9 @@
                             }
                             if (typeof window.triggerTripMapInit === 'function' && document.getElementById('liveGpsMapMain')) {
                                 setTimeout(() => { try { window.triggerTripMapInit(); } catch(e) {} }, 100);
+                            }
+                            if (typeof window.initScheduleCalendar === 'function' && document.getElementById('reservationCalendar')) {
+                                setTimeout(() => { try { window.initScheduleCalendar(); } catch(e) {} }, 100);
                             }
 
                             // Trigger active module search

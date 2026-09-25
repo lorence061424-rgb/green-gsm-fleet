@@ -481,9 +481,14 @@ window.filterReservationsTable = function() {
 function initScheduleCalendar() {
     const calendarEl = document.getElementById('reservationCalendar');
     if (calendarEl && typeof FullCalendar !== 'undefined') {
+        if (window.reservationCalendarInstance) {
+            try { window.reservationCalendarInstance.destroy(); } catch(e) {}
+            window.reservationCalendarInstance = null;
+        }
+
         const eventsData = @json($calendarEvents ?? []);
 
-        reservationCalendarInstance = new FullCalendar.Calendar(calendarEl, {
+        window.reservationCalendarInstance = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             height: 'auto',
             headerToolbar: {
@@ -501,9 +506,10 @@ function initScheduleCalendar() {
                 }
             }
         });
-        reservationCalendarInstance.render();
+        window.reservationCalendarInstance.render();
     }
 }
+window.initScheduleCalendar = initScheduleCalendar;
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initScheduleCalendar);

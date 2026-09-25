@@ -136,15 +136,17 @@
     </div>
 </div>
 
-<!-- Lockout Management & Live Audit Trail Table Container -->
+<!-- User Roles & Access Management Roster (Full-width Landscape Table Card) -->
 <div class="row g-4 mb-4">
-    <!-- User Roles & Accounts Roster Panel -->
-    <div class="col-lg-4">
-        <div class="card premium-card p-4 h-100">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold mb-0"><i class="bi bi-people-fill text-danger me-2"></i> User Roster & Status</h5>
-                <button class="btn btn-sm btn-outline-success rounded-3" data-bs-toggle="modal" data-bs-target="#createUserModal">
-                    <i class="bi bi-plus-circle me-1"></i> Add
+    <div class="col-12">
+        <div class="card premium-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <h5 class="fw-bold mb-1"><i class="bi bi-people-fill text-danger me-2"></i> User Roster & Access Control Roster</h5>
+                    <small class="text-muted">Manage system users, activate or deactivate accounts, reset lockout strikes, and remove accounts.</small>
+                </div>
+                <button class="btn btn-sm btn-success rounded-3 fw-bold px-3 py-2" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                    <i class="bi bi-person-plus-fill me-1"></i> Add New User Account
                 </button>
             </div>
 
@@ -158,99 +160,119 @@
                 </div>
             @endif
 
-            <div class="list-group list-group-flush" style="font-size: 12.5px; max-height: 480px; overflow-y: auto;">
-                @foreach($users as $usr)
-                    <div class="list-group-item px-0 py-2 border-0 border-bottom">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <div class="d-flex align-items-center gap-2">
-                                <img src="{{ $usr->avatar_url ?? ('https://ui-avatars.com/api/?name=' . urlencode($usr->name) . '&background=CE2029&color=fff&size=128') }}" 
-                                     alt="{{ $usr->name }}" 
-                                     class="rounded-circle border border-2 border-danger shadow-sm flex-shrink-0" 
-                                     style="width: 36px; height: 36px; object-fit: cover;">
-                                <div>
-                                    <strong class="text-dark d-block" style="font-size: 13px; line-height: 1.2;">{{ $usr->name }}</strong>
-                                    @if(!empty($usr->job_title))
-                                        <small class="text-primary fw-medium d-block" style="font-size: 11px;">{{ $usr->job_title }}</small>
-                                    @endif
-                                    <small class="text-muted d-block" style="font-size: 11px;">{{ $usr->email }}</small>
-                                    @if(!empty($usr->phone_number))
-                                        <small class="text-success fw-medium d-block" style="font-size: 10.5px;"><i class="bi bi-telephone-fill me-1"></i> {{ $usr->phone_number }}</small>
-                                    @endif
-                                </div>
-                            </div>
-                            <span class="badge bg-dark" style="font-size: 10px;">{{ ucfirst($usr->role ?? 'User') }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-1">
-                            @if($usr->is_locked)
-                                <span class="badge bg-danger text-white rounded-pill px-2 py-1" style="font-size: 10px;">
-                                    <i class="bi bi-lock-fill me-1"></i> LOCKED OUT
-                                </span>
-                                <form action="{{ route('admin.security.unlock') }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <input type="hidden" name="email" value="{{ $usr->email }}">
-                                    <button type="submit" class="btn btn-xs btn-danger fw-bold rounded-2 px-2 py-1" style="font-size: 10.5px; background: #CE2029 !important;">
-                                        🔓 Unlock
-                                    </button>
-                                </form>
-                            @elseif(($usr->attempts_count ?? 0) > 0)
-                                <span class="badge bg-warning text-dark rounded-pill px-2 py-1" style="font-size: 10px;">
-                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ $usr->attempts_count }}/3 Strikes
-                                </span>
-                                <form action="{{ route('admin.security.unlock') }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <input type="hidden" name="email" value="{{ $usr->email }}">
-                                    <button type="submit" class="btn btn-xs btn-outline-warning text-dark fw-bold rounded-2 px-2 py-0" style="font-size: 10px;">
-                                        Reset Strikes
-                                    </button>
-                                </form>
-                            @else
-                                @if(isset($usr->status) && ($usr->status === 'inactive' || $usr->status === 'deactivated'))
-                                    <span class="badge bg-secondary text-white rounded-pill px-2 py-1" style="font-size: 10px;">
-                                        <i class="bi bi-slash-circle me-1"></i> Deactivated
-                                    </span>
-                                @else
-                                    <span class="badge bg-success-subtle text-success border border-success border-opacity-25 rounded-pill px-2 py-1" style="font-size: 10px;">
-                                        <i class="bi bi-shield-check me-1"></i> Active
-                                    </span>
-                                @endif
-                            @endif
-
-                            @if(isset($usr->id) && is_numeric($usr->id))
-                                <div class="d-flex gap-1 ms-auto">
-                                    <!-- Toggle Active / Deactivate -->
-                                    <form action="{{ route('admin.security.users.toggle-status', $usr->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @if(isset($usr->status) && ($usr->status === 'inactive' || $usr->status === 'deactivated'))
-                                            <button type="submit" class="btn btn-xs btn-outline-success fw-bold rounded-2 px-2 py-1" style="font-size: 10px;" title="Activate User Account">
-                                                🟢 Activate
-                                            </button>
-                                        @else
-                                            <button type="submit" class="btn btn-xs btn-outline-warning text-dark fw-bold rounded-2 px-2 py-1" style="font-size: 10px;" title="Deactivate User Account">
-                                                ⛔ Deactivate
-                                            </button>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="text-muted" style="font-size: 11px; font-weight: 700; text-transform: uppercase;">
+                            <th>USER / PROFILE</th>
+                            <th>CONTACT DETAILS</th>
+                            <th>ASSIGNED ROLE</th>
+                            <th>SECURITY & LOCKOUT STATUS</th>
+                            <th class="text-end">ACTIONS & ACCESS CONTROL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($users as $usr)
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="{{ $usr->avatar_url ?? ('https://ui-avatars.com/api/?name=' . urlencode($usr->name) . '&background=CE2029&color=fff&size=128') }}" 
+                                             alt="{{ $usr->name }}" 
+                                             class="rounded-circle border border-2 border-danger shadow-sm flex-shrink-0" 
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                        <div>
+                                            <strong class="text-dark d-block" style="font-size: 13.5px;">{{ $usr->name }}</strong>
+                                            @if(!empty($usr->job_title))
+                                                <small class="text-primary fw-medium d-block" style="font-size: 11.5px;">{{ $usr->job_title }}</small>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="font-size: 12px;">
+                                        <div class="fw-semibold text-dark"><i class="bi bi-envelope me-1 text-muted"></i> {{ $usr->email }}</div>
+                                        @if(!empty($usr->phone_number))
+                                            <small class="text-success fw-medium"><i class="bi bi-telephone-fill me-1"></i> {{ $usr->phone_number }}</small>
                                         @endif
-                                    </form>
-                                    
-                                    <!-- Delete Account -->
-                                    <form action="{{ route('admin.security.users.destroy', $usr->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to permanently delete the user account {{ addslashes($usr->email) }}?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-xs btn-outline-danger fw-bold rounded-2 px-2 py-1" style="font-size: 10px;" title="Delete User Account">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-dark px-3 py-1.5" style="font-size: 11px;">
+                                        <i class="bi bi-shield-lock me-1"></i> {{ ucfirst(str_replace('_', ' ', $usr->role ?? 'User')) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @if($usr->is_locked)
+                                        <span class="badge bg-danger text-white rounded-pill px-3 py-1.5" style="font-size: 11px;">
+                                            <i class="bi bi-lock-fill me-1"></i> LOCKED OUT
+                                        </span>
+                                    @elseif(($usr->attempts_count ?? 0) > 0)
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-1.5" style="font-size: 11px;">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ $usr->attempts_count }}/3 Strikes
+                                        </span>
+                                    @else
+                                        @if(isset($usr->status) && ($usr->status === 'inactive' || $usr->status === 'deactivated'))
+                                            <span class="badge bg-secondary text-white rounded-pill px-3 py-1.5" style="font-size: 11px;">
+                                                <i class="bi bi-slash-circle me-1"></i> Deactivated
+                                            </span>
+                                        @else
+                                            <span class="badge bg-success-subtle text-success border border-success border-opacity-25 rounded-pill px-3 py-1.5" style="font-size: 11px;">
+                                                <i class="bi bi-shield-check me-1"></i> Active
+                                            </span>
+                                        @endif
+                                    @endif
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex align-items-center gap-2">
+                                        @if($usr->is_locked || ($usr->attempts_count ?? 0) > 0)
+                                            <form action="{{ route('admin.security.unlock') }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <input type="hidden" name="email" value="{{ $usr->email }}">
+                                                <button type="submit" class="btn btn-sm btn-danger fw-bold rounded-2 px-2.5 py-1" style="font-size: 11px; background: #CE2029 !important;">
+                                                    🔓 Unlock / Reset
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        @if(isset($usr->id) && is_numeric($usr->id))
+                                            <!-- Toggle Active / Deactivate -->
+                                            <form action="{{ route('admin.security.users.toggle-status', $usr->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @if(isset($usr->status) && ($usr->status === 'inactive' || $usr->status === 'deactivated'))
+                                                    <button type="submit" class="btn btn-sm btn-outline-success fw-bold rounded-2 px-2.5 py-1" style="font-size: 11px;" title="Activate User Account">
+                                                        🟢 Activate
+                                                    </button>
+                                                @else
+                                                    <button type="submit" class="btn btn-sm btn-outline-warning text-dark fw-bold rounded-2 px-2.5 py-1" style="font-size: 11px;" title="Deactivate User Account">
+                                                        ⛔ Deactivate
+                                                    </button>
+                                                @endif
+                                            </form>
+                                            
+                                            <!-- Delete Account -->
+                                            <form action="{{ route('admin.security.users.destroy', $usr->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to permanently delete the user account {{ addslashes($usr->email) }}?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger fw-bold rounded-2 px-2.5 py-1" style="font-size: 11px;" title="Delete User Account">
+                                                    <i class="bi bi-trash me-1"></i> Delete
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Live Security Audit Log Table -->
-    <div class="col-lg-8">
-        <div class="card premium-card p-4 h-100">
+<!-- Live Security Audit Log Table (Full-width Landscape Table Card) -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card premium-card p-4">
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <h5 class="fw-bold mb-0"><i class="bi bi-journal-text text-danger me-2"></i> Security Incident Audit Log</h5>
                 <span class="badge bg-dark text-white rounded-pill px-3 py-2">{{ $securityLogs->total() }} Total Incidents</span>

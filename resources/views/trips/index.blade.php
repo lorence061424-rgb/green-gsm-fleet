@@ -1181,6 +1181,9 @@
         const mapContainer = document.getElementById('liveGpsMapMain');
         if (!mapContainer) return;
 
+        mapContainer.style.height = '320px';
+        mapContainer.style.minHeight = '320px';
+
         const startLatLng = getLatLng(startName) || [14.5995, 120.9842];
         const endLatLng = getLatLng(endName) || [14.5547, 121.0244];
 
@@ -1220,7 +1223,7 @@
                 leafletMap.fitBounds([startLatLng, endLatLng], { padding: [35, 35] });
             } catch(e) {}
 
-            [100, 300, 500, 800].forEach(delay => {
+            [50, 150, 300, 600, 1000, 1500].forEach(delay => {
                 setTimeout(() => {
                     if (leafletMap) {
                         leafletMap.invalidateSize();
@@ -1228,6 +1231,18 @@
                     }
                 }, delay);
             });
+
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && leafletMap) {
+                            leafletMap.invalidateSize();
+                            try { leafletMap.fitBounds([startLatLng, endLatLng], { padding: [35, 35] }); } catch(e) {}
+                        }
+                    });
+                }, { threshold: 0.1 });
+                observer.observe(mapContainer);
+            }
         } catch(err) {
             console.error("Leaflet map initialization error:", err);
         }

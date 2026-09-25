@@ -10,7 +10,13 @@
         <h2 class="page-header-title mt-1">Superadmin Security & User Access Control Center</h2>
         <p class="page-header-subtitle">Monitor brute-force rate-limiting, unlock locked users, create system accounts, and inspect security audit logs.</p>
     </div>
-    <div class="col-auto d-flex gap-2 flex-wrap">
+    <div class="col-auto d-flex gap-2 flex-wrap align-items-center">
+        <div class="input-group" style="max-width: 280px;">
+            <input type="text" id="securityGlobalSearchInput" class="form-control rounded-start-3 border-secondary-subtle" placeholder="Search user, email, role, IP..." onkeyup="filterSecurityRosterAndLogs()">
+            <button class="btn btn-danger rounded-end-3 fw-bold" type="button" onclick="filterSecurityRosterAndLogs()" style="background: #CE2029 !important;">
+                <i class="bi bi-search me-1"></i> Search
+            </button>
+        </div>
         <button class="btn btn-danger rounded-3 fw-bold" data-bs-toggle="modal" data-bs-target="#quickUnlockModal" style="background: #CE2029 !important;">
             <i class="bi bi-unlock-fill me-1"></i> Unlock Account / IP
         </button>
@@ -142,9 +148,17 @@
                     <h5 class="fw-bold mb-1"><i class="bi bi-people-fill text-danger me-2"></i> User Roster & Access Control Roster</h5>
                     <small class="text-muted">Manage system users, activate or deactivate accounts, reset lockout strikes, and remove accounts.</small>
                 </div>
-                <button class="btn btn-sm btn-success rounded-3 fw-bold px-3 py-2" data-bs-toggle="modal" data-bs-target="#createUserModal">
-                    <i class="bi bi-person-plus-fill me-1"></i> Add New User Account
-                </button>
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <div class="input-group" style="max-width: 260px;">
+                        <input type="text" id="userRosterSearchInput" class="form-control form-control-sm rounded-start-3 border-secondary-subtle" placeholder="Search user, email, role..." onkeyup="filterUserRosterTable()">
+                        <button class="btn btn-sm btn-danger rounded-end-3 fw-bold" type="button" onclick="filterUserRosterTable()" style="background: #CE2029 !important;">
+                            <i class="bi bi-search me-1"></i> Search
+                        </button>
+                    </div>
+                    <button class="btn btn-sm btn-success rounded-3 fw-bold px-3 py-2" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                        <i class="bi bi-person-plus-fill me-1"></i> Add New User Account
+                    </button>
+                </div>
             </div>
 
             <!-- Active Lockout Notice -->
@@ -158,7 +172,7 @@
             @endif
 
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0" id="userRosterTable">
                     <thead>
                         <tr class="text-muted" style="font-size: 11px; font-weight: 700; text-transform: uppercase;">
                             <th>USER / PROFILE</th>
@@ -272,11 +286,19 @@
         <div class="card premium-card p-4">
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <h5 class="fw-bold mb-0"><i class="bi bi-journal-text text-danger me-2"></i> Security Incident Audit Log</h5>
-                <span class="badge bg-dark text-white rounded-pill px-3 py-2">{{ $securityLogs->total() }} Total Incidents</span>
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <div class="input-group" style="max-width: 260px;">
+                        <input type="text" id="auditLogSearchInput" class="form-control form-control-sm rounded-start-3 border-secondary-subtle" placeholder="Search event, email, IP..." onkeyup="filterAuditLogTable()">
+                        <button class="btn btn-sm btn-danger rounded-end-3 fw-bold" type="button" onclick="filterAuditLogTable()" style="background: #CE2029 !important;">
+                            <i class="bi bi-search me-1"></i> Search
+                        </button>
+                    </div>
+                    <span class="badge bg-dark text-white rounded-pill px-3 py-2">{{ $securityLogs->total() }} Total Incidents</span>
+                </div>
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0" id="securityAuditLogTable">
                     <thead>
                         <tr class="text-muted" style="font-size: 11px; font-weight: 700; text-transform: uppercase;">
                             <th>TIMESTAMP</th>
@@ -803,9 +825,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 else if (!isEmailValid) emailInput.focus();
                 else if (!isPhoneValid) phoneInput.focus();
                 else if (!isPassValid) passwordInput.focus();
-            }
-        });
     }
 });
+
+function filterUserRosterTable() {
+    const query = (document.getElementById('userRosterSearchInput')?.value || '').toLowerCase().trim();
+    const rows = document.querySelectorAll('#userRosterTable tbody tr');
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+    });
+}
+
+function filterAuditLogTable() {
+    const query = (document.getElementById('auditLogSearchInput')?.value || '').toLowerCase().trim();
+    const rows = document.querySelectorAll('#securityAuditLogTable tbody tr');
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+    });
+}
+
+function filterSecurityRosterAndLogs() {
+    const query = (document.getElementById('securityGlobalSearchInput')?.value || '').toLowerCase().trim();
+    
+    const rosterInput = document.getElementById('userRosterSearchInput');
+    if (rosterInput) rosterInput.value = query;
+    filterUserRosterTable();
+
+    const logInput = document.getElementById('auditLogSearchInput');
+    if (logInput) logInput.value = query;
+    filterAuditLogTable();
+}
 </script>
 @endsection

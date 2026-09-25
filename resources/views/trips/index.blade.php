@@ -2060,14 +2060,8 @@ window.triggerTripMapInit = function() {
 };
 
 window.initLeafletGpsMap = initLeafletGpsMap;
+window.triggerTripMapInit = triggerTripMapInit;
 
-document.addEventListener('DOMContentLoaded', function() {
-    triggerTripMapInit();
-});
-window.addEventListener('pjax:loaded', function() {
-    triggerTripMapInit();
-});
-setTimeout(triggerTripMapInit, 100);
-setTimeout(triggerTripMapInit, 400);
+triggerTripMapInit();
 </script>
 @endsection

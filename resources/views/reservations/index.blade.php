@@ -510,12 +510,7 @@ function initScheduleCalendar() {
     }
 }
 window.initScheduleCalendar = initScheduleCalendar;
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initScheduleCalendar);
-} else {
-    initScheduleCalendar();
-}
+initScheduleCalendar();
 </script>
 
 @endsection

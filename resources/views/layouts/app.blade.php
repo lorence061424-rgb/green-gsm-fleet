@@ -575,9 +575,9 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
-    <!-- High-Performance Instant Module Switcher & Button Response Engine -->
+    <!-- High-Performance Instant Module Switcher & Non-Blocking Engine -->
     <script>
-        // Global Targeted Module Search Dispatcher
+        // 1. Global Module Search Dispatcher (Defined once at top-level window scope)
         window.triggerTargetSearch = function(inputEl) {
             if (!inputEl) {
                 window.executeActiveModuleSearch();
@@ -617,76 +617,21 @@
                 if (typeof window.filterAuditLogTable === 'function') window.filterAuditLogTable();
                 return;
             }
-
-            if (typeof window.filterTripsTable === 'function' && document.getElementById('tripSearchInput')) {
-                window.filterTripsTable();
-            }
-            if (typeof window.filterCompletedTripsTable === 'function' && document.getElementById('completedTripsSearchInput')) {
-                window.filterCompletedTripsTable();
-            }
-            if (typeof window.filterRoutesTable === 'function' && document.getElementById('routeSearchInput')) {
-                window.filterRoutesTable();
-            }
-            if (typeof window.filterVehiclesTable === 'function' && document.getElementById('vehicleSearchInput')) {
-                window.filterVehiclesTable();
-            }
-            if (typeof window.filterPmsTable === 'function' && document.getElementById('pmsSearchInput')) {
-                window.filterPmsTable();
-            }
-            if (typeof window.filterTcaoTables === 'function' && document.getElementById('tcaoSearchInput')) {
-                window.filterTcaoTables();
-            }
-            if (typeof window.filterFuelLogsTable === 'function' && document.getElementById('fuelSearchInput')) {
-                window.filterFuelLogsTable();
-            }
-            if (typeof window.filterReservationsTable === 'function' && document.getElementById('reservationSearchInput')) {
-                window.filterReservationsTable();
-            }
+            if (typeof window.filterTripsTable === 'function' && document.getElementById('tripSearchInput')) window.filterTripsTable();
+            if (typeof window.filterCompletedTripsTable === 'function' && document.getElementById('completedTripsSearchInput')) window.filterCompletedTripsTable();
+            if (typeof window.filterRoutesTable === 'function' && document.getElementById('routeSearchInput')) window.filterRoutesTable();
+            if (typeof window.filterVehiclesTable === 'function' && document.getElementById('vehicleSearchInput')) window.filterVehiclesTable();
+            if (typeof window.filterPmsTable === 'function' && document.getElementById('pmsSearchInput')) window.filterPmsTable();
+            if (typeof window.filterTcaoTables === 'function' && document.getElementById('tcaoSearchInput')) window.filterTcaoTables();
+            if (typeof window.filterFuelLogsTable === 'function' && document.getElementById('fuelSearchInput')) window.filterFuelLogsTable();
+            if (typeof window.filterReservationsTable === 'function' && document.getElementById('reservationSearchInput')) window.filterReservationsTable();
         };
 
-        document.addEventListener('DOMContentLoaded', function () {
-            // 1. Instant Button Click Feedback & Multi-submit Lock
-            document.body.addEventListener('click', function (e) {
-                const btn = e.target.closest('button, .btn, input[type="submit"]');
-                if (btn && !btn.disabled) {
-                    btn.classList.add('active');
-                    setTimeout(() => btn.classList.remove('active'), 250);
-                    
-                    const form = btn.closest('form');
-                    if (form && btn.type === 'submit' && !form.dataset.submitting) {
-                        form.dataset.submitting = 'true';
-                        setTimeout(() => delete form.dataset.submitting, 2000);
-                    }
-                }
-
-                // Global Delegated Search Button Handler
-                const searchBtn = e.target.closest('[data-search-btn], .btn-search, button[onclick*="filter"], button[onclick*="Search"]');
-                if (searchBtn) {
-                    const parentGroup = searchBtn.closest('.input-group');
-                    const searchInput = parentGroup ? parentGroup.querySelector('input') : null;
-                    if (searchInput) {
-                        window.triggerTargetSearch(searchInput);
-                    } else {
-                        window.executeActiveModuleSearch();
-                    }
-                }
-            });
-
-            // Global Delegated Search Input Handler
-            document.body.addEventListener('keyup', function(e) {
-                if (e.target.matches('input[id*="SearchInput"], input[id*="search"], input[type="search"]')) {
-                    window.triggerTargetSearch(e.target);
-                }
-            });
-            document.body.addEventListener('input', function(e) {
-                if (e.target.matches('input[id*="SearchInput"], input[id*="search"], input[type="search"]')) {
-                    window.triggerTargetSearch(e.target);
-                }
-            });
-
-            // 2. High-Speed Sub-Second Module Switcher Engine
+        // 2. High-Performance Instant Module Switcher (Guaranteed Non-Blocking & Idempotent)
+        (function() {
             const mainBody = document.getElementById('mainContentBody');
             const progressBar = document.getElementById('tabLoadingProgress');
+            let isNavigating = false;
 
             function executeScriptsInContainer(container) {
                 const scripts = container.querySelectorAll('script');
@@ -705,15 +650,16 @@
             }
 
             async function loadModule(url, targetLink) {
-                if (!mainBody || !url || url.includes('#') || url.startsWith('javascript:')) return;
+                if (!mainBody || !url || url.includes('#') || url.startsWith('javascript:') || isNavigating) return;
+                isNavigating = true;
 
-                // Close mobile offcanvas if open
+                // Close mobile offcanvas drawer if open
                 const mobileSidebar = document.getElementById('mobileSidebar');
                 if (mobileSidebar && window.bootstrap && bootstrap.Offcanvas.getInstance(mobileSidebar)) {
-                    bootstrap.Offcanvas.getInstance(mobileSidebar).hide();
+                    try { bootstrap.Offcanvas.getInstance(mobileSidebar).hide(); } catch(e) {}
                 }
 
-                // Visual feedback: Update active link states instantly across desktop and mobile sidebars
+                // Visual feedback: Update active link states across sidebars
                 document.querySelectorAll('.sidebar-nav-link').forEach(el => {
                     if (el.getAttribute('href') === url) {
                         el.classList.add('active');
@@ -722,9 +668,7 @@
                     }
                 });
 
-                if (progressBar) {
-                    progressBar.style.width = '35%';
-                }
+                if (progressBar) progressBar.style.width = '35%';
                 mainBody.classList.add('tab-fade-out');
 
                 try {
@@ -735,7 +679,6 @@
                         }
                     });
 
-                    // Safeguard: If redirected to auth/login/OTP pages or failed, perform clean browser navigation
                     const finalUrl = response.url || url;
                     if (response.redirected || finalUrl.includes('/login') || finalUrl.includes('/verify-otp') || finalUrl.includes('/logout') || !response.ok) {
                         window.location.href = finalUrl;
@@ -760,56 +703,66 @@
                             newContent.appendChild(sc.cloneNode(true));
                         });
 
-                        setTimeout(() => {
-                            mainBody.innerHTML = newContent.innerHTML;
-                            executeScriptsInContainer(mainBody);
-                            mainBody.classList.remove('tab-fade-out');
-                            
-                            if (progressBar) {
-                                progressBar.style.width = '100%';
-                                setTimeout(() => { progressBar.style.width = '0%'; }, 200);
-                            }
+                        mainBody.innerHTML = newContent.innerHTML;
+                        executeScriptsInContainer(mainBody);
 
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                            window.dispatchEvent(new Event('resize'));
-                            window.dispatchEvent(new Event('pjax:loaded'));
-                            try {
-                                document.dispatchEvent(new Event('DOMContentLoaded'));
-                            } catch(e) {}
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        window.dispatchEvent(new Event('resize'));
+                        
+                        // Dispatch PJAX loaded event ONCE (Never dispatch DOMContentLoaded manually!)
+                        window.dispatchEvent(new Event('pjax:loaded'));
 
-                            // Trigger map & chart initializations if containers exist in swapped DOM
-                            if (typeof window.initDashboardCharts === 'function' && document.getElementById('costHistoryChart')) {
-                                setTimeout(() => { try { window.initDashboardCharts(); } catch(e) {} }, 100);
-                            }
-                            if (typeof window.initRouteMap === 'function' && document.getElementById('routeVisualizerMap')) {
-                                setTimeout(() => { try { window.initRouteMap(); } catch(e) {} }, 100);
-                            }
-                            if (typeof window.triggerTripMapInit === 'function' && document.getElementById('liveGpsMapMain')) {
-                                setTimeout(() => { try { window.triggerTripMapInit(); } catch(e) {} }, 100);
-                            }
-                            if (typeof window.initScheduleCalendar === 'function' && document.getElementById('reservationCalendar')) {
-                                setTimeout(() => { try { window.initScheduleCalendar(); } catch(e) {} }, 100);
-                            }
-                            if (typeof window.initTcaoModule === 'function' && document.getElementById('tcaoSearchInput')) {
-                                setTimeout(() => { try { window.initTcaoModule(); } catch(e) {} }, 100);
-                            }
-                            if (typeof window.initSecurityModule === 'function' && document.getElementById('userRosterSearchInput')) {
-                                setTimeout(() => { try { window.initSecurityModule(); } catch(e) {} }, 100);
-                            }
-
-                            // Trigger active module search
-                            window.executeActiveModuleSearch();
-                        }, 90);
+                        // Trigger active module search once
+                        window.executeActiveModuleSearch();
                     } else {
                         window.location.href = finalUrl;
                     }
                 } catch (err) {
-                    if (progressBar) progressBar.style.width = '0%';
+                    console.error("Module loading failed:", err);
                     window.location.href = url;
+                } finally {
+                    isNavigating = false;
+                    if (progressBar) {
+                        progressBar.style.width = '100%';
+                        setTimeout(() => { progressBar.style.width = '0%'; }, 150);
+                    }
+                    mainBody.classList.remove('tab-fade-out');
                 }
             }
 
+            // Single Top-Level Document Delegation (Registered ONCE)
             document.body.addEventListener('click', function (e) {
+                // Priority 1: Never intercept Logout buttons, logout modal elements, or logout forms!
+                if (e.target.closest('#logoutConfirmationModal, [data-bs-target="#logoutConfirmationModal"], form[action*="logout"]')) {
+                    return; // Direct browser handling
+                }
+
+                // Priority 2: Button Click Active State Feedback & Lock
+                const btn = e.target.closest('button, .btn, input[type="submit"]');
+                if (btn && !btn.disabled) {
+                    btn.classList.add('active');
+                    setTimeout(() => btn.classList.remove('active'), 250);
+                    
+                    const form = btn.closest('form');
+                    if (form && btn.type === 'submit' && !form.dataset.submitting) {
+                        form.dataset.submitting = 'true';
+                        setTimeout(() => delete form.dataset.submitting, 2000);
+                    }
+                }
+
+                // Priority 3: Search Button Dispatcher
+                const searchBtn = e.target.closest('[data-search-btn], .btn-search, button[onclick*="filter"], button[onclick*="Search"]');
+                if (searchBtn) {
+                    const parentGroup = searchBtn.closest('.input-group');
+                    const searchInput = parentGroup ? parentGroup.querySelector('input') : null;
+                    if (searchInput) {
+                        window.triggerTargetSearch(searchInput);
+                    } else {
+                        window.executeActiveModuleSearch();
+                    }
+                }
+
+                // Priority 4: Module Navigation Link Switcher
                 const link = e.target.closest('.sidebar-nav-link, .pjax-link, .kpi-clickable-card, [data-pjax]');
                 if (link && link.href && !e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
                     const url = link.href;
@@ -820,10 +773,22 @@
                 }
             });
 
+            // Search Input Event Delegation (Registered ONCE)
+            document.body.addEventListener('keyup', function(e) {
+                if (e.target.matches('input[id*="SearchInput"], input[id*="search"], input[type="search"]')) {
+                    window.triggerTargetSearch(e.target);
+                }
+            });
+            document.body.addEventListener('input', function(e) {
+                if (e.target.matches('input[id*="SearchInput"], input[id*="search"], input[type="search"]')) {
+                    window.triggerTargetSearch(e.target);
+                }
+            });
+
             window.addEventListener('popstate', function () {
                 window.location.reload();
             });
-        });
+        })();
     </script>
 </body>
 </html>

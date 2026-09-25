@@ -836,10 +836,7 @@ function initSecurityModule() {
     }
 }
 window.initSecurityModule = initSecurityModule;
-
 initSecurityModule();
-document.addEventListener('DOMContentLoaded', initSecurityModule);
-window.addEventListener('pjax:loaded', initSecurityModule);
 
 function filterUserRosterTable() {
     const query = (document.getElementById('userRosterSearchInput')?.value || '').toLowerCase().trim();

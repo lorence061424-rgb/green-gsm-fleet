@@ -318,9 +318,6 @@ function initTcaoModule() {
     }
 }
 window.initTcaoModule = initTcaoModule;
-
 initTcaoModule();
-document.addEventListener('DOMContentLoaded', initTcaoModule);
-window.addEventListener('pjax:loaded', initTcaoModule);
 </script>
 @endsection

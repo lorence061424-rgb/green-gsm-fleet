@@ -542,11 +542,11 @@ function selectRoute(index) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
     initRouteMap();
-
     const searchInput = document.getElementById('routeSearchInput');
-    if (searchInput) {
+    if (searchInput && !searchInput.dataset.bound) {
+        searchInput.dataset.bound = 'true';
         searchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -555,13 +555,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         searchInput.addEventListener('input', filterRoutesTable);
     }
-});
-
-// Auto-initialize map when PJAX injects this module content
-if (typeof initRouteMap === 'function') {
-    initRouteMap();
-    setTimeout(initRouteMap, 150);
-    setTimeout(initRouteMap, 450);
-}
+})();
 </script>
 @endsection

@@ -508,13 +508,8 @@
         }
     };
 
-    // Execute initialization instantly if DOM is ready, and set fallback timer
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        setTimeout(window.initDashboardCharts, 50);
-    } else {
-        document.addEventListener('DOMContentLoaded', window.initDashboardCharts);
-    }
-    window.addEventListener('pjax:loaded', window.initDashboardCharts);
+    // Execute initialization once
+    window.initDashboardCharts();
 
     function exportDashboardToCSV() {
         let csv = [];

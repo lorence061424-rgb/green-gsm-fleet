@@ -34,7 +34,7 @@ class FleetController extends Controller
             'model' => 'required|string',
             'make' => 'required|string',
             'year' => 'required|integer|min:2000|max:' . (date('Y') + 1),
-            'type' => 'required|in:Sedan,SUV,Van,Hatchback,Truck',
+            'type' => 'required|string|max:50',
             'fuel_capacity' => 'required|numeric|min:1',
             'status' => 'required|in:active,maintenance,offline',
         ]);
@@ -51,7 +51,7 @@ class FleetController extends Controller
             'model' => 'required|string',
             'make' => 'required|string',
             'year' => 'required|integer|min:2000|max:' . (date('Y') + 1),
-            'type' => 'required|in:Sedan,SUV,Van,Hatchback,Truck',
+            'type' => 'required|string|max:50',
             'fuel_capacity' => 'required|numeric|min:1',
             'status' => 'required|in:active,maintenance,offline',
         ]);

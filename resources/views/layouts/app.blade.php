@@ -739,12 +739,11 @@
                     if (target && target.startsWith('#')) {
                         const targetModal = document.querySelector(target);
                         if (targetModal) {
+                            e.preventDefault();
+                            e.stopPropagation();
                             const modalInst = bootstrap.Modal.getOrCreateInstance(targetModal);
-                            setTimeout(() => {
-                                if (!targetModal.classList.contains('show')) {
-                                    modalInst.show();
-                                }
-                            }, 50);
+                            modalInst.show();
+                            return;
                         }
                     }
                 }

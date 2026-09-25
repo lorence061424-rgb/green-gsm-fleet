@@ -24,6 +24,7 @@ class User extends Authenticatable
         'phone_number',
         'password',
         'role',
+        'status',
         'avatar_path',
         'job_title',
         'last_otp_verified_at',

@@ -10,13 +10,33 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+
 class SecurityController extends Controller
 {
+    /**
+     * Auto-heal database schema to ensure status column exists in users table.
+     */
+    protected function ensureStatusColumnExists(): void
+    {
+        try {
+            if (Schema::hasTable('users') && !Schema::hasColumn('users', 'status')) {
+                Schema::table('users', function (Blueprint $table) {
+                    $table->string('status')->default('active')->nullable()->after('role');
+                });
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Could not auto-create status column: " . $e->getMessage());
+        }
+    }
+
     /**
      * Display the Superadmin Security & User Access Control Center.
      */
     public function index()
     {
+        $this->ensureStatusColumnExists();
         $securityLogs = SecurityLog::latest()->paginate(15);
         
         $dbUsers = User::all();
@@ -136,6 +156,8 @@ class SecurityController extends Controller
             'role.in' => 'Selected system role is invalid.',
         ]);
 
+        $this->ensureStatusColumnExists();
+
         $user = User::create([
             'name' => ucwords(Str::lower(trim($validated['name']))),
             'email' => trim(Str::lower($validated['email'])),
@@ -143,6 +165,7 @@ class SecurityController extends Controller
             'phone_number' => trim($validated['phone_number']),
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
+            'status' => 'active',
         ]);
 
         SecurityLog::create([
@@ -222,32 +245,63 @@ class SecurityController extends Controller
      */
     public function toggleUserStatus(Request $request, $id)
     {
-        $usr = User::find($id);
-        if (!$usr) {
-            return redirect()->back()->with('error', 'User account not found in database.');
+        $this->ensureStatusColumnExists();
+
+        try {
+            $usr = User::find($id);
+            if (!$usr) {
+                // Check fallback default system role accounts (IDs 1-5)
+                $defaultUsers = [
+                    1 => ['name' => 'Hirna System Admin', 'email' => 'hirna admin', 'role' => 'admin'],
+                    2 => ['name' => 'Alex Fleet Manager', 'email' => 'hirna fleet', 'role' => 'fleet_manager'],
+                    3 => ['name' => 'Sarah Dispatcher', 'email' => 'hirna dispatcher', 'role' => 'dispatcher'],
+                    4 => ['name' => 'Marcus Finance Officer', 'email' => 'hirna finance', 'role' => 'finance'],
+                    5 => ['name' => 'Elena Operations Manager', 'email' => 'hirna operations', 'role' => 'operations'],
+                ];
+
+                if (isset($defaultUsers[$id])) {
+                    $def = $defaultUsers[$id];
+                    $usr = User::firstOrCreate(
+                        ['email' => $def['email']],
+                        [
+                            'name' => $def['name'],
+                            'role' => $def['role'],
+                            'password' => Hash::make('HirnaPass2026!'),
+                            'status' => 'active'
+                        ]
+                    );
+                }
+            }
+
+            if (!$usr) {
+                return redirect()->back()->with('error', 'User account not found in database.');
+            }
+
+            $currentEmail = session('user_email', 'admin@hirna.ph');
+            if (Str::lower($usr->email) === Str::lower($currentEmail)) {
+                return redirect()->back()->with('error', 'Security Policy: You cannot deactivate your own active superadmin session.');
+            }
+
+            $newStatus = ($usr->status === 'inactive' || $usr->status === 'deactivated') ? 'active' : 'deactivated';
+            $usr->status = $newStatus;
+            $usr->save();
+
+            SecurityLog::create([
+                'event_type' => 'admin_toggle_status',
+                'email' => $usr->email,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'details' => "Superadmin (" . session('user_email', 'admin@hirna.ph') . ") changed account status for {$usr->name} to '{$newStatus}'",
+            ]);
+
+            Log::info("SECURITY AUDIT: Superadmin updated account status for {$usr->email} to {$newStatus}");
+
+            $statusBadge = $newStatus === 'active' ? 'Activated 🟢' : 'Deactivated ⛔';
+            return redirect()->back()->with('success', "User account '{$usr->name}' ({$usr->email}) status updated to {$statusBadge}.");
+        } catch (\Throwable $e) {
+            Log::error("Error toggling user status: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Unable to toggle user status: ' . $e->getMessage());
         }
-
-        $currentEmail = session('user_email', 'admin@hirna.ph');
-        if (Str::lower($usr->email) === Str::lower($currentEmail)) {
-            return redirect()->back()->with('error', 'Security Policy: You cannot deactivate your own active superadmin session.');
-        }
-
-        $newStatus = ($usr->status === 'inactive' || $usr->status === 'deactivated') ? 'active' : 'deactivated';
-        $usr->status = $newStatus;
-        $usr->save();
-
-        SecurityLog::create([
-            'event_type' => 'admin_toggle_status',
-            'email' => $usr->email,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'details' => "Superadmin (" . session('user_email', 'admin@hirna.ph') . ") changed account status for {$usr->name} to '{$newStatus}'",
-        ]);
-
-        Log::info("SECURITY AUDIT: Superadmin updated account status for {$usr->email} to {$newStatus}");
-
-        $statusBadge = $newStatus === 'active' ? 'Activated 🟢' : 'Deactivated ⛔';
-        return redirect()->back()->with('success', "User account '{$usr->name}' ({$usr->email}) status updated to {$statusBadge}.");
     }
 
     /**
@@ -255,31 +309,36 @@ class SecurityController extends Controller
      */
     public function deleteUser(Request $request, $id)
     {
-        $usr = User::find($id);
-        if (!$usr) {
-            return redirect()->back()->with('error', 'User account not found in database.');
+        try {
+            $usr = User::find($id);
+            if (!$usr) {
+                return redirect()->back()->with('error', 'User account not found in database.');
+            }
+
+            $currentEmail = session('user_email', 'admin@hirna.ph');
+            if (Str::lower($usr->email) === Str::lower($currentEmail)) {
+                return redirect()->back()->with('error', 'Security Policy Protection: You cannot delete your own active superadmin account.');
+            }
+
+            $deletedEmail = $usr->email;
+            $deletedName = $usr->name;
+            $usr->delete();
+
+            SecurityLog::create([
+                'event_type' => 'admin_delete_user',
+                'email' => $deletedEmail,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'details' => "Superadmin (" . session('user_email', 'admin@hirna.ph') . ") permanently deleted user account: {$deletedName} ({$deletedEmail})",
+            ]);
+
+            Log::info("SECURITY AUDIT: Superadmin deleted user account {$deletedEmail}");
+
+            return redirect()->back()->with('success', "🗑️ User account '{$deletedName}' ({$deletedEmail}) deleted successfully.");
+        } catch (\Throwable $e) {
+            Log::error("Error deleting user: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Unable to delete user account: ' . $e->getMessage());
         }
-
-        $currentEmail = session('user_email', 'admin@hirna.ph');
-        if (Str::lower($usr->email) === Str::lower($currentEmail)) {
-            return redirect()->back()->with('error', 'Security Policy Protection: You cannot delete your own active superadmin account.');
-        }
-
-        $deletedEmail = $usr->email;
-        $deletedName = $usr->name;
-        $usr->delete();
-
-        SecurityLog::create([
-            'event_type' => 'admin_delete_user',
-            'email' => $deletedEmail,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'details' => "Superadmin (" . session('user_email', 'admin@hirna.ph') . ") permanently deleted user account: {$deletedName} ({$deletedEmail})",
-        ]);
-
-        Log::info("SECURITY AUDIT: Superadmin deleted user account {$deletedEmail}");
-
-        return redirect()->back()->with('success', "🗑️ User account '{$deletedName}' ({$deletedEmail}) deleted successfully.");
     }
 
     /**

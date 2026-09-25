@@ -86,6 +86,11 @@ class AuthController extends Controller
             return back()->with('error', "🚨 Security Lockout: Too many failed login attempts (3/3). Your account has been temporarily locked for {$seconds} seconds.");
         }
 
+        // 5. Block Deactivated Accounts
+        if ($user && isset($user->status) && in_array($user->status, ['inactive', 'deactivated'])) {
+            return back()->with('error', '⛔ Account Deactivated: Your access has been deactivated by Superadmin. Please contact system administrator.');
+        }
+
         if ($user && Hash::check($request->password, $user->password)) {
             // Clear brute-force rate limiter on successful password verification
             RateLimiter::clear($throttleKey);

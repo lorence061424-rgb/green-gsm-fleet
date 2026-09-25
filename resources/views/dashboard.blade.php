@@ -339,10 +339,12 @@
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="bg-secondary bg-opacity-10 p-2 rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                                            <i class="bi bi-person-fill text-secondary"></i>
-                                        </div>
-                                        <span class="fw-bold" style="font-size: 14px;">{{ $driver->user ? $driver->user->name : 'Driver #' . $driver->id }}</span>
+                                        @php
+                                            $driverName = $driver->user ? $driver->user->name : ('Driver #' . $driver->id);
+                                            $avatarUrl = $driver->user ? $driver->user->avatar_url : ('https://ui-avatars.com/api/?name=' . urlencode($driverName) . '&background=CE2029&color=ffffff&bold=true');
+                                        @endphp
+                                        <img src="{{ $avatarUrl }}" alt="{{ $driverName }}" class="rounded-circle me-2 shadow-sm border border-danger border-opacity-25" style="width: 34px; height: 34px; object-fit: cover;">
+                                        <span class="fw-bold" style="font-size: 14px;">{{ $driverName }}</span>
                                     </div>
                                 </td>
                                 <td style="font-size: 13px;">{{ $driver->license_number }}</td>
@@ -368,119 +370,145 @@
 
 @section('scripts')
 <script>
-    // 1. Chart 1: Dual Fuel & Energy Expense History (Line Chart)
-    const costCtx = document.getElementById('costHistoryChart').getContext('2d');
-    
-    const costDates = {!! json_encode($costHistory->pluck('date')) !!};
-    const costData = {!! json_encode($costHistory->pluck('daily_cost')) !!};
-    const litersData = {!! json_encode($costHistory->pluck('daily_liters')) !!};
+    window.initDashboardCharts = function() {
+        if (typeof Chart === 'undefined') return;
 
-    new Chart(costCtx, {
-        type: 'line',
-        data: {
-            labels: costDates,
-            datasets: [
-                {
-                    label: 'Daily Expense (₱)',
-                    data: costData,
-                    borderColor: '#CE2029',
-                    backgroundColor: 'rgba(206, 32, 41, 0.05)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.3,
-                    yAxisID: 'y'
-                },
-                {
-                    label: 'Fuel & Energy Volume (Liters / kWh)',
-                    data: litersData,
-                    borderColor: '#0284C7',
-                    backgroundColor: 'transparent',
-                    borderWidth: 2,
-                    borderDash: [5, 5],
-                    fill: false,
-                    tension: 0.3,
-                    yAxisID: 'y1'
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        font: {
-                            family: 'Outfit'
+        // Destroy existing Chart instances to prevent canvas reuse errors
+        const existingCost = Chart.getChart('costHistoryChart');
+        if (existingCost) existingCost.destroy();
+
+        const existingFuel = Chart.getChart('fuelTypeChart');
+        if (existingFuel) existingFuel.destroy();
+
+        // 1. Chart 1: Dual Fuel & Energy Expense History (Line Chart)
+        const costCanvas = document.getElementById('costHistoryChart');
+        if (costCanvas) {
+            const costCtx = costCanvas.getContext('2d');
+            const costDates = {!! json_encode($costHistory->pluck('date')) !!};
+            const costData = {!! json_encode($costHistory->pluck('daily_cost')) !!};
+            const litersData = {!! json_encode($costHistory->pluck('daily_liters')) !!};
+
+            new Chart(costCtx, {
+                type: 'line',
+                data: {
+                    labels: costDates,
+                    datasets: [
+                        {
+                            label: 'Daily Expense (₱)',
+                            data: costData,
+                            borderColor: '#CE2029',
+                            backgroundColor: 'rgba(206, 32, 41, 0.08)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.35,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#CE2029',
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Fuel & Energy Volume (Liters / kWh)',
+                            data: litersData,
+                            borderColor: '#0284C7',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.35,
+                            pointRadius: 3,
+                            pointBackgroundColor: '#0284C7',
+                            yAxisID: 'y1'
                         }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Cost (₱)',
-                        font: { family: 'Outfit' }
-                    }
+                    ]
                 },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    grid: {
-                        drawOnChartArea: false
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { family: 'Outfit', size: 12 }
+                            }
+                        }
                     },
-                    title: {
-                        display: true,
-                        text: 'Volume (L / kWh)',
-                        font: { family: 'Outfit' }
-                    }
-                }
-            }
-        }
-    });
-
-    // 2. Chart 2: Fuel/Energy Distribution by Hirna Vehicle Class (Doughnut Chart)
-    const fuelCtx = document.getElementById('fuelTypeChart').getContext('2d');
-    const fuelTypes = {!! json_encode($fuelByType->pluck('type')) !!};
-    const fuelTotals = {!! json_encode($fuelByType->pluck('total_liters')) !!};
-
-    new Chart(fuelCtx, {
-        type: 'doughnut',
-        data: {
-            labels: fuelTypes,
-            datasets: [{
-                data: fuelTotals,
-                backgroundColor: [
-                    '#CE2029',
-                    '#10B981',
-                    '#0284C7',
-                    '#F59E0B',
-                    '#8B5CF6'
-                ],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        font: {
-                            family: 'Outfit'
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Cost (₱)',
+                                font: { family: 'Outfit', weight: '600' }
+                            },
+                            ticks: {
+                                callback: function(value) { return '₱' + value.toLocaleString(); }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            title: {
+                                display: true,
+                                text: 'Volume (L / kWh)',
+                                font: { family: 'Outfit', weight: '600' }
+                            }
                         }
                     }
                 }
-            },
-            cutout: '70%'
+            });
         }
-    });
+
+        // 2. Chart 2: Fuel/Energy Distribution by Hirna Vehicle Class (Doughnut Chart)
+        const fuelCanvas = document.getElementById('fuelTypeChart');
+        if (fuelCanvas) {
+            const fuelCtx = fuelCanvas.getContext('2d');
+            const fuelTypes = {!! json_encode($fuelByType->pluck('type')) !!};
+            const fuelTotals = {!! json_encode($fuelByType->pluck('total_liters')) !!};
+
+            new Chart(fuelCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: fuelTypes,
+                    datasets: [{
+                        data: fuelTotals,
+                        backgroundColor: [
+                            '#CE2029',
+                            '#10B981',
+                            '#0284C7',
+                            '#F59E0B',
+                            '#8B5CF6'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { family: 'Outfit', size: 11 }
+                            }
+                        }
+                    },
+                    cutout: '68%'
+                }
+            });
+        }
+    };
+
+    // Execute initialization instantly if DOM is ready, and set fallback timer
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setTimeout(window.initDashboardCharts, 50);
+    } else {
+        document.addEventListener('DOMContentLoaded', window.initDashboardCharts);
+    }
+    window.addEventListener('pjax:loaded', window.initDashboardCharts);
 
     function exportDashboardToCSV() {
         let csv = [];

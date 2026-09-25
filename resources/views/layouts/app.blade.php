@@ -18,11 +18,16 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Bootstrap 5 CSS -->
+    <!-- Bootstrap 5 & Leaflet CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Leaflet Interactive GPS Map CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Vendor JavaScript Dependencies (Loaded in Head so modules can access Chart.js instantly) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
 
     <!-- Custom Instant SPA Tab Switcher Animation Styles -->
     <style>
@@ -760,7 +765,10 @@
                                 document.dispatchEvent(new Event('DOMContentLoaded'));
                             } catch(e) {}
 
-                            // Trigger map initializations if map containers exist in swapped DOM
+                            // Trigger map & chart initializations if containers exist in swapped DOM
+                            if (typeof window.initDashboardCharts === 'function' && document.getElementById('costHistoryChart')) {
+                                setTimeout(() => { try { window.initDashboardCharts(); } catch(e) {} }, 100);
+                            }
                             if (typeof window.initRouteMap === 'function' && document.getElementById('routeVisualizerMap')) {
                                 setTimeout(() => { try { window.initRouteMap(); } catch(e) {} }, 100);
                             }

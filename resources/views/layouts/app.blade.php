@@ -697,19 +697,13 @@
                         if (newTitle) document.title = newTitle.innerText;
                         window.history.pushState({}, '', url);
 
-                        // Capture any scripts outside mainContentBody in fetched document
-                        const extraScripts = doc.querySelectorAll('body > script:not([src*="bootstrap"]):not([src*="chart"]):not([src*="leaflet"]):not([src*="fullcalendar"])');
-                        extraScripts.forEach(sc => {
-                            newContent.appendChild(sc.cloneNode(true));
-                        });
-
                         mainBody.innerHTML = newContent.innerHTML;
                         executeScriptsInContainer(mainBody);
 
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         window.dispatchEvent(new Event('resize'));
                         
-                        // Dispatch PJAX loaded event ONCE (Never dispatch DOMContentLoaded manually!)
+                        // Dispatch PJAX loaded event ONCE
                         window.dispatchEvent(new Event('pjax:loaded'));
 
                         // Trigger active module search once
@@ -732,9 +726,9 @@
 
             // Single Top-Level Document Delegation (Registered ONCE)
             document.body.addEventListener('click', function (e) {
-                // Priority 1: Never intercept Logout buttons, logout modal elements, or logout forms!
-                if (e.target.closest('#logoutConfirmationModal, [data-bs-target="#logoutConfirmationModal"], form[action*="logout"]')) {
-                    return; // Direct browser handling
+                // Priority 1: Never intercept Bootstrap dropdowns, modals, offcanvas, or Logout elements!
+                if (e.target.closest('.dropdown, .dropdown-toggle, .dropdown-menu, #logoutConfirmationModal, [data-bs-toggle], [data-bs-target], form[action*="logout"]')) {
+                    return; // Direct Bootstrap & browser handling
                 }
 
                 // Priority 2: Button Click Active State Feedback & Lock

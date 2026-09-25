@@ -263,7 +263,7 @@
 
 @section('scripts')
 <script>
-window.filterTcaoTables = function() {
+function filterTcaoTables() {
     const inputEl = document.getElementById('tcaoSearchInput');
     if (!inputEl) return;
     const input = inputEl.value.toLowerCase().trim();
@@ -281,20 +281,8 @@ window.filterTcaoTables = function() {
         const text = (row.textContent || row.innerText || '').toLowerCase();
         row.style.display = (!input || text.includes(input)) ? '' : 'none';
     });
-};
-
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('tcaoSearchInput');
-    if (searchInput) {
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                filterTcaoTables();
-            }
-        });
-        searchInput.addEventListener('input', filterTcaoTables);
-    }
-});
+}
+window.filterTcaoTables = filterTcaoTables;
 
 function exportTcaoToCSV() {
     let csv = [];
@@ -315,4 +303,23 @@ function exportTcaoToCSV() {
     downloadLink.click();
     document.body.removeChild(downloadLink);
 }
+window.exportTcaoToCSV = exportTcaoToCSV;
+
+function initTcaoModule() {
+    const searchInput = document.getElementById('tcaoSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                filterTcaoTables();
+            }
+        });
+        searchInput.addEventListener('input', filterTcaoTables);
+    }
+}
+window.initTcaoModule = initTcaoModule;
+
+initTcaoModule();
+document.addEventListener('DOMContentLoaded', initTcaoModule);
+window.addEventListener('pjax:loaded', initTcaoModule);
 </script>

@@ -756,6 +756,9 @@
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                             window.dispatchEvent(new Event('resize'));
                             window.dispatchEvent(new Event('pjax:loaded'));
+                            try {
+                                document.dispatchEvent(new Event('DOMContentLoaded'));
+                            } catch(e) {}
 
                             // Trigger map initializations if map containers exist in swapped DOM
                             if (typeof window.initRouteMap === 'function' && document.getElementById('routeVisualizerMap')) {
@@ -766,6 +769,12 @@
                             }
                             if (typeof window.initScheduleCalendar === 'function' && document.getElementById('reservationCalendar')) {
                                 setTimeout(() => { try { window.initScheduleCalendar(); } catch(e) {} }, 100);
+                            }
+                            if (typeof window.initTcaoModule === 'function' && document.getElementById('tcaoSearchInput')) {
+                                setTimeout(() => { try { window.initTcaoModule(); } catch(e) {} }, 100);
+                            }
+                            if (typeof window.initSecurityModule === 'function' && document.getElementById('userRosterSearchInput')) {
+                                setTimeout(() => { try { window.initSecurityModule(); } catch(e) {} }, 100);
                             }
 
                             // Trigger active module search

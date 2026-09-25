@@ -666,7 +666,7 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+function initSecurityModule() {
     // Auto-open modal if server-side validation failed
     @if($errors->any())
         var createUserModalEl = document.getElementById('createUserModal');
@@ -831,19 +831,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 else if (!isEmailValid) emailInput.focus();
                 else if (!isPhoneValid) phoneInput.focus();
                 else if (!isPassValid) passwordInput.focus();
+            }
+        });
     }
-});
+}
+window.initSecurityModule = initSecurityModule;
 
-window.filterUserRosterTable = function() {
+initSecurityModule();
+document.addEventListener('DOMContentLoaded', initSecurityModule);
+window.addEventListener('pjax:loaded', initSecurityModule);
+
+function filterUserRosterTable() {
     const query = (document.getElementById('userRosterSearchInput')?.value || '').toLowerCase().trim();
     const rows = document.querySelectorAll('#userRosterTable tbody tr');
     rows.forEach(row => {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(query) ? '' : 'none';
     });
-};
+}
+window.filterUserRosterTable = filterUserRosterTable;
 
-window.filterAuditLogTable = function() {
+function filterAuditLogTable() {
     const activeQuery = (document.getElementById('auditLogSearchInput')?.value || '').toLowerCase().trim();
     const activeRows = document.querySelectorAll('#securityAuditLogTable tbody tr');
     activeRows.forEach(row => {
@@ -857,21 +865,23 @@ window.filterAuditLogTable = function() {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(archiveQuery) ? '' : 'none';
     });
-};
+}
+window.filterAuditLogTable = filterAuditLogTable;
 
-window.filterSecurityRosterAndLogs = function() {
+function filterSecurityRosterAndLogs() {
     const query = (document.getElementById('securityGlobalSearchInput')?.value || '').toLowerCase().trim();
     
     const rosterInput = document.getElementById('userRosterSearchInput');
     if (rosterInput) rosterInput.value = query;
-    window.filterUserRosterTable();
+    filterUserRosterTable();
 
     const logInput = document.getElementById('auditLogSearchInput');
     if (logInput) logInput.value = query;
 
     const archiveInput = document.getElementById('archivedLogSearchInput');
     if (archiveInput) archiveInput.value = query;
-    window.filterAuditLogTable();
-};
+    filterAuditLogTable();
+}
+window.filterSecurityRosterAndLogs = filterSecurityRosterAndLogs;
 </script>
 @endsection

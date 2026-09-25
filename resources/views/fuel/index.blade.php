@@ -477,13 +477,15 @@ function runPredictionTest(e) {
     .catch(err => console.error(err));
 }
 
-function filterFuelLogsTable() {
-    const input = document.getElementById('fuelSearchInput').value.toLowerCase();
+window.filterFuelLogsTable = function() {
+    const inputEl = document.getElementById('fuelSearchInput');
+    if (!inputEl) return;
+    const input = inputEl.value.toLowerCase();
     const rows = document.querySelectorAll('table tbody tr');
     rows.forEach(row => {
         const text = row.innerText.toLowerCase();
         row.style.display = text.includes(input) ? '' : 'none';
     });
-}
+};
 </script>
 @endsection

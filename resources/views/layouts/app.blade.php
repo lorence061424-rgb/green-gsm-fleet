@@ -549,6 +549,7 @@
 
         <div id="mainContentBody" class="tab-fade-in">
             @yield('content')
+            @yield('scripts')
         </div>
     </div>
     <!-- Vendor JavaScript Dependencies -->
@@ -558,6 +559,43 @@
 
     <!-- High-Performance Instant Module Switcher & Button Response Engine -->
     <script>
+        // Global Active Module Search Dispatcher
+        window.executeActiveModuleSearch = function() {
+            if (typeof window.filterSecurityRosterAndLogs === 'function' && document.getElementById('securityGlobalSearchInput')) {
+                window.filterSecurityRosterAndLogs();
+            }
+            if (typeof window.filterUserRosterTable === 'function' && document.getElementById('userRosterSearchInput')) {
+                window.filterUserRosterTable();
+            }
+            if (typeof window.filterAuditLogTable === 'function' && (document.getElementById('auditLogSearchInput') || document.getElementById('archivedLogSearchInput'))) {
+                window.filterAuditLogTable();
+            }
+            if (typeof window.filterTripsTable === 'function' && document.getElementById('tripSearchInput')) {
+                window.filterTripsTable();
+            }
+            if (typeof window.filterCompletedTripsTable === 'function' && document.getElementById('completedTripsSearchInput')) {
+                window.filterCompletedTripsTable();
+            }
+            if (typeof window.filterRoutesTable === 'function' && document.getElementById('routeSearchInput')) {
+                window.filterRoutesTable();
+            }
+            if (typeof window.filterVehiclesTable === 'function' && document.getElementById('vehicleSearchInput')) {
+                window.filterVehiclesTable();
+            }
+            if (typeof window.filterPmsTable === 'function' && document.getElementById('pmsSearchInput')) {
+                window.filterPmsTable();
+            }
+            if (typeof window.filterTcaoTables === 'function' && document.getElementById('tcaoSearchInput')) {
+                window.filterTcaoTables();
+            }
+            if (typeof window.filterFuelLogsTable === 'function' && document.getElementById('fuelSearchInput')) {
+                window.filterFuelLogsTable();
+            }
+            if (typeof window.filterReservationsTable === 'function' && document.getElementById('reservationSearchInput')) {
+                window.filterReservationsTable();
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', function () {
             // 1. Instant Button Click Feedback & Multi-submit Lock
             document.body.addEventListener('click', function (e) {
@@ -571,6 +609,24 @@
                         form.dataset.submitting = 'true';
                         setTimeout(() => delete form.dataset.submitting, 2000);
                     }
+                }
+
+                // Global Delegated Search Button Handler
+                const searchBtn = e.target.closest('[data-search-btn], .btn-search, button[onclick*="filter"], button[onclick*="Search"]');
+                if (searchBtn) {
+                    window.executeActiveModuleSearch();
+                }
+            });
+
+            // Global Delegated Search Input Handler
+            document.body.addEventListener('keyup', function(e) {
+                if (e.target.matches('input[id*="SearchInput"], input[id*="search"], input[type="search"]')) {
+                    window.executeActiveModuleSearch();
+                }
+            });
+            document.body.addEventListener('input', function(e) {
+                if (e.target.matches('input[id*="SearchInput"], input[id*="search"], input[type="search"]')) {
+                    window.executeActiveModuleSearch();
                 }
             });
 
@@ -640,6 +696,12 @@
                         if (newTitle) document.title = newTitle.innerText;
                         window.history.pushState({}, '', url);
 
+                        // Capture any scripts outside mainContentBody in fetched document
+                        const extraScripts = doc.querySelectorAll('body > script:not([src*="bootstrap"]):not([src*="chart"]):not([src*="leaflet"])');
+                        extraScripts.forEach(sc => {
+                            newContent.appendChild(sc.cloneNode(true));
+                        });
+
                         setTimeout(() => {
                             mainBody.innerHTML = newContent.innerHTML;
                             executeScriptsInContainer(mainBody);
@@ -654,10 +716,16 @@
                             window.dispatchEvent(new Event('resize'));
                             window.dispatchEvent(new Event('pjax:loaded'));
 
-                            // Trigger map initialization if map containers exist in swapped DOM
-                            if (typeof initRouteMap === 'function' && document.getElementById('routeVisualizerMap')) {
-                                setTimeout(() => { try { initRouteMap(); } catch(e) {} }, 100);
+                            // Trigger map initializations if map containers exist in swapped DOM
+                            if (typeof window.initRouteMap === 'function' && document.getElementById('routeVisualizerMap')) {
+                                setTimeout(() => { try { window.initRouteMap(); } catch(e) {} }, 100);
                             }
+                            if (typeof window.triggerTripMapInit === 'function' && document.getElementById('liveGpsMapMain')) {
+                                setTimeout(() => { try { window.triggerTripMapInit(); } catch(e) {} }, 100);
+                            }
+
+                            // Trigger active module search
+                            window.executeActiveModuleSearch();
                         }, 90);
                     } else {
                         window.location.href = finalUrl;
@@ -684,7 +752,5 @@
             });
         });
     </script>
-    
-    @yield('scripts')
 </body>
 </html>

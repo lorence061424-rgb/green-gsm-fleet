@@ -1893,61 +1893,61 @@
         }
     }
 
-    function filterTripsTable() {
-        const query = (document.getElementById('tripSearchInput')?.value || '').toLowerCase().trim();
-        document.querySelectorAll('.list-group-item').forEach(item => {
-            const text = item.textContent.toLowerCase();
-            item.style.display = text.includes(query) ? '' : 'none';
-        });
-    }
+window.filterTripsTable = function() {
+    const query = (document.getElementById('tripSearchInput')?.value || '').toLowerCase().trim();
+    document.querySelectorAll('.list-group-item').forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(query) ? '' : 'none';
+    });
+};
 
-    function filterCompletedTripsTable() {
-        currentCompletedPage = 1;
-        renderCompletedTripsTable();
-    }
+window.filterCompletedTripsTable = function() {
+    currentCompletedPage = 1;
+    renderCompletedTripsTable();
+};
 
-    function goToCompletedTripsPage(page) {
-        currentCompletedPage = page;
-        renderCompletedTripsTable();
-    }
+window.goToCompletedTripsPage = function(page) {
+    currentCompletedPage = page;
+    renderCompletedTripsTable();
+};
 
-    function changeCompletedTripsPage(delta) {
-        currentCompletedPage += delta;
-        renderCompletedTripsTable();
-    }
+window.changeCompletedTripsPage = function(delta) {
+    currentCompletedPage += delta;
+    renderCompletedTripsTable();
+};
 
-    // Manual trigger function to force Leaflet map re-render and tile refresh
-    function refreshTripGpsMap() {
-        triggerTripMapInit();
-        if (window.leafletMap) {
-            try {
+window.refreshTripGpsMap = function() {
+    triggerTripMapInit();
+    if (window.leafletMap) {
+        try {
+            window.leafletMap.invalidateSize();
+            window.dispatchEvent(new Event('resize'));
+        } catch(e) {}
+    }
+};
+
+window.triggerTripMapInit = function() {
+    renderCompletedTripsTable();
+    if (typeof initLeafletGpsMap === 'function') {
+        try {
+            initLeafletGpsMap('Manila Hub (Port Area)', 'Makati Hub (Ayala Ave)');
+            if (window.leafletMap) {
                 window.leafletMap.invalidateSize();
                 window.dispatchEvent(new Event('resize'));
-            } catch(e) {}
-        }
+            }
+        } catch(e) {}
     }
+};
 
-    // Initialize pagination & map on load and PJAX module navigation
-    function triggerTripMapInit() {
-        renderCompletedTripsTable();
-        if (typeof initLeafletGpsMap === 'function') {
-            try {
-                initLeafletGpsMap('Manila Hub (Port Area)', 'Makati Hub (Ayala Ave)');
-                if (window.leafletMap) {
-                    window.leafletMap.invalidateSize();
-                    window.dispatchEvent(new Event('resize'));
-                }
-            } catch(e) {}
-        }
-    }
+window.initLeafletGpsMap = initLeafletGpsMap;
 
-    document.addEventListener('DOMContentLoaded', function() {
-        triggerTripMapInit();
-    });
-    window.addEventListener('pjax:loaded', function() {
-        triggerTripMapInit();
-    });
-    setTimeout(triggerTripMapInit, 100);
-    setTimeout(triggerTripMapInit, 400);
+document.addEventListener('DOMContentLoaded', function() {
+    triggerTripMapInit();
+});
+window.addEventListener('pjax:loaded', function() {
+    triggerTripMapInit();
+});
+setTimeout(triggerTripMapInit, 100);
+setTimeout(triggerTripMapInit, 400);
 </script>
 @endsection

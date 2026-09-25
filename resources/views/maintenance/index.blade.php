@@ -275,7 +275,7 @@ function toggleCompletionDate(recordId) {
     }
 }
 
-function filterPmsTable() {
+window.filterPmsTable = function() {
     const inputEl = document.getElementById('pmsSearchInput');
     if (!inputEl) return;
     const input = inputEl.value.toLowerCase().trim();
@@ -284,7 +284,7 @@ function filterPmsTable() {
         const text = (row.textContent || row.innerText || '').toLowerCase();
         row.style.display = (!input || text.includes(input)) ? '' : 'none';
     });
-}
+};
 
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('pmsSearchInput');

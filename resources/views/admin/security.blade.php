@@ -834,16 +834,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-function filterUserRosterTable() {
+window.filterUserRosterTable = function() {
     const query = (document.getElementById('userRosterSearchInput')?.value || '').toLowerCase().trim();
     const rows = document.querySelectorAll('#userRosterTable tbody tr');
     rows.forEach(row => {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(query) ? '' : 'none';
     });
-}
+};
 
-function filterAuditLogTable() {
+window.filterAuditLogTable = function() {
     const activeQuery = (document.getElementById('auditLogSearchInput')?.value || '').toLowerCase().trim();
     const activeRows = document.querySelectorAll('#securityAuditLogTable tbody tr');
     activeRows.forEach(row => {
@@ -857,21 +857,21 @@ function filterAuditLogTable() {
         const text = row.textContent.toLowerCase();
         row.style.display = text.includes(archiveQuery) ? '' : 'none';
     });
-}
+};
 
-function filterSecurityRosterAndLogs() {
+window.filterSecurityRosterAndLogs = function() {
     const query = (document.getElementById('securityGlobalSearchInput')?.value || '').toLowerCase().trim();
     
     const rosterInput = document.getElementById('userRosterSearchInput');
     if (rosterInput) rosterInput.value = query;
-    filterUserRosterTable();
+    window.filterUserRosterTable();
 
     const logInput = document.getElementById('auditLogSearchInput');
     if (logInput) logInput.value = query;
 
     const archiveInput = document.getElementById('archivedLogSearchInput');
     if (archiveInput) archiveInput.value = query;
-    filterAuditLogTable();
-}
+    window.filterAuditLogTable();
+};
 </script>
 @endsection

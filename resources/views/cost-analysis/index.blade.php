@@ -263,7 +263,7 @@
 
 @section('scripts')
 <script>
-function filterTcaoTables() {
+window.filterTcaoTables = function() {
     const inputEl = document.getElementById('tcaoSearchInput');
     if (!inputEl) return;
     const input = inputEl.value.toLowerCase().trim();
@@ -281,7 +281,7 @@ function filterTcaoTables() {
         const text = (row.textContent || row.innerText || '').toLowerCase();
         row.style.display = (!input || text.includes(input)) ? '' : 'none';
     });
-}
+};
 
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('tcaoSearchInput');

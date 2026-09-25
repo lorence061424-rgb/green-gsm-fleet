@@ -193,20 +193,22 @@ let polylineGroup = [];
 let markerGroup = [];
 const allHubs = @json($hubs);
 
-function filterRoutesTable() {
-    const inputEl = document.getElementById('routeSearchInput');
-    if (!inputEl) return;
-    const input = inputEl.value.toLowerCase().trim();
+window.filterRoutesTable = function() {
+    const input = (document.getElementById('routeSearchInput')?.value || '').toLowerCase().trim();
     const rows = document.querySelectorAll('#routeResultsContainer .route-option-card, #distanceMatrixTable tbody tr');
     rows.forEach(row => {
         const text = (row.textContent || row.innerText || '').toLowerCase();
         row.style.display = (!input || text.includes(input)) ? '' : 'none';
     });
-}
+};
 
-function initRouteMap() {
+window.initRouteMap = function() {
     const mapContainer = document.getElementById('routeVisualizerMap');
     if (!mapContainer) return;
+
+    mapContainer.style.height = '340px';
+    mapContainer.style.minHeight = '340px';
+    mapContainer.style.width = '100%';
 
     if (routeMap) {
         try { routeMap.remove(); } catch(e) {}
@@ -238,12 +240,25 @@ function initRouteMap() {
         }
     });
 
+    const fixSize = () => {
+        if (routeMap) {
+            try { routeMap.invalidateSize(); } catch(e) {}
+        }
+    };
+
     // Auto-calculate initial route optimization on load
     setTimeout(() => {
-        if (routeMap) routeMap.invalidateSize();
+        fixSize();
         calculateOptimizedRoutes();
-    }, 400);
-}
+    }, 150);
+    setTimeout(fixSize, 350);
+    setTimeout(fixSize, 700);
+
+    if (window.ResizeObserver) {
+        const ro = new ResizeObserver(() => fixSize());
+        ro.observe(mapContainer);
+    }
+};
 
 function calculateOptimizedRoutes(e) {
     if (e) e.preventDefault();

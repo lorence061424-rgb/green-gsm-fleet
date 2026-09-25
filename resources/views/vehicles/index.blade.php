@@ -459,8 +459,8 @@
 
 @section('scripts')
 <script>
-function filterVehiclesTable() {
-    const input = document.getElementById('vehicleSearchInput').value.toLowerCase();
+window.filterVehiclesTable = function() {
+    const input = (document.getElementById('vehicleSearchInput')?.value || '').toLowerCase();
     const filter = document.getElementById('vehicleTypeFilter') ? document.getElementById('vehicleTypeFilter').value.toLowerCase() : '';
     const rows = document.querySelectorAll('#vehicles-pane tbody tr, #pms-pane tbody tr, #battery-pane tbody tr');
     rows.forEach(row => {
@@ -469,7 +469,7 @@ function filterVehiclesTable() {
         const matchesFilter = filter === '' || text.includes(filter);
         row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
     });
-}
+};
 
 function exportVehiclesToCSV() {
     let csv = [];

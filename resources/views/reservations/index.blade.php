@@ -467,14 +467,16 @@ function checkAvailability() {
         });
 }
 
-function filterReservationsTable() {
-    const input = document.getElementById('reservationSearchInput').value.toLowerCase();
+window.filterReservationsTable = function() {
+    const inputEl = document.getElementById('reservationSearchInput');
+    if (!inputEl) return;
+    const input = inputEl.value.toLowerCase();
     const rows = document.querySelectorAll('table tbody tr');
     rows.forEach(row => {
         const text = row.innerText.toLowerCase();
         row.style.display = text.includes(input) ? '' : 'none';
     });
-}
+};
 
 function initScheduleCalendar() {
     const calendarEl = document.getElementById('reservationCalendar');

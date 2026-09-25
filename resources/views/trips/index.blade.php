@@ -710,9 +710,9 @@
                     <div class="d-flex align-items-center">
                         <i class="bi bi-shield-exclamation text-warning fs-3 me-3"></i>
                         <div>
-                            <strong class="text-dark d-block small text-uppercase">AUTOMATED DRIVER INFRACTION & PAYROLL DEDUCTION RULES</strong>
+                            <strong class="text-dark d-block small text-uppercase">AUTOMATED DRIVER INFRACTION & PAYROLL DEDUCTION RULES (WITH 24H HR AUDIT WINDOW)</strong>
                             <span class="text-dark small" style="font-size: 11px;">
-                                1-Star Rating = <strong>-7.0% Safety Score</strong> & <strong>₱300 Payroll Penalty</strong> &bull; 
+                                1-Star Rating = <strong>-7.0% Safety Score</strong> & <strong>₱300 Payroll Penalty (Flags 24h HR Verification Window; No Instant Deduction)</strong> &bull; 
                                 3+ Low Ratings (&le; 2.0 Stars) = <strong>-10.0% Extra Infraction Penalty</strong> & <strong>Team 3 HR Suspension Alert</strong> &bull; 
                                 Safety Score &lt; 80% = <strong>₱500 Safety Review Penalty Fee (Team 5 Payroll)</strong>
                             </span>
@@ -751,7 +751,8 @@
                                     <th>PASSENGER RATING</th>
                                     <th>CUSTOMER FEEDBACK REVIEW</th>
                                     <th>CATEGORY</th>
-                                    <th>SCORE IMPACT</th>
+                                    <th>SCORE IMPACT & HR AUDIT</th>
+                                    <th>DISPUTE ACTION</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -766,31 +767,31 @@
                                             'ref' => '#TRP-9082', 'date' => '2026-09-25 15:30',
                                             'driver' => 'Juan Dela Cruz', 'license' => 'N01-18-99201',
                                             'rating' => 5.0, 'feedback' => 'Very smooth driving, polite, clean EV car condition and punctual arrival!',
-                                            'category' => 'compliment', 'impact' => 'Satisfactory (0%)'
+                                            'category' => 'compliment', 'status' => 'Verified'
                                         ],
                                         [
                                             'ref' => '#TRP-8910', 'date' => '2026-09-25 14:15',
                                             'driver' => 'Jose Rizal', 'license' => 'N03-45-678901',
                                             'rating' => 1.0, 'feedback' => 'Severe speeding on South Luzon Expressway, abrupt braking, rude conduct.',
-                                            'category' => 'safety_violation', 'impact' => '-7.0% Score Deduction'
+                                            'category' => 'safety_violation', 'status' => 'Pending HR 24h Audit'
                                         ],
                                         [
                                             'ref' => '#TRP-8744', 'date' => '2026-09-25 12:40',
                                             'driver' => 'Maria Santos', 'license' => 'N02-98-765432',
                                             'rating' => 4.8, 'feedback' => 'Great route navigation around EDSA traffic congestion. Highly recommended driver!',
-                                            'category' => 'compliment', 'impact' => 'Satisfactory (0%)'
+                                            'category' => 'compliment', 'status' => 'Verified'
                                         ],
                                         [
                                             'ref' => '#TRP-8601', 'date' => '2026-09-25 10:20',
                                             'driver' => 'Jose Rizal', 'license' => 'N03-45-678901',
                                             'rating' => 1.5, 'feedback' => 'Tailgating other vehicles and ignored aircon temperature requests.',
-                                            'category' => 'bad_conduct', 'impact' => '-3.5% Score Deduction'
+                                            'category' => 'bad_conduct', 'status' => 'Pending HR 24h Audit'
                                         ],
                                         [
                                             'ref' => '#TRP-8420', 'date' => '2026-09-24 18:05',
                                             'driver' => 'Pedro Penduko', 'license' => 'N04-12-098765',
                                             'rating' => 5.0, 'feedback' => 'Safe driving, zero overspeeding, spotless vehicle interior.',
-                                            'category' => 'compliment', 'impact' => 'Satisfactory (0%)'
+                                            'category' => 'compliment', 'status' => 'Verified'
                                         ],
                                     ];
                                 @endphp
@@ -814,7 +815,7 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <span class="small text-dark fw-medium d-block" style="max-width: 380px;">{{ $ft->customer_feedback ?: 'Satisfactory trip execution.' }}</span>
+                                            <span class="small text-dark fw-medium d-block" style="max-width: 320px;">{{ $ft->customer_feedback ?: 'Satisfactory trip execution.' }}</span>
                                         </td>
                                         <td>
                                             <span class="badge rounded-pill {{ ($ft->rating ?? 5) <= 2.0 ? 'bg-danger-subtle text-danger border border-danger' : 'bg-success-subtle text-success border border-success' }}" style="font-size: 10px;">
@@ -823,13 +824,29 @@
                                         </td>
                                         <td>
                                             @if(($ft->rating ?? 5) <= 1.0)
-                                                <span class="badge bg-danger text-white">-7.0% Score Deduction</span>
+                                                <span class="badge bg-danger text-white d-block mb-1">-7.0% Score Deduction</span>
+                                                <span class="badge bg-warning text-dark border border-warning" style="font-size: 10px;"><i class="bi bi-clock-history me-1"></i> Pending HR 24h Audit</span>
                                             @elseif(($ft->rating ?? 5) <= 2.0)
-                                                <span class="badge bg-danger bg-opacity-75 text-white">-3.5% Score Deduction</span>
+                                                <span class="badge bg-danger bg-opacity-75 text-white d-block mb-1">-3.5% Score Deduction</span>
+                                                <span class="badge bg-warning text-dark border border-warning" style="font-size: 10px;"><i class="bi bi-clock-history me-1"></i> Pending HR 24h Audit</span>
                                             @elseif(($ft->rating ?? 5) <= 3.0)
                                                 <span class="badge bg-warning text-dark">-1.0% Score Deduction</span>
                                             @else
                                                 <span class="badge bg-success text-white">Satisfactory (0%)</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if(($ft->rating ?? 5) <= 2.0)
+                                                <div class="d-flex gap-1">
+                                                    <button class="btn btn-sm btn-outline-success py-0 px-2 rounded-3" style="font-size: 11px;" onclick="alert('✅ HR Audit Confirmed:\n1-Star rating verified against telematics logs. ₱300 penalty confirmed for Team 5 Payroll.');">
+                                                        <i class="bi bi-check-lg"></i> Confirm
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-3" style="font-size: 11px;" onclick="alert('🛡️ Driver Appeal Granted:\nComplaint dismissed as false/malicious. ₱0 payroll deduction applied.');">
+                                                        <i class="bi bi-x-lg"></i> Dismiss
+                                                    </button>
+                                                </div>
+                                            @else
+                                                <span class="text-muted small" style="font-size: 11px;">Verified</span>
                                             @endif
                                         </td>
                                     </tr>
@@ -854,7 +871,7 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <span class="small text-dark fw-medium d-block" style="max-width: 380px;">{{ $df['feedback'] }}</span>
+                                                <span class="small text-dark fw-medium d-block" style="max-width: 320px;">{{ $df['feedback'] }}</span>
                                             </td>
                                             <td>
                                                 <span class="badge rounded-pill {{ $df['rating'] <= 2.0 ? 'bg-danger-subtle text-danger border border-danger' : 'bg-success-subtle text-success border border-success' }}" style="font-size: 10px;">
@@ -863,13 +880,29 @@
                                             </td>
                                             <td>
                                                 @if($df['rating'] <= 1.0)
-                                                    <span class="badge bg-danger text-white">-7.0% Score Deduction</span>
+                                                    <span class="badge bg-danger text-white d-block mb-1">-7.0% Score Deduction</span>
+                                                    <span class="badge bg-warning text-dark border border-warning" style="font-size: 10px;"><i class="bi bi-clock-history me-1"></i> Pending HR 24h Audit</span>
                                                 @elseif($df['rating'] <= 2.0)
-                                                    <span class="badge bg-danger bg-opacity-75 text-white">-3.5% Score Deduction</span>
+                                                    <span class="badge bg-danger bg-opacity-75 text-white d-block mb-1">-3.5% Score Deduction</span>
+                                                    <span class="badge bg-warning text-dark border border-warning" style="font-size: 10px;"><i class="bi bi-clock-history me-1"></i> Pending HR 24h Audit</span>
                                                 @elseif($df['rating'] <= 3.0)
                                                     <span class="badge bg-warning text-dark">-1.0% Score Deduction</span>
                                                 @else
                                                     <span class="badge bg-success text-white">Satisfactory (0%)</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($df['rating'] <= 2.0)
+                                                    <div class="d-flex gap-1">
+                                                        <button class="btn btn-sm btn-outline-success py-0 px-2 rounded-3" style="font-size: 11px;" onclick="alert('✅ HR Audit Confirmed:\n1-Star rating verified against telematics logs. ₱300 penalty confirmed for Team 5 Payroll.');">
+                                                            <i class="bi bi-check-lg"></i> Confirm
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-3" style="font-size: 11px;" onclick="alert('🛡️ Driver Appeal Granted:\nComplaint dismissed as false/malicious. ₱0 payroll deduction applied.');">
+                                                            <i class="bi bi-x-lg"></i> Dismiss
+                                                        </button>
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted small" style="font-size: 11px;">Verified</span>
                                                 @endif
                                             </td>
                                         </tr>

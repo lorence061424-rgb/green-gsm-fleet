@@ -584,7 +584,9 @@
                     const newScript = document.createElement('script');
                     Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
                     newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                    try {
+                        oldScript.parentNode.replaceChild(newScript, oldScript);
+                    } catch(e) {}
                 });
             }
 
@@ -619,7 +621,12 @@
                         }
                     });
 
-                    if (!response.ok) throw new Error('Module fetch failed');
+                    // Safeguard: If redirected to auth/login/OTP pages or failed, perform clean browser navigation
+                    const finalUrl = response.url || url;
+                    if (response.redirected || finalUrl.includes('/login') || finalUrl.includes('/verify-otp') || finalUrl.includes('/logout') || !response.ok) {
+                        window.location.href = finalUrl;
+                        return;
+                    }
 
                     if (progressBar) progressBar.style.width = '75%';
 
@@ -637,15 +644,23 @@
                             mainBody.innerHTML = newContent.innerHTML;
                             executeScriptsInContainer(mainBody);
                             mainBody.classList.remove('tab-fade-out');
+                            
                             if (progressBar) {
                                 progressBar.style.width = '100%';
                                 setTimeout(() => { progressBar.style.width = '0%'; }, 200);
                             }
+
                             window.scrollTo({ top: 0, behavior: 'smooth' });
+                            window.dispatchEvent(new Event('resize'));
                             window.dispatchEvent(new Event('pjax:loaded'));
+
+                            // Trigger map initialization if map containers exist in swapped DOM
+                            if (typeof initRouteMap === 'function' && document.getElementById('routeVisualizerMap')) {
+                                setTimeout(() => { try { initRouteMap(); } catch(e) {} }, 100);
+                            }
                         }, 90);
                     } else {
-                        window.location.href = url;
+                        window.location.href = finalUrl;
                     }
                 } catch (err) {
                     if (progressBar) progressBar.style.width = '0%';

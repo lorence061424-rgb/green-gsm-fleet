@@ -186,9 +186,7 @@
         </table>
     </div>
 </div>
-@endsection
 
-@section('scripts')
 <script>
 let routeMap = null;
 let polylineGroup = [];
@@ -543,5 +541,12 @@ document.addEventListener('DOMContentLoaded', function() {
         searchInput.addEventListener('input', filterRoutesTable);
     }
 });
+
+// Auto-initialize map when PJAX injects this module content
+if (typeof initRouteMap === 'function') {
+    initRouteMap();
+    setTimeout(initRouteMap, 150);
+    setTimeout(initRouteMap, 450);
+}
 </script>
 @endsection

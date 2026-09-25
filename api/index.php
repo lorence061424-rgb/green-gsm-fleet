@@ -70,6 +70,7 @@ try {
         
         config(['database.default' => 'sqlite']);
         config(['database.connections.sqlite.database' => $dbFile]);
+        config(['session.driver' => 'file']);
         config(['cache.default' => 'array']);
     }
 

@@ -43,6 +43,53 @@
     </div>
 </div>
 
+<!-- Management Date Range Filter Card -->
+<div class="card premium-card border-0 p-3 mb-4 shadow-sm bg-white rounded-4">
+    <form action="{{ route('cost-analysis.index') }}" method="GET" class="row align-items-center g-3">
+        <div class="col-md-3">
+            <label class="form-label text-muted small fw-bold text-uppercase mb-1"><i class="bi bi-calendar-event me-1 text-primary"></i> Report Start Date</label>
+            <input type="date" name="start_date" class="form-control rounded-3 border-secondary-subtle" value="{{ $startDate ?? '' }}">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label text-muted small fw-bold text-uppercase mb-1"><i class="bi bi-calendar-check me-1 text-primary"></i> Report End Date</label>
+            <input type="date" name="end_date" class="form-control rounded-3 border-secondary-subtle" value="{{ $endDate ?? '' }}">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label text-muted small fw-bold text-uppercase mb-1"><i class="bi bi-funnel me-1 text-primary"></i> Quick Presets</label>
+            <select name="preset" class="form-select rounded-3 border-secondary-subtle" onchange="this.form.submit()">
+                <option value="all" {{ ($preset ?? 'all') === 'all' ? 'selected' : '' }}>All Time History</option>
+                <option value="today" {{ ($preset ?? '') === 'today' ? 'selected' : '' }}>Today's Report</option>
+                <option value="month" {{ ($preset ?? '') === 'month' ? 'selected' : '' }}>This Month ({{ date('F Y') }})</option>
+                <option value="last30" {{ ($preset ?? '') === 'last30' ? 'selected' : '' }}>Last 30 Days</option>
+                <option value="year" {{ ($preset ?? '') === 'year' ? 'selected' : '' }}>This Year ({{ date('Y') }})</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-primary fw-bold rounded-3 flex-grow-1 shadow-sm" style="height: 38px;">
+                <i class="bi bi-filter me-1"></i> Apply Filter
+            </button>
+            <a href="{{ route('cost-analysis.index') }}" class="btn btn-outline-secondary rounded-3" title="Reset Date Filter" style="height: 38px; display: flex; align-items: center;">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </a>
+        </div>
+    </form>
+    @if(!empty($startDate) && !empty($endDate))
+        <div class="mt-2 pt-2 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <small class="text-success fw-bold">
+                <i class="bi bi-check-circle-fill me-1"></i> Currently showing Management Report filtered from <strong>{{ \Carbon\Carbon::parse($startDate)->format('M d, Y') }}</strong> to <strong>{{ \Carbon\Carbon::parse($endDate)->format('M d, Y') }}</strong>
+            </small>
+            <div class="d-flex gap-2">
+                <a href="{{ route('cost-analysis.export-csv', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="badge bg-success text-white text-decoration-none px-3 py-2 rounded-pill">
+                    <i class="bi bi-download me-1"></i> Export Filtered CSV
+                </a>
+                <a href="{{ route('cost-analysis.export-pdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" target="_blank" class="badge bg-dark text-white text-decoration-none px-3 py-2 rounded-pill">
+                    <i class="bi bi-printer me-1"></i> Export Filtered PDF
+                </a>
+            </div>
+        </div>
+    @endif
+</div>
+
 <!-- TCAO KPI Summary Cards -->
 <div class="row g-3 mb-4">
     <div class="col-md-3">

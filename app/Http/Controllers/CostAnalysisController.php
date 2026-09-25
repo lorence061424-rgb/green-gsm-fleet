@@ -17,12 +17,45 @@ class CostAnalysisController extends Controller
      */
     public function index(Request $request)
     {
-        $timeframe = $request->get('timeframe', 'month');
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+        $preset = $request->get('preset', 'all');
 
-        // Total Fleet Metrics (Raw numbers for accurate calculations)
-        $totalDistance = (float) Trip::where('status', 'completed')->sum('distance_km');
-        $totalFuelCost = (float) FuelLog::sum('cost');
-        $totalMaintenanceCost = (float) MaintenanceRecord::sum('cost');
+        // Handle Quick Presets if custom date range is not provided
+        if (empty($startDate) && empty($endDate) && $preset !== 'all') {
+            if ($preset === 'today') {
+                $startDate = now()->toDateString();
+                $endDate = now()->toDateString();
+            } elseif ($preset === 'month') {
+                $startDate = now()->startOfMonth()->toDateString();
+                $endDate = now()->endOfMonth()->toDateString();
+            } elseif ($preset === 'last30') {
+                $startDate = now()->subDays(30)->toDateString();
+                $endDate = now()->toDateString();
+            } elseif ($preset === 'year') {
+                $startDate = now()->startOfYear()->toDateString();
+                $endDate = now()->endOfYear()->toDateString();
+            }
+        }
+
+        // Build base queries with optional date filters
+        $tripQuery = Trip::where('status', 'completed');
+        $fuelQuery = FuelLog::query();
+        $maintQuery = MaintenanceRecord::query();
+
+        if ($startDate && $endDate) {
+            $tripQuery->where(function($q) use ($startDate, $endDate) {
+                $q->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate])
+                  ->orWhereBetween(DB::raw('DATE(updated_at)'), [$startDate, $endDate]);
+            });
+            $fuelQuery->whereBetween('date', [$startDate, $endDate]);
+            $maintQuery->whereBetween('scheduled_date', [$startDate, $endDate]);
+        }
+
+        // Total Fleet Metrics
+        $totalDistance = (float) (clone $tripQuery)->sum('distance_km');
+        $totalFuelCost = (float) (clone $fuelQuery)->sum('cost');
+        $totalMaintenanceCost = (float) (clone $maintQuery)->sum('cost');
         $totalOperationalCost = $totalFuelCost + $totalMaintenanceCost;
 
         // Raw float metrics for calculations
@@ -36,23 +69,28 @@ class CostAnalysisController extends Controller
         $maintCostPerKm = number_format($rawMaintCostPerKm, 2);
 
         // Bulk Aggregations to Eliminate N+1 DB Queries
-        $tripDistanceByVehicle = Trip::where('status', 'completed')
+        $tripDistanceByVehicle = (clone $tripQuery)
             ->select('vehicle_id', DB::raw('SUM(distance_km) as total_distance'))
             ->groupBy('vehicle_id')
             ->pluck('total_distance', 'vehicle_id');
 
-        $fuelCostByVehicle = FuelLog::select('vehicle_id', DB::raw('SUM(cost) as total_cost'), DB::raw('MIN(fuel_type) as sample_fuel_type'))
+        $fuelCostByVehicle = (clone $fuelQuery)
+            ->select('vehicle_id', DB::raw('SUM(cost) as total_cost'), DB::raw('MIN(fuel_type) as sample_fuel_type'))
             ->groupBy('vehicle_id')
             ->get()
             ->keyBy('vehicle_id');
 
-        $maintCostByVehicle = MaintenanceRecord::select('vehicle_id', DB::raw('SUM(cost) as total_cost'))
+        $maintCostByVehicle = (clone $maintQuery)
+            ->select('vehicle_id', DB::raw('SUM(cost) as total_cost'))
             ->groupBy('vehicle_id')
             ->pluck('total_cost', 'vehicle_id');
 
         // Vehicle Cost Breakdown
-        $vehicles = Vehicle::withCount(['trips' => function($q) {
+        $vehicles = Vehicle::withCount(['trips' => function($q) use ($startDate, $endDate) {
             $q->where('status', 'completed');
+            if ($startDate && $endDate) {
+                $q->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+            }
         }])->get()->map(function ($vehicle) use ($tripDistanceByVehicle, $fuelCostByVehicle, $maintCostByVehicle) {
             $distance = (float) ($tripDistanceByVehicle[$vehicle->id] ?? 0);
             $fuelLog = $fuelCostByVehicle->get($vehicle->id);
@@ -80,23 +118,17 @@ class CostAnalysisController extends Controller
         })->sortByDesc('total_cost');
 
         // Bulk Driver Aggregations
-        $tripStatsByDriver = Trip::where('status', 'completed')
+        $tripStatsByDriver = (clone $tripQuery)
             ->select('driver_id', DB::raw('SUM(distance_km) as total_distance'), DB::raw('SUM(actual_duration_minutes) as total_duration'))
             ->groupBy('driver_id')
             ->get()
             ->keyBy('driver_id');
 
-        $fuelCostByTrip = FuelLog::whereNotNull('trip_id')
-            ->select('trip_id', DB::raw('SUM(cost) as total_cost'))
-            ->groupBy('trip_id')
-            ->pluck('total_cost', 'trip_id');
-
         // Driver Efficiency & Cost Analysis
         $drivers = Driver::with('user')->get()->map(function ($driver) use ($tripStatsByDriver) {
             $stats = $tripStatsByDriver->get($driver->id);
             $distance = (float) ($stats ? $stats->total_distance : 0);
-            $totalDuration = (float) ($stats ? $stats->total_duration : 0);
-            $fuelCost = 0; // Derived from trip telemetry if available
+            $fuelCost = 0;
 
             $perfScore = (float) ($driver->performance_score ?? 100);
 
@@ -116,7 +148,6 @@ class CostAnalysisController extends Controller
         // AI Cost Optimization Suggestions
         $optimizationInsights = [];
 
-        // Insight 1: Vehicle type comparison
         $threshold = $rawCostPerKm * 1.25;
         $highCostVehicles = $vehicles->filter(function($v) use ($threshold) {
             return $v['cost_per_km'] > $threshold;
@@ -132,7 +163,6 @@ class CostAnalysisController extends Controller
             ];
         }
 
-        // Insight 2: Route & Fuel optimization
         if ($totalFuelCost > 0) {
             $optimizationInsights[] = [
                 'type' => 'success',
@@ -145,7 +175,7 @@ class CostAnalysisController extends Controller
         return view('cost-analysis.index', compact(
             'totalDistance', 'totalFuelCost', 'totalMaintenanceCost', 'totalOperationalCost',
             'costPerKm', 'fuelCostPerKm', 'maintCostPerKm',
-            'vehicles', 'drivers', 'optimizationInsights', 'timeframe'
+            'vehicles', 'drivers', 'optimizationInsights', 'startDate', 'endDate', 'preset'
         ));
     }
 
@@ -154,18 +184,27 @@ class CostAnalysisController extends Controller
      */
     public function exportCsv(Request $request)
     {
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
         $fileName = 'Hirna_TCAO_Cost_Analysis_' . date('Y-m-d_His') . '.csv';
 
-        $vehicles = Vehicle::withCount(['trips' => function($q) {
-            $q->where('status', 'completed');
-        }])->get()->map(function ($vehicle) {
-            $trips = Trip::where('vehicle_id', $vehicle->id)->where('status', 'completed');
-            $distance = (float) $trips->sum('distance_km');
-            $fuelCost = (float) FuelLog::where('vehicle_id', $vehicle->id)->sum('cost');
-            $maintCost = (float) MaintenanceRecord::where('vehicle_id', $vehicle->id)->sum('cost');
+        $tripQuery = Trip::where('status', 'completed');
+        $fuelQuery = FuelLog::query();
+        $maintQuery = MaintenanceRecord::query();
+
+        if ($startDate && $endDate) {
+            $tripQuery->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+            $fuelQuery->whereBetween('date', [$startDate, $endDate]);
+            $maintQuery->whereBetween('scheduled_date', [$startDate, $endDate]);
+        }
+
+        $vehicles = Vehicle::all()->map(function ($vehicle) use ($tripQuery, $fuelQuery, $maintQuery) {
+            $distance = (float) (clone $tripQuery)->where('vehicle_id', $vehicle->id)->sum('distance_km');
+            $fuelCost = (float) (clone $fuelQuery)->where('vehicle_id', $vehicle->id)->sum('cost');
+            $maintCost = (float) (clone $maintQuery)->where('vehicle_id', $vehicle->id)->sum('cost');
             $totalCost = $fuelCost + $maintCost;
 
-            $logFuelType = FuelLog::where('vehicle_id', $vehicle->id)->value('fuel_type');
+            $logFuelType = (clone $fuelQuery)->where('vehicle_id', $vehicle->id)->value('fuel_type');
             $fuelType = $logFuelType ?: (str_contains(strtolower($vehicle->model . ' ' . $vehicle->make . ' ' . $vehicle->type), 'ev') || str_contains(strtolower($vehicle->model), 'vinfast') ? 'Electric (kWh)' : 'Gasoline (Liters)');
 
             return [
@@ -173,7 +212,7 @@ class CostAnalysisController extends Controller
                 'model' => $vehicle->make . ' ' . $vehicle->model,
                 'type' => $vehicle->type,
                 'fuel_type' => $fuelType,
-                'trips_completed' => $vehicle->trips_count,
+                'trips_completed' => (clone $tripQuery)->where('vehicle_id', $vehicle->id)->count(),
                 'distance_km' => round($distance, 1),
                 'fuel_cost' => round($fuelCost, 2),
                 'maintenance_cost' => round($maintCost, 2),
@@ -224,23 +263,35 @@ class CostAnalysisController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        $totalDistance = (float) Trip::where('status', 'completed')->sum('distance_km');
-        $totalFuelCost = (float) FuelLog::sum('cost');
-        $totalMaintenanceCost = (float) MaintenanceRecord::sum('cost');
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+
+        $tripQuery = Trip::where('status', 'completed');
+        $fuelQuery = FuelLog::query();
+        $maintQuery = MaintenanceRecord::query();
+
+        if ($startDate && $endDate) {
+            $tripQuery->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+            $fuelQuery->whereBetween('date', [$startDate, $endDate]);
+            $maintQuery->whereBetween('scheduled_date', [$startDate, $endDate]);
+        }
+
+        $totalDistance = (float) (clone $tripQuery)->sum('distance_km');
+        $totalFuelCost = (float) (clone $fuelQuery)->sum('cost');
+        $totalMaintenanceCost = (float) (clone $maintQuery)->sum('cost');
         $totalOperationalCost = $totalFuelCost + $totalMaintenanceCost;
 
         $costPerKm = number_format($totalDistance > 0 ? ($totalOperationalCost / $totalDistance) : 0, 2);
         $fuelCostPerKm = number_format($totalDistance > 0 ? ($totalFuelCost / $totalDistance) : 0, 2);
         $maintCostPerKm = number_format($totalDistance > 0 ? ($totalMaintenanceCost / $totalDistance) : 0, 2);
 
-        $vehicles = Vehicle::all()->map(function ($vehicle) {
-            $trips = Trip::where('vehicle_id', $vehicle->id)->where('status', 'completed');
-            $distance = (float) $trips->sum('distance_km');
-            $fuelCost = (float) FuelLog::where('vehicle_id', $vehicle->id)->sum('cost');
-            $maintCost = (float) MaintenanceRecord::where('vehicle_id', $vehicle->id)->sum('cost');
+        $vehicles = Vehicle::all()->map(function ($vehicle) use ($tripQuery, $fuelQuery, $maintQuery) {
+            $distance = (float) (clone $tripQuery)->where('vehicle_id', $vehicle->id)->sum('distance_km');
+            $fuelCost = (float) (clone $fuelQuery)->where('vehicle_id', $vehicle->id)->sum('cost');
+            $maintCost = (float) (clone $maintQuery)->where('vehicle_id', $vehicle->id)->sum('cost');
             $totalCost = $fuelCost + $maintCost;
 
-            $logFuelType = FuelLog::where('vehicle_id', $vehicle->id)->value('fuel_type');
+            $logFuelType = (clone $fuelQuery)->where('vehicle_id', $vehicle->id)->value('fuel_type');
             $fuelType = $logFuelType ?: (str_contains(strtolower($vehicle->model . ' ' . $vehicle->make . ' ' . $vehicle->type), 'ev') || str_contains(strtolower($vehicle->model), 'vinfast') ? 'Electric (kWh)' : 'Gasoline (Liters)');
 
             return [
@@ -257,7 +308,7 @@ class CostAnalysisController extends Controller
 
         return view('cost-analysis.pdf', compact(
             'totalDistance', 'totalFuelCost', 'totalMaintenanceCost', 'totalOperationalCost',
-            'costPerKm', 'fuelCostPerKm', 'maintCostPerKm', 'vehicles'
+            'costPerKm', 'fuelCostPerKm', 'maintCostPerKm', 'vehicles', 'startDate', 'endDate'
         ));
     }
 

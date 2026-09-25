@@ -221,7 +221,6 @@
                 </div>
             @endforeach
         </div>
-        </div>
 
         <!-- PMS Maintenance Tab -->
         <div class="tab-pane fade" id="pms-pane" role="tabpanel" aria-labelledby="pms-tab" tabindex="0">
@@ -362,10 +361,10 @@
                                         <div class="bg-secondary bg-opacity-10 p-2 rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
                                             <i class="bi bi-person-fill text-secondary fs-5"></i>
                                         </div>
-                                        <span class="fw-bold">{{ $driver->user->name }}</span>
+                                        <span class="fw-bold">{{ $driver->user?->name ?? 'Driver #'.$driver->id }}</span>
                                     </div>
                                 </td>
-                                <td>{{ $driver->user->email }}</td>
+                                <td>{{ $driver->user?->email ?? 'N/A' }}</td>
                                 <td class="fw-bold text-uppercase">{{ $driver->license_number }}</td>
                                 <td>
                                     <span class="badge rounded-pill {{ $driver->status === 'available' ? 'bg-success' : ($driver->status === 'on_trip' ? 'bg-info' : 'bg-secondary') }}">

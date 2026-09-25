@@ -569,12 +569,6 @@
             @yield('scripts')
         </div>
     </div>
-    <!-- Vendor JavaScript Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-
     <!-- High-Performance Instant Module Switcher & Non-Blocking Engine -->
     <script>
         // 1. Global Module Search Dispatcher (Defined once at top-level window scope)
@@ -726,6 +720,35 @@
 
             // Single Top-Level Document Delegation (Registered ONCE)
             document.body.addEventListener('click', function (e) {
+                // Ensure Bootstrap Dropdown instances are initialized and toggled reliably
+                const dropdownToggle = e.target.closest('[data-bs-toggle="dropdown"]');
+                if (dropdownToggle && window.bootstrap && window.bootstrap.Dropdown) {
+                    const dropdownInst = bootstrap.Dropdown.getOrCreateInstance(dropdownToggle);
+                    setTimeout(() => {
+                        const menu = dropdownToggle.nextElementSibling || (dropdownToggle.parentElement ? dropdownToggle.parentElement.querySelector('.dropdown-menu') : null);
+                        if (menu && !menu.classList.contains('show')) {
+                            dropdownInst.toggle();
+                        }
+                    }, 50);
+                }
+
+                // Ensure Bootstrap Modal instances are initialized and shown reliably
+                const modalToggle = e.target.closest('[data-bs-toggle="modal"]');
+                if (modalToggle && window.bootstrap && window.bootstrap.Modal) {
+                    const target = modalToggle.getAttribute('data-bs-target') || modalToggle.getAttribute('href');
+                    if (target && target.startsWith('#')) {
+                        const targetModal = document.querySelector(target);
+                        if (targetModal) {
+                            const modalInst = bootstrap.Modal.getOrCreateInstance(targetModal);
+                            setTimeout(() => {
+                                if (!targetModal.classList.contains('show')) {
+                                    modalInst.show();
+                                }
+                            }, 50);
+                        }
+                    }
+                }
+
                 // Priority 1: Never intercept Bootstrap dropdowns, modals, offcanvas, or Logout elements!
                 if (e.target.closest('.dropdown, .dropdown-toggle, .dropdown-menu, #logoutConfirmationModal, [data-bs-toggle], [data-bs-target], form[action*="logout"]')) {
                     return; // Direct Bootstrap & browser handling

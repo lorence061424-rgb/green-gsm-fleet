@@ -139,7 +139,7 @@
                                         <button class="btn btn-sm btn-primary rounded-2 px-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#editVehicleModal{{ $vehicle->id }}" title="Edit Vehicle">
                                             <i class="bi bi-pencil-fill me-1"></i> Edit
                                         </button>
-                                        <form action="{{ route('vehicles.destroy', $vehicle) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this vehicle?');">
+                                         <form action="{{ route('vehicles.destroy', $vehicle) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this vehicle?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger rounded-2 px-2 shadow-sm" title="Delete Vehicle">
@@ -149,67 +149,6 @@
                                     </div>
                                 </td>
                             </tr>
-
-                            <!-- Edit Vehicle Modal -->
-                            <div class="modal fade" id="editVehicleModal{{ $vehicle->id }}" tabindex="-1" aria-labelledby="editVehicleModalLabel{{ $vehicle->id }}" aria-hidden="true">
-                                <div class="modal-dialog rounded-4 overflow-hidden">
-                                    <div class="modal-content border-0">
-                                        <form action="{{ route('vehicles.update', $vehicle) }}" method="POST">
-                                            @csrf
-                                            @method('PUT')
-                                            <div class="modal-header bg-secondary text-white border-0">
-                                                <h5 class="modal-title fw-bold" id="editVehicleModalLabel{{ $vehicle->id }}">Edit Hirna Vehicle Details</h5>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body p-4">
-                                                <div class="row g-3">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label" style="font-weight: 500;">Make (Brand)</label>
-                                                        <input type="text" name="make" value="{{ $vehicle->make }}" class="form-control rounded-3" required>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label" style="font-weight: 500;">Model (Name)</label>
-                                                        <input type="text" name="model" value="{{ $vehicle->model }}" class="form-control rounded-3" required>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label" style="font-weight: 500;">License Plate</label>
-                                                        <input type="text" name="license_plate" value="{{ $vehicle->license_plate }}" class="form-control rounded-3" required>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label" style="font-weight: 500;">Year</label>
-                                                        <input type="number" name="year" value="{{ $vehicle->year }}" class="form-control rounded-3" required>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label" style="font-weight: 500;">Vehicle Category</label>
-                                                        <select name="type" class="form-select rounded-3" required>
-                                                            <option value="Sedan" {{ $vehicle->type === 'Sedan' ? 'selected' : '' }}>Sedan (Nerio Green)</option>
-                                                            <option value="SUV" {{ $vehicle->type === 'SUV' ? 'selected' : '' }}>SUV (VF 8 / VF 9)</option>
-                                                            <option value="Crossover" {{ $vehicle->type === 'Crossover' ? 'selected' : '' }}>Crossover (VF e34)</option>
-                                                            <option value="Hatchback" {{ $vehicle->type === 'Hatchback' ? 'selected' : '' }}>Compact (VF 5)</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label" style="font-weight: 500;">Tank / Battery Capacity (Liters / kWh)</label>
-                                                        <input type="number" name="fuel_capacity" value="{{ $vehicle->fuel_capacity }}" step="0.1" class="form-control rounded-3" required>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <label class="form-label" style="font-weight: 500;">Status</label>
-                                                        <select name="status" class="form-select rounded-3" required>
-                                                            <option value="active" {{ $vehicle->status === 'active' ? 'selected' : '' }}>Active (Available)</option>
-                                                            <option value="maintenance" {{ $vehicle->status === 'maintenance' ? 'selected' : '' }}>Maintenance</option>
-                                                            <option value="offline" {{ $vehicle->status === 'offline' ? 'selected' : '' }}>Offline</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer border-0 p-3 bg-light">
-                                                <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
-                                                <button type="submit" class="btn btn-premium rounded-3">Update Vehicle</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
                         @empty
                             <tr>
                                 <td colspan="6" class="text-center text-muted py-5">No fleet vehicles registered yet.</td>
@@ -218,6 +157,70 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Edit Vehicle Modals (Placed cleanly outside table to ensure valid DOM HTML) -->
+            @foreach($vehicles as $vehicle)
+                <div class="modal fade" id="editVehicleModal{{ $vehicle->id }}" tabindex="-1" aria-labelledby="editVehicleModalLabel{{ $vehicle->id }}" aria-hidden="true">
+                    <div class="modal-dialog rounded-4 overflow-hidden">
+                        <div class="modal-content border-0">
+                            <form action="{{ route('vehicles.update', $vehicle) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <div class="modal-header bg-secondary text-white border-0">
+                                    <h5 class="modal-title fw-bold" id="editVehicleModalLabel{{ $vehicle->id }}">Edit Hirna Vehicle Details</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label" style="font-weight: 500;">Make (Brand)</label>
+                                            <input type="text" name="make" value="{{ $vehicle->make }}" class="form-control rounded-3" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" style="font-weight: 500;">Model (Name)</label>
+                                            <input type="text" name="model" value="{{ $vehicle->model }}" class="form-control rounded-3" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" style="font-weight: 500;">License Plate</label>
+                                            <input type="text" name="license_plate" value="{{ $vehicle->license_plate }}" class="form-control rounded-3" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" style="font-weight: 500;">Year</label>
+                                            <input type="number" name="year" value="{{ $vehicle->year }}" class="form-control rounded-3" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" style="font-weight: 500;">Vehicle Category</label>
+                                            <select name="type" class="form-select rounded-3" required>
+                                                <option value="Sedan" {{ $vehicle->type === 'Sedan' ? 'selected' : '' }}>Sedan (Nerio Green)</option>
+                                                <option value="SUV" {{ $vehicle->type === 'SUV' ? 'selected' : '' }}>SUV (VF 8 / VF 9)</option>
+                                                <option value="Crossover" {{ $vehicle->type === 'Crossover' ? 'selected' : '' }}>Crossover (VF e34)</option>
+                                                <option value="Hatchback" {{ $vehicle->type === 'Hatchback' ? 'selected' : '' }}>Compact (VF 5)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" style="font-weight: 500;">Tank / Battery Capacity (Liters / kWh)</label>
+                                            <input type="number" name="fuel_capacity" value="{{ $vehicle->fuel_capacity }}" step="0.1" class="form-control rounded-3" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label" style="font-weight: 500;">Status</label>
+                                            <select name="status" class="form-select rounded-3" required>
+                                                <option value="active" {{ $vehicle->status === 'active' ? 'selected' : '' }}>Active (Available)</option>
+                                                <option value="maintenance" {{ $vehicle->status === 'maintenance' ? 'selected' : '' }}>Maintenance</option>
+                                                <option value="offline" {{ $vehicle->status === 'offline' ? 'selected' : '' }}>Offline</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-0 p-3 bg-light">
+                                    <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-premium rounded-3">Update Vehicle</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
         </div>
 
         <!-- PMS Maintenance Tab -->

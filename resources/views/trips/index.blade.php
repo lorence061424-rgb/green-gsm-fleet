@@ -1893,6 +1893,14 @@
         }
     }
 
+    function filterTripsTable() {
+        const query = (document.getElementById('tripSearchInput')?.value || '').toLowerCase().trim();
+        document.querySelectorAll('.list-group-item').forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(query) ? '' : 'none';
+        });
+    }
+
     function filterCompletedTripsTable() {
         currentCompletedPage = 1;
         renderCompletedTripsTable();

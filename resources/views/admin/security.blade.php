@@ -386,7 +386,13 @@
                     <h5 class="fw-bold mb-1"><i class="bi bi-archive-fill text-primary me-2"></i> Database Security Log Archives Registry</h5>
                     <small class="text-muted">Safely stored historical audit log records archived into database table <code>security_log_archives</code>.</small>
                 </div>
-                <div class="d-flex gap-2 align-items-center">
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <div class="input-group" style="max-width: 260px;">
+                        <input type="text" id="archivedLogSearchInput" class="form-control form-control-sm rounded-start-3 border-secondary-subtle" placeholder="Search archive event, IP..." onkeyup="filterAuditLogTable()">
+                        <button class="btn btn-sm btn-danger rounded-end-3 fw-bold" type="button" onclick="filterAuditLogTable()" style="background: #CE2029 !important;">
+                            <i class="bi bi-search me-1"></i> Search
+                        </button>
+                    </div>
                     <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-2 fw-bold">
                         <i class="bi bi-database-check me-1"></i> {{ number_format($totalArchivedCount) }} Archived Record(s)
                     </span>
@@ -400,7 +406,7 @@
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0" id="securityArchivedLogTable">
                     <thead>
                         <tr class="text-muted" style="font-size: 11px; font-weight: 700; text-transform: uppercase;">
                             <th>ARCHIVED TIMESTAMP</th>
@@ -838,11 +844,18 @@ function filterUserRosterTable() {
 }
 
 function filterAuditLogTable() {
-    const query = (document.getElementById('auditLogSearchInput')?.value || '').toLowerCase().trim();
-    const rows = document.querySelectorAll('#securityAuditLogTable tbody tr');
-    rows.forEach(row => {
+    const activeQuery = (document.getElementById('auditLogSearchInput')?.value || '').toLowerCase().trim();
+    const activeRows = document.querySelectorAll('#securityAuditLogTable tbody tr');
+    activeRows.forEach(row => {
         const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(query) ? '' : 'none';
+        row.style.display = text.includes(activeQuery) ? '' : 'none';
+    });
+
+    const archiveQuery = (document.getElementById('archivedLogSearchInput')?.value || '').toLowerCase().trim();
+    const archiveRows = document.querySelectorAll('#securityArchivedLogTable tbody tr');
+    archiveRows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(archiveQuery) ? '' : 'none';
     });
 }
 
@@ -855,6 +868,9 @@ function filterSecurityRosterAndLogs() {
 
     const logInput = document.getElementById('auditLogSearchInput');
     if (logInput) logInput.value = query;
+
+    const archiveInput = document.getElementById('archivedLogSearchInput');
+    if (archiveInput) archiveInput.value = query;
     filterAuditLogTable();
 }
 </script>

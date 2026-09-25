@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SecurityLog;
+use App\Models\SecurityLogArchive;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -32,13 +33,43 @@ class SecurityController extends Controller
     }
 
     /**
+     * Auto-heal database schema to ensure security_log_archives table exists.
+     */
+    protected function ensureArchiveTableExists(): void
+    {
+        try {
+            if (!Schema::hasTable('security_log_archives')) {
+                Schema::create('security_log_archives', function (Blueprint $table) {
+                    $table->id();
+                    $table->unsignedBigInteger('original_log_id')->nullable();
+                    $table->string('event_type');
+                    $table->string('email')->nullable();
+                    $table->string('ip_address')->nullable();
+                    $table->string('user_agent')->nullable();
+                    $table->text('details')->nullable();
+                    $table->timestamp('original_created_at')->nullable();
+                    $table->timestamp('archived_at')->useCurrent();
+                    $table->string('archived_by')->nullable();
+                    $table->timestamps();
+                });
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Could not auto-create security_log_archives table: " . $e->getMessage());
+        }
+    }
+
+    /**
      * Display the Superadmin Security & User Access Control Center.
      */
     public function index()
     {
         $this->ensureStatusColumnExists();
+        $this->ensureArchiveTableExists();
+
         $securityLogs = SecurityLog::latest()->paginate(15);
-        
+        $archivedLogs = SecurityLogArchive::latest()->paginate(15, ['*'], 'archived_page');
+        $totalArchivedCount = SecurityLogArchive::count();
+
         $dbUsers = User::all();
         
         // Hirna Mobility official system role accounts
@@ -96,6 +127,8 @@ class SecurityController extends Controller
 
         return view('admin.security', compact(
             'securityLogs',
+            'archivedLogs',
+            'totalArchivedCount',
             'users',
             'lockedUsersCount',
             'totalFailedAttempts',
@@ -342,19 +375,54 @@ class SecurityController extends Controller
     }
 
     /**
-     * Clear old security logs.
+     * Safely archive active security audit logs into database table 'security_log_archives'.
      */
-    public function clearLogs()
+    public function archiveLogs(Request $request)
     {
-        SecurityLog::truncate();
-        
-        SecurityLog::create([
-            'event_type' => 'admin_unlock',
-            'email' => session('user_email', 'admin@hirna.ph'),
-            'ip_address' => request()->ip(),
-            'details' => 'Security audit log database truncated by Superadmin.',
-        ]);
+        $this->ensureArchiveTableExists();
 
-        return redirect()->back()->with('success', 'Security audit logs cleared successfully.');
+        try {
+            $logs = SecurityLog::all();
+            $count = $logs->count();
+
+            if ($count === 0) {
+                return redirect()->back()->with('error', '⚠️ No active security incident logs available to archive.');
+            }
+
+            $adminEmail = session('user_email', 'admin@hirna.ph');
+
+            foreach ($logs as $log) {
+                SecurityLogArchive::create([
+                    'original_log_id' => $log->id,
+                    'event_type' => $log->event_type,
+                    'email' => $log->email,
+                    'ip_address' => $log->ip_address,
+                    'user_agent' => $log->user_agent,
+                    'details' => $log->details,
+                    'original_created_at' => $log->created_at,
+                    'archived_at' => now(),
+                    'archived_by' => $adminEmail,
+                ]);
+            }
+
+            // Truncate active security logs table after safe archiving
+            SecurityLog::truncate();
+
+            // Record archiving event audit log
+            SecurityLog::create([
+                'event_type' => 'admin_archive_logs',
+                'email' => $adminEmail,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'details' => "Superadmin archived {$count} active security audit log(s) into database table 'security_log_archives'.",
+            ]);
+
+            Log::info("SECURITY AUDIT: Superadmin archived {$count} security logs to security_log_archives table.");
+
+            return redirect()->back()->with('success', "📦 Successfully archived {$count} security audit log record(s) into database table 'security_log_archives'.");
+        } catch (\Throwable $e) {
+            Log::error("Error archiving security logs: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to archive security logs: ' . $e->getMessage());
+        }
     }
 }

@@ -14,10 +14,10 @@
         <button class="btn btn-danger rounded-3 fw-bold" data-bs-toggle="modal" data-bs-target="#quickUnlockModal" style="background: #CE2029 !important;">
             <i class="bi bi-unlock-fill me-1"></i> Unlock Account / IP
         </button>
-        <form action="{{ route('admin.security.clear-logs') }}" method="POST" onsubmit="return confirm('Are you sure you want to clear security audit logs?');">
+        <form action="{{ route('admin.security.archive-logs') }}" method="POST" onsubmit="return confirm('Are you sure you want to archive all active security audit logs into the database archive table?');">
             @csrf
-            <button type="submit" class="btn btn-outline-secondary rounded-3">
-                <i class="bi bi-trash me-1"></i> Clear Audit Logs
+            <button type="submit" class="btn btn-outline-primary rounded-3 fw-bold">
+                <i class="bi bi-archive-fill me-1"></i> Archive Audit Logs
             </button>
         </form>
     </div>
@@ -349,6 +349,88 @@
                 <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-3">
                     <small class="text-muted">Page {{ $securityLogs->currentPage() }} of {{ $securityLogs->lastPage() }}</small>
                     {{ $securityLogs->links('pagination::bootstrap-5') }}
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+<!-- Database Security Log Archives Registry (Full-width Landscape Table Card) -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card premium-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <h5 class="fw-bold mb-1"><i class="bi bi-archive-fill text-primary me-2"></i> Database Security Log Archives Registry</h5>
+                    <small class="text-muted">Safely stored historical audit log records archived into database table <code>security_log_archives</code>.</small>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-2 fw-bold">
+                        <i class="bi bi-database-check me-1"></i> {{ number_format($totalArchivedCount) }} Archived Record(s)
+                    </span>
+                    <form action="{{ route('admin.security.archive-logs') }}" method="POST" onsubmit="return confirm('Are you sure you want to archive all active security audit logs into the database archive table?');">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-outline-primary rounded-3 fw-bold">
+                            <i class="bi bi-archive me-1"></i> Archive Current Logs
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="text-muted" style="font-size: 11px; font-weight: 700; text-transform: uppercase;">
+                            <th>ARCHIVED TIMESTAMP</th>
+                            <th>SECURITY EVENT</th>
+                            <th>TARGET ACCOUNT / EMAIL</th>
+                            <th>CLIENT IP</th>
+                            <th>DETAILS & REASON</th>
+                            <th>ARCHIVED BY</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($archivedLogs as $archived)
+                            <tr>
+                                <td style="font-size: 11.5px; white-space: nowrap;">
+                                    <div><i class="bi bi-clock-history me-1 text-muted"></i> {{ \Carbon\Carbon::parse($archived->original_created_at ?? $archived->created_at)->format('Y-m-d H:i:s') }}</div>
+                                    <small class="text-muted" style="font-size: 10px;">Archived: {{ \Carbon\Carbon::parse($archived->archived_at)->format('Y-m-d H:i') }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary rounded-pill px-2.5 py-1" style="font-size: 10.5px;">
+                                        <i class="bi bi-archive me-1"></i> {{ ucfirst(str_replace('_', ' ', $archived->event_type)) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong class="text-dark small d-block">{{ $archived->email ?: 'N/A' }}</strong>
+                                </td>
+                                <td>
+                                    <code class="bg-light text-dark px-2 py-1 rounded small" style="font-size: 11px;">{{ $archived->ip_address ?: '127.0.0.1' }}</code>
+                                </td>
+                                <td style="font-size: 11.5px; max-width: 280px;">
+                                    <span class="text-muted d-block text-truncate">{{ $archived->details }}</span>
+                                </td>
+                                <td style="font-size: 11px;" class="text-primary fw-medium">
+                                    <i class="bi bi-person-shield me-1"></i> {{ $archived->archived_by ?: 'Superadmin' }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="bi bi-box-seam fs-2 d-block mb-2 text-muted"></i>
+                                    No archived security logs found in <code>security_log_archives</code> table yet. Click <strong>Archive Audit Logs</strong> above to transfer logs safely into the database archive.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Archived Logs Pagination -->
+            @if($archivedLogs->hasPages())
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-3">
+                    <small class="text-muted">Archive Page {{ $archivedLogs->currentPage() }} of {{ $archivedLogs->lastPage() }}</small>
+                    {{ $archivedLogs->appends(['page' => $securityLogs->currentPage()])->links('pagination::bootstrap-5') }}
                 </div>
             @endif
         </div>

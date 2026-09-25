@@ -55,7 +55,8 @@ Route::middleware(['role'])->group(function () {
     Route::post('/admin/security/users', [\App\Http\Controllers\SecurityController::class, 'storeUser'])->middleware('role:admin')->name('admin.security.users.store');
     Route::post('/admin/security/users/{id}/toggle-status', [\App\Http\Controllers\SecurityController::class, 'toggleUserStatus'])->middleware('role:admin')->name('admin.security.users.toggle-status');
     Route::delete('/admin/security/users/{id}', [\App\Http\Controllers\SecurityController::class, 'deleteUser'])->middleware('role:admin')->name('admin.security.users.destroy');
-    Route::post('/admin/security/clear-logs', [\App\Http\Controllers\SecurityController::class, 'clearLogs'])->middleware('role:admin')->name('admin.security.clear-logs');
+    Route::post('/admin/security/archive-logs', [\App\Http\Controllers\SecurityController::class, 'archiveLogs'])->middleware('role:admin')->name('admin.security.archive-logs');
+    Route::post('/admin/security/clear-logs', [\App\Http\Controllers\SecurityController::class, 'archiveLogs'])->middleware('role:admin')->name('admin.security.clear-logs');
 
     // Fleet Management (FVM) (Fleet Manager & Admin Only)
     Route::get('/vehicles', [FleetController::class, 'index'])->middleware('role:admin,fleet_manager')->name('vehicles.index');

@@ -25,53 +25,59 @@
 
 <!-- KPI Cards Grid -->
 <div class="row mb-4">
-    <!-- Active Fleet Status -->
-    <div class="col-md-3">
-        <div class="card premium-card p-3 h-100">
+    <!-- Active Fleet Status (Navigates to Vehicles Fleet Inventory) -->
+    <div class="col-md-3 mb-3 mb-md-0">
+        <a href="{{ route('vehicles.index') }}" class="card premium-card p-3 h-100 text-decoration-none text-reset pjax-link kpi-clickable-card">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px;">Active Hirna Fleet</span>
+                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">Active Hirna Fleet</span>
                     <h3 class="fw-bold mt-1 mb-0 text-primary">{{ $activeVehicles }}<span class="fs-6 text-muted font-normal"> / {{ $totalVehicles }} units</span></h3>
                 </div>
-                <div class="bg-primary bg-opacity-10 p-3 rounded-4">
-                    <i class="bi bi-car-front-fill fs-3 text-primary"></i>
+                <div class="bg-primary text-white p-3 rounded-4 shadow-sm d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                    <i class="bi bi-car-front-fill fs-3"></i>
                 </div>
             </div>
-            <div class="mt-3">
-                <span class="badge bg-success rounded-pill me-1">{{ $activeVehicles }} Active Vehicles</span>
-                <span class="badge bg-warning text-dark rounded-pill">{{ $maintenanceVehicles }} PMS Servicing</span>
+            <div class="mt-3 d-flex align-items-center justify-content-between flex-wrap gap-1">
+                <div>
+                    <span class="badge bg-success rounded-pill me-1">{{ $activeVehicles }} Active Vehicles</span>
+                    <span class="badge bg-warning text-dark rounded-pill">{{ $maintenanceVehicles }} PMS Servicing</span>
+                </div>
+                <small class="text-primary fw-bold" style="font-size: 11px;">Fleet Module <i class="bi bi-arrow-right ms-1"></i></small>
             </div>
-        </div>
+        </a>
     </div>
 
-    <!-- Active Dispatches & Live GPS -->
-    <div class="col-md-3">
-        <div class="card premium-card p-3 h-100">
+    <!-- Active Dispatches & Live GPS (Navigates to Trip Performance Monitoring) -->
+    <div class="col-md-3 mb-3 mb-md-0">
+        <a href="{{ route('trips.index') }}" class="card premium-card p-3 h-100 text-decoration-none text-reset pjax-link kpi-clickable-card">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px;">Active Dispatches</span>
+                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">Active Dispatches</span>
                     <h3 class="fw-bold mt-1 mb-0 text-info">{{ $activeTrips }}</h3>
                 </div>
-                <div class="bg-info bg-opacity-10 p-3 rounded-4">
-                    <i class="bi bi-geo-alt-fill fs-3 text-info"></i>
+                <div class="bg-info text-white p-3 rounded-4 shadow-sm d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                    <i class="bi bi-geo-alt-fill fs-3"></i>
                 </div>
             </div>
-            <div class="mt-3 text-muted" style="font-size: 13px;">
-                <span class="loader-pulse me-1"></span> <span class="fw-bold text-danger">Live GPS</span> Telemetry Online
+            <div class="mt-3 d-flex align-items-center justify-content-between text-muted" style="font-size: 12.5px;">
+                <div>
+                    <span class="loader-pulse me-1"></span> <span class="fw-bold text-danger">Live GPS</span> Telemetry Online
+                </div>
+                <small class="text-info fw-bold" style="font-size: 11px;">Trips Module <i class="bi bi-arrow-right ms-1"></i></small>
             </div>
-        </div>
+        </a>
     </div>
 
-    <!-- Dual Fuel & Energy Expenses (Gasoline/Diesel + EV Electric) -->
-    <div class="col-md-3">
-        <div class="card premium-card p-3 h-100">
+    <!-- Dual Fuel & Energy Expenses (Navigates to Fuel Management System) -->
+    <div class="col-md-3 mb-3 mb-md-0">
+        <a href="{{ route('fuel.index') }}" class="card premium-card p-3 h-100 text-decoration-none text-reset pjax-link kpi-clickable-card">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px;">Total Fuel & Energy Expense</span>
+                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">Total Fuel & Energy Expense</span>
                     <h3 class="fw-bold mt-1 mb-0 text-success">₱{{ number_format($totalFuelCost, 2) }}</h3>
                 </div>
-                <div class="bg-success bg-opacity-10 p-3 rounded-4">
-                    <i class="bi bi-fuel-pump-fill fs-3 text-success"></i>
+                <div class="bg-success text-white p-3 rounded-4 shadow-sm d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                    <i class="bi bi-fuel-pump-fill fs-3"></i>
                 </div>
             </div>
             <div class="mt-3 text-muted" style="font-size: 11.5px;">
@@ -79,24 +85,24 @@
                     <span>⛽ <strong>Gasoline/Diesel:</strong></span>
                     <span class="text-dark fw-bold">{{ number_format($gasolineLiters, 1) }} L (₱{{ number_format($gasolineCost, 2) }})</span>
                 </div>
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between align-items-center">
                     <span>⚡ <strong>EV Charging:</strong></span>
-                    <span class="text-dark fw-bold">{{ number_format($evKwh, 1) }} kWh (₱{{ number_format($evCost, 2) }})</span>
+                    <small class="text-success fw-bold" style="font-size: 11px;">Fuel Module <i class="bi bi-arrow-right ms-1"></i></small>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
-    <!-- Maintenance & Energy Consumption Rates -->
+    <!-- Maintenance & Energy Consumption Rates (Navigates to PMS Maintenance Logs) -->
     <div class="col-md-3">
-        <div class="card premium-card p-3 h-100">
+        <a href="{{ route('maintenance.index') }}" class="card premium-card p-3 h-100 text-decoration-none text-reset pjax-link kpi-clickable-card">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px;">Maintenance Expense</span>
+                    <span class="text-muted text-uppercase fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">Maintenance Expense</span>
                     <h3 class="fw-bold mt-1 mb-0 text-danger">₱{{ number_format($totalMaintenanceCost, 2) }}</h3>
                 </div>
-                <div class="bg-danger bg-opacity-10 p-3 rounded-4">
-                    <i class="bi bi-wrench-adjustable-circle-fill fs-3 text-danger"></i>
+                <div class="bg-danger text-white p-3 rounded-4 shadow-sm d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                    <i class="bi bi-wrench-adjustable-circle-fill fs-3"></i>
                 </div>
             </div>
             <div class="mt-3 text-muted" style="font-size: 11.5px;">
@@ -104,12 +110,12 @@
                     <span>⛽ Fuel Consumed:</span>
                     <strong class="text-dark">{{ number_format($gasolineLiters, 1) }} Liters</strong>
                 </div>
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between align-items-center">
                     <span>⚡ Energy Consumed:</span>
-                    <strong class="text-dark">{{ number_format($evKwh, 1) }} kWh</strong>
+                    <small class="text-danger fw-bold" style="font-size: 11px;">PMS Module <i class="bi bi-arrow-right ms-1"></i></small>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 

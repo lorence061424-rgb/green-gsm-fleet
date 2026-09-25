@@ -203,6 +203,18 @@
             border-radius: 10px;
         }
 
+        /* Interactive Dashboard KPI Cards */
+        .kpi-clickable-card {
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 1px solid var(--border-color) !important;
+        }
+        .kpi-clickable-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -6px rgba(206, 32, 41, 0.18) !important;
+            border-color: #CE2029 !important;
+        }
+
         /* Typography */
         .page-header-title {
             font-weight: 700;
@@ -798,7 +810,7 @@
             }
 
             document.body.addEventListener('click', function (e) {
-                const link = e.target.closest('.sidebar-nav-link');
+                const link = e.target.closest('.sidebar-nav-link, .pjax-link, .kpi-clickable-card, [data-pjax]');
                 if (link && link.href && !e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
                     const url = link.href;
                     if (url !== window.location.href) {

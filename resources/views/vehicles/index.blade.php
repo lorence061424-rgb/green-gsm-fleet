@@ -89,10 +89,10 @@
                 <table class="table table-hover align-middle" id="vehiclesTable">
                     <thead>
                         <tr class="text-muted" style="font-size: 13px;">
-                            <th>HIRNA EV MODEL</th>
-                            <th>PLATE NUMBER</th>
-                            <th>YEAR</th>
-                            <th>BATTERY CAPACITY</th>
+                            <th>HIRNA VEHICLE MODEL</th>
+                            <th>DEALERSHIP COMPANY</th>
+                            <th>OR / CR & REGISTRATION</th>
+                            <th>GASOLINE / FUEL TYPE</th>
                             <th>STATUS</th>
                             <th>ACTIONS</th>
                         </tr>
@@ -106,15 +106,26 @@
                                             <i class="bi bi-ev-front-fill text-success fs-5"></i>
                                         </div>
                                         <div>
-                                            <span class="fw-bold d-block text-dark">{{ $vehicle->make }} {{ $vehicle->model }}</span>
-                                            <small class="badge bg-secondary" style="font-size: 10px;">{{ $vehicle->type }}</small>
+                                            <span class="fw-bold d-block text-dark">{{ $vehicle->make }} {{ $vehicle->model }} ({{ $vehicle->year }})</span>
+                                            <small class="badge bg-dark" style="font-size: 10px;">{{ $vehicle->license_plate }}</small>
+                                            <small class="badge bg-secondary ms-1" style="font-size: 10px;">{{ $vehicle->type }}</small>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="fw-bold text-dark">{{ $vehicle->license_plate }}</td>
-                                <td>{{ $vehicle->year }}</td>
-                                <td class="fw-bold text-success">
-                                    <i class="bi bi-battery-charging me-1"></i> {{ $vehicle->fuel_capacity }} kWh
+                                <td>
+                                    <span class="fw-bold text-dark d-block small"><i class="bi bi-building me-1 text-danger"></i> {{ $vehicle->dealership_company ?? 'Toyota Pasig Motors' }}</span>
+                                </td>
+                                <td>
+                                    <div class="small">
+                                        <span class="d-block text-muted">OR: <strong class="text-dark">{{ $vehicle->or_number ?? 'OR-2026-001' }}</strong> | CR: <strong class="text-dark">{{ $vehicle->cr_number ?? 'CR-2025-001' }}</strong></span>
+                                        <span class="badge {{ $vehicle->registration_status === 'active' ? 'bg-success' : 'bg-warning text-dark' }} mt-1">
+                                            <i class="bi bi-card-checklist me-1"></i> Reg: {{ ucfirst(str_replace('_', ' ', $vehicle->registration_status ?? 'active')) }} (Exp: {{ $vehicle->registration_expiry_date ?? '2027-08-15' }})
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info text-dark fw-bold mb-1 d-inline-block"><i class="bi bi-fuel-pump me-1"></i> {{ $vehicle->fuel_type ?? 'Unleaded 91' }}</span>
+                                    <span class="d-block small text-muted"><i class="bi bi-battery-charging me-1 text-success"></i> {{ $vehicle->fuel_capacity }} kWh/L</span>
                                 </td>
                                 <td>
                                     <span class="badge rounded-pill {{ $vehicle->status === 'active' ? 'bg-success' : ($vehicle->status === 'maintenance' ? 'bg-warning text-dark' : 'bg-secondary') }}">
@@ -136,14 +147,14 @@
                                                 ⚙️ Send to Maintenance
                                             </button>
                                         @endif
-                                        <button class="btn btn-sm btn-primary rounded-2 px-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#editVehicleModal{{ $vehicle->id }}" title="Edit Vehicle">
-                                            <i class="bi bi-pencil-fill me-1"></i> Edit
-                                        </button>
-                                         <form action="{{ route('vehicles.destroy', $vehicle) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this vehicle?');">
+                                        <a href="{{ route('maintenance.index', ['vehicle_id' => $vehicle->id]) }}" class="btn btn-sm btn-outline-dark rounded-2 px-2 shadow-sm" style="font-size: 11px;" title="View Vehicle Repair History">
+                                            <i class="bi bi-clock-history me-1"></i> Repair History
+                                        </a>
+                                        <form action="{{ route('vehicles.destroy', $vehicle) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this vehicle?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-2 px-2 shadow-sm" title="Delete Vehicle">
-                                                <i class="bi bi-trash-fill me-1"></i> Delete
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-2 px-2 shadow-sm" style="font-size: 11px;" title="Delete Vehicle">
+                                                <i class="bi bi-trash-fill"></i>
                                             </button>
                                         </form>
                                     </div>
@@ -419,18 +430,52 @@
                             <input type="number" name="year" value="2026" class="form-control rounded-3" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label" style="font-weight: 500;">Vehicle Category</label>
-                            <select name="type" class="form-select rounded-3" required>
-                                <option value="Taxi Sedan" selected>Taxi Sedan (Toyota Vios / Accent / Almera)</option>
-                                <option value="MPV / SUV">MPV / SUV (Toyota Innova / SUV)</option>
-                                <option value="Shuttle Van">Shuttle Van (Toyota HiAce)</option>
-                                <option value="Electric Vehicle (EV)">Electric Vehicle (EV - VinFast / Nerio Green)</option>
-                                <option value="Hirna Traysikel">Hirna Traysikel (3-Wheeler Transport)</option>
+                            <label class="form-label" style="font-weight: 500;">Dealership Company</label>
+                            <input type="text" name="dealership_company" placeholder="e.g. Toyota Pasig Motors, VinFast Metro Manila" class="form-control rounded-3" value="Toyota Pasig Motors">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 500;">Gasoline / Fuel Type</label>
+                            <select name="fuel_type" class="form-select rounded-3" required>
+                                <option value="Unleaded 91" selected>⛽ Unleaded 91</option>
+                                <option value="Premium 95">🏎️ Premium 95</option>
+                                <option value="Euro 5 Diesel">🚛 Euro 5 Diesel</option>
+                                <option value="Electric / EV">⚡ Electric / EV</option>
+                                <option value="Hybrid">🔌 Hybrid</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label" style="font-weight: 500;">Tank / Battery Capacity (Liters / kWh)</label>
-                            <input type="number" name="fuel_capacity" placeholder="e.g. 45.0" step="0.1" class="form-control rounded-3" required>
+                            <label class="form-label" style="font-weight: 500;">OR Number (Official Receipt)</label>
+                            <input type="text" name="or_number" placeholder="e.g. OR-2026-88120" class="form-control rounded-3" value="OR-2026-00192">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 500;">CR Number (Certificate of Reg)</label>
+                            <input type="text" name="cr_number" placeholder="e.g. CR-2025-44910" class="form-control rounded-3" value="CR-2025-00481">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 500;">LTO Registration Number</label>
+                            <input type="text" name="registration_number" placeholder="e.g. LTO-NCR-99120" class="form-control rounded-3" value="LTO-NCR-77120">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 500;">Registration Status</label>
+                            <select name="registration_status" class="form-select rounded-3">
+                                <option value="active" selected>Active Compliance</option>
+                                <option value="pending_renewal">Pending Renewal</option>
+                                <option value="expired">Expired</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 500;">Category</label>
+                            <select name="type" class="form-select rounded-3" required>
+                                <option value="Taxi Sedan" selected>Taxi Sedan</option>
+                                <option value="MPV / SUV">MPV / SUV</option>
+                                <option value="Shuttle Van">Shuttle Van</option>
+                                <option value="Electric Vehicle (EV)">Electric Vehicle (EV)</option>
+                                <option value="Hirna Traysikel">Hirna Traysikel</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-weight: 500;">Tank / Battery Capacity (L / kWh)</label>
+                            <input type="number" name="fuel_capacity" placeholder="e.g. 45.0" step="0.1" value="45.0" class="form-control rounded-3" required>
                         </div>
                         <div class="col-12">
                             <label class="form-label" style="font-weight: 500;">Initial Status</label>

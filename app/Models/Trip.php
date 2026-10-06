@@ -25,6 +25,8 @@ class Trip extends Model
         'actual_duration_minutes',
         'estimated_fuel_liters',
         'actual_fuel_liters',
+        'toll_fees_amount',
+        'toll_fees_breakdown',
         'start_time',
         'end_time',
         'rating',
@@ -35,6 +37,7 @@ class Trip extends Model
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
+        'toll_fees_breakdown' => 'array',
     ];
 
     public function driver(): BelongsTo

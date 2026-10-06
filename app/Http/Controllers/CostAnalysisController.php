@@ -56,12 +56,14 @@ class CostAnalysisController extends Controller
         $totalDistance = (float) (clone $tripQuery)->sum('distance_km');
         $totalFuelCost = (float) (clone $fuelQuery)->sum('cost');
         $totalMaintenanceCost = (float) (clone $maintQuery)->sum('cost');
-        $totalOperationalCost = $totalFuelCost + $totalMaintenanceCost;
+        $totalTollFees = (float) (clone $tripQuery)->sum('toll_fees_amount');
+        $totalOperationalCost = $totalFuelCost + $totalMaintenanceCost + $totalTollFees;
 
         // Raw float metrics for calculations
         $rawCostPerKm = $totalDistance > 0 ? ($totalOperationalCost / $totalDistance) : 0;
         $rawFuelCostPerKm = $totalDistance > 0 ? ($totalFuelCost / $totalDistance) : 0;
         $rawMaintCostPerKm = $totalDistance > 0 ? ($totalMaintenanceCost / $totalDistance) : 0;
+        $rawTollCostPerKm = $totalDistance > 0 ? ($totalTollFees / $totalDistance) : 0;
 
         // Formatted metrics for display
         $costPerKm = number_format($rawCostPerKm, 2);
@@ -173,7 +175,7 @@ class CostAnalysisController extends Controller
         }
 
         return view('cost-analysis.index', compact(
-            'totalDistance', 'totalFuelCost', 'totalMaintenanceCost', 'totalOperationalCost',
+            'totalDistance', 'totalFuelCost', 'totalMaintenanceCost', 'totalTollFees', 'totalOperationalCost',
             'costPerKm', 'fuelCostPerKm', 'maintCostPerKm',
             'vehicles', 'drivers', 'optimizationInsights', 'startDate', 'endDate', 'preset'
         ));

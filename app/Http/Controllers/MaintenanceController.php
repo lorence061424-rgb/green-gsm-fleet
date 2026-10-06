@@ -8,12 +8,19 @@ use Illuminate\Http\Request;
 
 class MaintenanceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $records = MaintenanceRecord::with('vehicle')->latest()->get();
+        $filter = $request->query('filter');
+        $query = MaintenanceRecord::with('vehicle')->latest();
+
+        if ($filter && in_array($filter, ['maintenance', 'active', 'inactive'])) {
+            $query->filterHistory($filter);
+        }
+
+        $records = $query->get();
         $vehicles = Vehicle::all();
 
-        return view('maintenance.index', compact('records', 'vehicles'));
+        return view('maintenance.index', compact('records', 'vehicles', 'filter'));
     }
 
     public function store(Request $request)

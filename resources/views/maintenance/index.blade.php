@@ -48,11 +48,33 @@
     </div>
 </div>
 
+<!-- Vehicle Repair History Filter Bar -->
+<div class="card premium-card p-3 mb-4 border-0 shadow-sm bg-light">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+            <span class="fw-bold text-dark me-2" style="font-size: 13px;"><i class="bi bi-funnel-fill text-danger me-1"></i> Repair History Filter:</span>
+            <a href="{{ route('maintenance.index') }}" class="btn btn-sm {{ empty($filter) ? 'btn-danger text-white' : 'btn-outline-secondary' }} rounded-pill px-3 fw-bold">
+                <i class="bi bi-grid-fill me-1"></i> All Records
+            </a>
+            <a href="{{ route('maintenance.index', ['filter' => 'maintenance']) }}" class="btn btn-sm {{ $filter === 'maintenance' ? 'btn-danger text-white' : 'btn-outline-primary' }} rounded-pill px-3 fw-bold">
+                <i class="bi bi-wrench me-1"></i> Maintenance (PMS)
+            </a>
+            <a href="{{ route('maintenance.index', ['filter' => 'active']) }}" class="btn btn-sm {{ $filter === 'active' ? 'btn-danger text-white' : 'btn-outline-success' }} rounded-pill px-3 fw-bold">
+                <i class="bi bi-gear-wide-connected me-1"></i> Active Repairs
+            </a>
+            <a href="{{ route('maintenance.index', ['filter' => 'inactive']) }}" class="btn btn-sm {{ $filter === 'inactive' ? 'btn-danger text-white' : 'btn-outline-secondary' }} rounded-pill px-3 fw-bold">
+                <i class="bi bi-archive me-1"></i> Inactive / Completed
+            </a>
+        </div>
+        <span class="text-muted small">Showing {{ $records->count() }} records</span>
+    </div>
+</div>
+
 <!-- Scheduled and Log PMS Table Container -->
 <div class="card premium-card p-4 mb-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold mb-0"><i class="bi bi-wrench-adjustable text-danger me-2"></i> PMS Logs & Service Schedule</h5>
-        <span class="badge bg-danger text-white rounded-pill px-3 py-2" style="background: #CE2029 !important;">{{ $records->count() }} Service Records</span>
+        <h5 class="fw-bold mb-0"><i class="bi bi-wrench-adjustable text-danger me-2"></i> Vehicle Repair & PMS History</h5>
+        <span class="badge bg-danger text-white rounded-pill px-3 py-2" style="background: #CE2029 !important;">{{ $records->count() }} Filtered Records</span>
     </div>
     
     <div class="table-responsive">

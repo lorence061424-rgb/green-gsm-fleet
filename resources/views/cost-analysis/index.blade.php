@@ -98,7 +98,7 @@
                 <div>
                     <span class="text-muted small fw-bold text-uppercase">Total Fleet Operating Cost</span>
                     <h3 class="fw-bold my-1 text-primary">₱{{ number_format($totalOperationalCost, 2) }}</h3>
-                    <small class="text-muted">Fuel + Maintenance</small>
+                    <small class="text-muted">Fuel + Maintenance + Tolls</small>
                 </div>
                 <div class="bg-primary-subtle text-primary p-3 rounded-4 fs-4">
                     <i class="bi bi-wallet2"></i>
@@ -110,21 +110,7 @@
         <div class="card premium-card p-3 border-0">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <span class="text-muted small fw-bold text-uppercase">Average Cost per KM</span>
-                    <h3 class="fw-bold my-1 text-dark">₱{{ $costPerKm }} <span class="fs-6 text-muted">/ km</span></h3>
-                    <small class="text-muted">Fleetwide Metric</small>
-                </div>
-                <div class="bg-info-subtle text-info p-3 rounded-4 fs-4">
-                    <i class="bi bi-speedometer2"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card premium-card p-3 border-0">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="text-muted small fw-bold text-uppercase">Fuel Expense Share</span>
+                    <span class="text-muted small fw-bold text-uppercase">Fuel / EV Charging</span>
                     <h3 class="fw-bold my-1 text-warning">₱{{ number_format($totalFuelCost, 2) }}</h3>
                     <small class="text-muted">₱{{ $fuelCostPerKm }} / km</small>
                 </div>
@@ -138,12 +124,26 @@
         <div class="card premium-card p-3 border-0">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <span class="text-muted small fw-bold text-uppercase">Maintenance Cost</span>
+                    <span class="text-muted small fw-bold text-uppercase">Maintenance & Repairs</span>
                     <h3 class="fw-bold my-1 text-danger">₱{{ number_format($totalMaintenanceCost, 2) }}</h3>
                     <small class="text-muted">₱{{ $maintCostPerKm }} / km</small>
                 </div>
                 <div class="bg-danger-subtle text-danger p-3 rounded-4 fs-4">
                     <i class="bi bi-wrench"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card premium-card p-3 border-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase">Expressway Toll Fees</span>
+                    <h3 class="fw-bold my-1 text-info">₱{{ number_format($totalTollFees ?? 0, 2) }}</h3>
+                    <small class="text-muted">SLEX / NLEX / Skyway / NAIAx</small>
+                </div>
+                <div class="bg-info-subtle text-info p-3 rounded-4 fs-4">
+                    <i class="bi bi-receipt"></i>
                 </div>
             </div>
         </div>

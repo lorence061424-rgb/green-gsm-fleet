@@ -367,13 +367,14 @@
                                         </div>
                                         <span class="fw-bold">{{ $driver->user?->name ?? 'Driver #'.$driver->id }}</span>
                                     </div>
+                                </td>
                                 <td>
                                     @php
                                         $rawEmail = $driver->user?->email;
                                         if ($rawEmail && !str_contains($rawEmail, '@')) {
-                                            $formattedEmail = strtolower(str_replace(' ', '.', $rawEmail)) . '@hirna.ph';
+                                            $formattedEmail = strtolower(str_replace(' ', '.', $rawEmail)) . '@gmail.com';
                                         } else {
-                                            $formattedEmail = $rawEmail ?? ('driver' . $driver->id . '@hirna.ph');
+                                            $formattedEmail = $rawEmail ?? ('driver' . $driver->id . '@gmail.com');
                                         }
                                     @endphp
                                     <div class="d-flex align-items-center">

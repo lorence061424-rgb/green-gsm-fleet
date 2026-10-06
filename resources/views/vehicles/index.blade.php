@@ -150,13 +150,6 @@
                                         <a href="{{ route('maintenance.index', ['vehicle_id' => $vehicle->id]) }}" class="btn btn-sm btn-outline-dark rounded-2 px-2 shadow-sm" style="font-size: 11px;" title="View Vehicle Repair History">
                                             <i class="bi bi-clock-history me-1"></i> Repair History
                                         </a>
-                                        <form action="{{ route('vehicles.destroy', $vehicle) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this vehicle?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-2 px-2 shadow-sm" style="font-size: 11px;" title="Delete Vehicle">
-                                                <i class="bi bi-trash-fill"></i>
-                                            </button>
-                                        </form>
                                     </div>
                                 </td>
                             </tr>

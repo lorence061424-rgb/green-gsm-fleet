@@ -114,21 +114,31 @@
                         @php
                             $purposeIcons = ['meeting'=>'bi-briefcase','field_visit'=>'bi-map','airport'=>'bi-airplane','inter_branch'=>'bi-building','errand'=>'bi-bag','emergency'=>'bi-exclamation-triangle'];
                             $icon = $purposeIcons[$req->purpose_type] ?? 'bi-car-front';
-                            $urgColor = $req->urgency_level === 'priority' ? 'danger' : 'secondary';
-                            $statusColors = ['pending'=>'warning','approved'=>'success','rejected'=>'danger','completed'=>'secondary','cancelled'=>'dark'];
-                            $sc = $statusColors[$req->status] ?? 'secondary';
+                            $urgencyBadgeMap = [
+                                'priority' => ['bg' => '#FEE2E2', 'text' => '#991B1B', 'border' => '#F87171', 'label' => 'Priority', 'icon' => 'bi-exclamation-octagon-fill'],
+                                'routine'  => ['bg' => '#ECFDF5', 'text' => '#065F46', 'border' => '#10B981', 'label' => 'Routine', 'icon' => 'bi-check-circle-fill'],
+                            ];
+                            $statusBadgeMap = [
+                                'pending'   => ['bg' => '#FEF3C7', 'text' => '#92400E', 'border' => '#F59E0B', 'icon' => 'bi-hourglass-split', 'label' => 'Pending Review'],
+                                'approved'  => ['bg' => '#DCFCE7', 'text' => '#166534', 'border' => '#22C55E', 'icon' => 'bi-check-circle-fill', 'label' => 'Approved & Dispatched'],
+                                'rejected'  => ['bg' => '#FEE2E2', 'text' => '#991B1B', 'border' => '#EF4444', 'icon' => 'bi-x-circle-fill', 'label' => 'Rejected'],
+                                'completed' => ['bg' => '#F1F5F9', 'text' => '#334155', 'border' => '#94A3B8', 'icon' => 'bi-flag-fill', 'label' => 'Completed'],
+                                'cancelled' => ['bg' => '#F1F5F9', 'text' => '#64748B', 'border' => '#CBD5E1', 'icon' => 'bi-slash-circle', 'label' => 'Cancelled'],
+                            ];
+                            $uStyle = $urgencyBadgeMap[$req->urgency_level] ?? $urgencyBadgeMap['routine'];
+                            $sStyle = $statusBadgeMap[$req->status] ?? $statusBadgeMap['pending'];
                         @endphp
                         <tr>
                             <td><span class="fw-bold text-danger">#{{ $req->id }}</span></td>
                             <td>
-                                <span class="fw-semibold d-block">{{ $req->employee->name ?? 'Hirna Employee' }}</span>
+                                <span class="fw-semibold d-block text-dark">{{ $req->employee->name ?? 'Hirna Employee' }}</span>
                                 <small class="text-muted">{{ ucfirst($req->employee->role ?? 'Staff') }}</small>
                             </td>
                             <td>
-                                <span class="badge bg-primary-subtle text-primary border border-primary px-2 py-1 rounded-pill mb-1">
+                                <span class="badge px-2 py-1 rounded-pill mb-1 fw-bold" style="background: #EFF6FF; color: #1E40AF; border: 1px solid #3B82F6;">
                                     <i class="bi {{ $icon }} me-1"></i>{{ $req->purpose_type_label }}
                                 </span>
-                                <div class="text-truncate" style="max-width: 220px;" title="{{ $req->purpose_description }}">{{ $req->purpose_description }}</div>
+                                <div class="text-truncate text-dark fw-medium" style="max-width: 220px;" title="{{ $req->purpose_description }}">{{ $req->purpose_description }}</div>
                             </td>
                             <td>
                                 <span class="fw-semibold text-dark">{{ $req->destination }}</span>
@@ -145,13 +155,13 @@
                                 <span class="badge bg-secondary-subtle text-dark">{{ $req->vehicle_preference ?: 'Any Vehicle' }}</span>
                             </td>
                             <td>
-                                <span class="badge bg-{{ $urgColor }} text-uppercase px-2 py-1 rounded-pill" style="font-size: 10px;">
-                                    {{ $req->urgency_level === 'priority' ? '🔴 Priority' : '🟢 Routine' }}
+                                <span class="badge px-2 py-1 rounded-pill fw-bold" style="background: {{ $uStyle['bg'] }}; color: {{ $uStyle['text'] }}; border: 1px solid {{ $uStyle['border'] }}; font-size: 11px;">
+                                    <i class="bi {{ $uStyle['icon'] }} me-1"></i> {{ $uStyle['label'] }}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge bg-{{ $sc }} bg-opacity-15 text-{{ $sc }} border border-{{ $sc }} px-2 py-1 rounded-pill fw-bold">
-                                    {{ ucfirst($req->status) }}
+                                <span class="badge px-3 py-1 rounded-pill fw-bold" style="background: {{ $sStyle['bg'] }}; color: {{ $sStyle['text'] }}; border: 1px solid {{ $sStyle['border'] }}; font-size: 11.5px;">
+                                    <i class="bi {{ $sStyle['icon'] }} me-1"></i> {{ $sStyle['label'] }}
                                 </span>
                                 @if($req->reservation_id)
                                     <small class="d-block text-success fw-bold mt-1" style="font-size: 10px;">

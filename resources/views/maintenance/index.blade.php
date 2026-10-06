@@ -104,16 +104,27 @@
                 <tbody>
                     @forelse($incomingRequests as $req)
                         @php
-                            $urgencyColors = ['critical'=>'danger','high'=>'warning','medium'=>'info','low'=>'secondary'];
-                            $uc = $urgencyColors[$req->urgency_level] ?? 'secondary';
-                            $statusColors = ['pending'=>'warning','approved'=>'success','rejected'=>'danger','in_progress'=>'info','completed'=>'secondary'];
-                            $sc = $statusColors[$req->status] ?? 'secondary';
+                            $urgencyBadgeMap = [
+                                'critical' => ['bg' => '#FEE2E2', 'text' => '#991B1B', 'border' => '#F87171', 'label' => 'Critical', 'icon' => 'bi-exclamation-octagon-fill'],
+                                'high'     => ['bg' => '#FEF3C7', 'text' => '#92400E', 'border' => '#F59E0B', 'label' => 'High', 'icon' => 'bi-exclamation-triangle-fill'],
+                                'medium'   => ['bg' => '#E0F2FE', 'text' => '#075985', 'border' => '#38BDF8', 'label' => 'Medium', 'icon' => 'bi-info-circle-fill'],
+                                'low'      => ['bg' => '#F1F5F9', 'text' => '#475569', 'border' => '#CBD5E1', 'label' => 'Low', 'icon' => 'bi-arrow-down-circle-fill'],
+                            ];
+                            $statusBadgeMap = [
+                                'pending'     => ['bg' => '#FEF3C7', 'text' => '#92400E', 'border' => '#F59E0B', 'icon' => 'bi-hourglass-split', 'label' => 'Pending Review'],
+                                'approved'    => ['bg' => '#DCFCE7', 'text' => '#166534', 'border' => '#22C55E', 'icon' => 'bi-check-circle-fill', 'label' => 'Approved'],
+                                'rejected'    => ['bg' => '#FEE2E2', 'text' => '#991B1B', 'border' => '#EF4444', 'icon' => 'bi-x-circle-fill', 'label' => 'Rejected'],
+                                'in_progress' => ['bg' => '#E0F2FE', 'text' => '#075985', 'border' => '#0284C7', 'icon' => 'bi-gear-fill', 'label' => 'In Progress'],
+                                'completed'   => ['bg' => '#F1F5F9', 'text' => '#334155', 'border' => '#94A3B8', 'icon' => 'bi-check2-all', 'label' => 'Completed'],
+                            ];
+                            $uStyle = $urgencyBadgeMap[$req->urgency_level] ?? $urgencyBadgeMap['medium'];
+                            $sStyle = $statusBadgeMap[$req->status] ?? $statusBadgeMap['pending'];
                             $typeLabels = ['repair'=>'Vehicle Repair','reimbursement'=>'Reimbursement','scheduled_maintenance'=>'Scheduled PMS'];
                         @endphp
                         <tr>
                             <td><span class="fw-bold text-danger">#{{ $req->id }}</span></td>
                             <td>
-                                <span class="fw-semibold d-block">{{ $req->employee->name ?? 'Hirna Employee' }}</span>
+                                <span class="fw-semibold d-block text-dark">{{ $req->employee->name ?? 'Hirna Employee' }}</span>
                                 <small class="text-muted">{{ ucfirst($req->employee->role ?? 'Staff') }}</small>
                             </td>
                             <td>
@@ -126,37 +137,37 @@
                             </td>
                             <td>
                                 @if($req->request_type === 'reimbursement')
-                                    <span class="badge bg-success-subtle text-success border border-success px-2 py-1 rounded-pill">
+                                    <span class="badge px-2 py-1 rounded-pill fw-bold" style="background: #ECFDF5; color: #065F46; border: 1px solid #10B981;">
                                         <i class="bi bi-cash me-1"></i>Reimbursement
                                     </span>
                                     @if($req->reimbursement_amount)
                                         <small class="d-block text-success fw-bold mt-1">₱{{ number_format($req->reimbursement_amount, 2) }}</small>
                                     @endif
                                 @elseif($req->request_type === 'scheduled_maintenance')
-                                    <span class="badge bg-info-subtle text-info border border-info px-2 py-1 rounded-pill">
+                                    <span class="badge px-2 py-1 rounded-pill fw-bold" style="background: #EFF6FF; color: #1E40AF; border: 1px solid #3B82F6;">
                                         <i class="bi bi-calendar-check me-1"></i>Scheduled PMS
                                     </span>
                                 @else
-                                    <span class="badge bg-primary-subtle text-primary border border-primary px-2 py-1 rounded-pill">
+                                    <span class="badge px-2 py-1 rounded-pill fw-bold" style="background: #FEF2F2; color: #991B1B; border: 1px solid #EF4444;">
                                         <i class="bi bi-wrench me-1"></i>Repair Request
                                     </span>
                                 @endif
                             </td>
                             <td style="max-width: 250px;">
-                                <div class="text-truncate fw-medium" title="{{ $req->anomaly_description }}">{{ $req->anomaly_description }}</div>
+                                <div class="text-truncate fw-medium text-dark" title="{{ $req->anomaly_description }}">{{ $req->anomaly_description }}</div>
                                 @if($req->receipt_number)
                                     <small class="text-muted"><i class="bi bi-receipt me-1"></i>Receipt: {{ $req->receipt_number }}</small>
                                 @endif
                             </td>
                             <td class="text-muted">{{ optional($req->anomaly_date)->format('M d, Y') }}</td>
                             <td>
-                                <span class="badge bg-{{ $uc }} text-uppercase px-2 py-1 rounded-pill" style="font-size: 10px;">
-                                    {{ ucfirst($req->urgency_level) }}
+                                <span class="badge px-2 py-1 rounded-pill fw-bold" style="background: {{ $uStyle['bg'] }}; color: {{ $uStyle['text'] }}; border: 1px solid {{ $uStyle['border'] }}; font-size: 11px;">
+                                    <i class="bi {{ $uStyle['icon'] }} me-1"></i> {{ $uStyle['label'] }}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge bg-{{ $sc }} bg-opacity-15 text-{{ $sc }} border border-{{ $sc }} px-2 py-1 rounded-pill fw-bold">
-                                    {{ ucfirst(str_replace('_', ' ', $req->status)) }}
+                                <span class="badge px-3 py-1 rounded-pill fw-bold" style="background: {{ $sStyle['bg'] }}; color: {{ $sStyle['text'] }}; border: 1px solid {{ $sStyle['border'] }}; font-size: 11.5px;">
+                                    <i class="bi {{ $sStyle['icon'] }} me-1"></i> {{ $sStyle['label'] }}
                                 </span>
                                 @if($req->maintenance_record_id)
                                     <small class="d-block text-muted mt-1" style="font-size: 10px;">PMS Record #{{ $req->maintenance_record_id }}</small>

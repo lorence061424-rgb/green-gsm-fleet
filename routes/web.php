@@ -8,6 +8,8 @@ use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\CostAnalysisController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EssMaintenanceRequestController;
+use App\Http\Controllers\EssVehicleRequestController;
 use Illuminate\Support\Facades\Route;
 
 // Authentication Routes (Public)
@@ -107,4 +109,28 @@ Route::middleware(['role'])->group(function () {
     Route::get('/routes', [\App\Http\Controllers\RouteController::class, 'index'])->middleware('role:admin,fleet_manager,dispatcher,operations')->name('routes.index');
     Route::post('/routes/plan', [\App\Http\Controllers\RouteController::class, 'planRoute'])->middleware('role:admin,fleet_manager,dispatcher,operations')->name('routes.plan');
 
+    // ── ESS Integration: Employee Self-Service Maintenance Requests ──────────────────────────────
+    // Employee portal: submit & track own requests (all authenticated roles)
+    Route::get('/ess/maintenance', [EssMaintenanceRequestController::class, 'index'])->name('ess.maintenance.index');
+    Route::post('/ess/maintenance', [EssMaintenanceRequestController::class, 'store'])->name('ess.maintenance.store');
+
+    // Fleet Manager queue: review & manage all ESS maintenance requests
+    Route::get('/ess/maintenance/queue', [EssMaintenanceRequestController::class, 'managerQueue'])->middleware('role:admin,fleet_manager')->name('ess.maintenance.queue');
+    Route::post('/ess/maintenance/{essRequest}/approve', [EssMaintenanceRequestController::class, 'approve'])->middleware('role:admin,fleet_manager')->name('ess.maintenance.approve');
+    Route::post('/ess/maintenance/{essRequest}/reject', [EssMaintenanceRequestController::class, 'reject'])->middleware('role:admin,fleet_manager')->name('ess.maintenance.reject');
+    Route::post('/ess/maintenance/{essRequest}/convert-pms', [EssMaintenanceRequestController::class, 'convertToPms'])->middleware('role:admin,fleet_manager')->name('ess.maintenance.convert-pms');
+    Route::post('/ess/maintenance/{essRequest}/complete', [EssMaintenanceRequestController::class, 'complete'])->middleware('role:admin,fleet_manager')->name('ess.maintenance.complete');
+
+    // ── ESS Integration: Employee Self-Service Vehicle Reservation Requests ───────────────────────
+    // Employee portal: submit & track own vehicle requests (all authenticated roles)
+    Route::get('/ess/vehicles', [EssVehicleRequestController::class, 'index'])->name('ess.vehicles.index');
+    Route::post('/ess/vehicles', [EssVehicleRequestController::class, 'store'])->name('ess.vehicles.store');
+    Route::post('/ess/vehicles/{essRequest}/cancel', [EssVehicleRequestController::class, 'cancel'])->name('ess.vehicles.cancel');
+
+    // Fleet Manager / Dispatcher queue: review & manage all ESS vehicle requests
+    Route::get('/ess/vehicles/queue', [EssVehicleRequestController::class, 'managerQueue'])->middleware('role:admin,fleet_manager,dispatcher')->name('ess.vehicles.queue');
+    Route::post('/ess/vehicles/{essRequest}/approve', [EssVehicleRequestController::class, 'approve'])->middleware('role:admin,fleet_manager,dispatcher')->name('ess.vehicles.approve');
+    Route::post('/ess/vehicles/{essRequest}/reject', [EssVehicleRequestController::class, 'reject'])->middleware('role:admin,fleet_manager,dispatcher')->name('ess.vehicles.reject');
+
 });
+

@@ -379,6 +379,15 @@
                 <i class="bi bi-shield-lock-fill"></i> Security & Access Center
             </a>
             @endif
+
+            {{-- ESS Integration Portal --}}
+            <div class="px-3 mt-3 mb-1" style="font-size:10px;letter-spacing:1px;color:rgba(255,255,255,0.45);font-weight:700;text-transform:uppercase;">ESS Integration</div>
+            <a href="{{ route('ess.maintenance.index') }}" class="sidebar-nav-link {{ Route::is('ess.maintenance.*') ? 'active' : '' }}">
+                <i class="bi bi-tools"></i> ESS &#8212; Maintenance Requests
+            </a>
+            <a href="{{ route('ess.vehicles.index') }}" class="sidebar-nav-link {{ Route::is('ess.vehicles.*') ? 'active' : '' }}">
+                <i class="bi bi-car-front-fill"></i> ESS &#8212; Vehicle Requests
+            </a>
         </nav>
     </div>
 

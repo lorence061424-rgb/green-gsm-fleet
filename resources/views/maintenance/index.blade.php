@@ -341,8 +341,28 @@
                             </select>
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-bold">Service Type</label>
-                            <input type="text" name="service_type" placeholder="e.g. Engine Tune-up, Oil Change, Tire Alignment, Brake Service" class="form-control rounded-3" required>
+                            <label class="form-label fw-bold">Service Type <span class="text-danger">*</span></label>
+                            <select id="serviceTypeCategorySelect" class="form-select rounded-3 mb-2" required onchange="handleServiceTypeSelect(this)">
+                                <option value="">-- Choose Standard Service Type --</option>
+                                <optgroup label="🔧 Preventive Maintenance Services (PMS)">
+                                    <option value="Engine Tune-up & Oil Change">Engine Tune-up & Oil Change</option>
+                                    <option value="Routine Oil & Filter Replacement">Routine Oil & Filter Replacement</option>
+                                    <option value="Tire Alignment & Wheel Balancing">Tire Alignment & Wheel Balancing</option>
+                                    <option value="Brake Pad Replacement & Inspection">Brake Pad Replacement & Inspection</option>
+                                    <option value="Air Conditioning & Cabin Filter Cleaning">Air Conditioning & Cabin Filter Cleaning</option>
+                                    <option value="Transmission & Fluid Flush">Transmission & Fluid Flush</option>
+                                    <option value="Battery Health Check & Replacement">Battery Health Check & Replacement</option>
+                                </optgroup>
+                                <optgroup label="⚙️ Corrective Repairs & Anomaly Fixes">
+                                    <option value="Engine Knocking & Anomaly Repair">Engine Knocking & Anomaly Repair</option>
+                                    <option value="Suspension & Shock Absorber Repair">Suspension & Shock Absorber Repair</option>
+                                    <option value="Electrical System & Sensor Diagnostic">Electrical System & Sensor Diagnostic</option>
+                                    <option value="Emergency Tire Puncture & Vulcanizing">Emergency Tire Puncture & Vulcanizing</option>
+                                    <option value="Reimbursement Repair Claim">Reimbursement Repair Claim</option>
+                                </optgroup>
+                                <option value="custom">✏️ Other / Custom Service Type...</option>
+                            </select>
+                            <input type="text" name="service_type" id="serviceTypeTextInput" placeholder="Selected service type or custom technician notes..." class="form-control rounded-3" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Scheduled Service Date</label>
@@ -587,6 +607,18 @@ function toggleSimReimbursement(type) {
     const div = document.getElementById('simReimbursementDiv');
     if (div) {
         div.style.display = (type === 'reimbursement') ? 'block' : 'none';
+    }
+}
+
+function handleServiceTypeSelect(selectEl) {
+    const textInput = document.getElementById('serviceTypeTextInput');
+    if (!textInput) return;
+    if (selectEl.value === 'custom') {
+        textInput.value = '';
+        textInput.placeholder = 'Enter custom service type notes...';
+        textInput.focus();
+    } else if (selectEl.value) {
+        textInput.value = selectEl.value;
     }
 }
 

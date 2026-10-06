@@ -459,7 +459,17 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-bold small">Purpose of Travel <span class="text-danger">*</span></label>
-                            <input type="text" name="purpose" class="form-control rounded-3" placeholder="e.g., Executive Client Meeting at BGC, Taguig" required>
+                            <select id="purposeCategorySelect" class="form-select rounded-3 mb-2" required onchange="handlePurposeCategorySelect(this)">
+                                <option value="">-- Choose Purpose Category --</option>
+                                <option value="💼 Executive &amp; Client Meeting">💼 Executive &amp; Client Meeting</option>
+                                <option value="🗺️ Regional Field Inspection &amp; Site Audit">🗺️ Regional Field Inspection &amp; Site Audit</option>
+                                <option value="✈️ Airport Reception &amp; Guest Transfer (NAIA)">✈️ Airport Reception &amp; Guest Transfer (NAIA)</option>
+                                <option value="🏢 Inter-Branch Operations &amp; Facility Transit">🏢 Inter-Branch Operations &amp; Facility Transit</option>
+                                <option value="🛍️ Official Logistics &amp; Documents Errand">🛍️ Official Logistics &amp; Documents Errand</option>
+                                <option value="🚨 Emergency Business Transport">🚨 Emergency Business Transport</option>
+                                <option value="custom">✏️ Other / Custom Purpose...</option>
+                            </select>
+                            <input type="text" name="purpose" id="purposeTextInput" class="form-control rounded-3" placeholder="Specify destination or trip details (e.g., Client Meeting at Shangri-La Makati)..." required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold small">Reservation Date <span class="text-danger">*</span></label>
@@ -720,6 +730,18 @@ function checkAvailability() {
                 btn.innerHTML = originalHtml;
             }
         });
+}
+
+function handlePurposeCategorySelect(selectEl) {
+    const textInput = document.getElementById('purposeTextInput');
+    if (!textInput) return;
+    if (selectEl.value === 'custom') {
+        textInput.value = '';
+        textInput.placeholder = 'Enter custom purpose of travel...';
+        textInput.focus();
+    } else if (selectEl.value) {
+        textInput.value = selectEl.value;
+    }
 }
 
 window.filterReservationsTable = function() {

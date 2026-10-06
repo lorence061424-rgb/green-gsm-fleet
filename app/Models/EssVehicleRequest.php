@@ -86,6 +86,6 @@ class EssVehicleRequest extends Model
             'completed' => 'secondary',
             'cancelled' => 'dark',
             default     => 'warning',
-        ];
+        };
     }
 }

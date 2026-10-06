@@ -80,19 +80,42 @@
             letter-spacing: -0.01em;
         }
 
-        /* Desktop Sidebar - Hirna Crimson Gradient */
+        /* Desktop Sidebar - Hirna Crimson Gradient (Scrollable) */
         .sidebar {
             width: var(--sidebar-width);
             height: 100vh;
+            max-height: 100vh;
             background: linear-gradient(180deg, #CE2029 0%, #7F1D1D 100%);
             position: fixed;
             top: 0;
             left: 0;
             z-index: 100;
             padding-top: 1.25rem;
+            padding-bottom: 3rem;
             color: white;
             box-shadow: 4px 0 24px rgba(206, 32, 41, 0.25);
             transition: all 0.3s ease;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(245, 158, 11, 0.4) transparent;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: rgba(245, 158, 11, 0.4);
+            border-radius: 10px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(245, 158, 11, 0.7);
         }
 
         .sidebar .brand {
@@ -379,15 +402,6 @@
                 <i class="bi bi-shield-lock-fill"></i> Security & Access Center
             </a>
             @endif
-
-            {{-- ESS Integration Portal --}}
-            <div class="px-3 mt-3 mb-1" style="font-size:10px;letter-spacing:1px;color:rgba(255,255,255,0.45);font-weight:700;text-transform:uppercase;">ESS Integration</div>
-            <a href="{{ route('ess.maintenance.index') }}" class="sidebar-nav-link {{ Route::is('ess.maintenance.*') ? 'active' : '' }}">
-                <i class="bi bi-tools"></i> ESS &#8212; Maintenance Requests
-            </a>
-            <a href="{{ route('ess.vehicles.index') }}" class="sidebar-nav-link {{ Route::is('ess.vehicles.*') ? 'active' : '' }}">
-                <i class="bi bi-car-front-fill"></i> ESS &#8212; Vehicle Requests
-            </a>
         </nav>
     </div>
 

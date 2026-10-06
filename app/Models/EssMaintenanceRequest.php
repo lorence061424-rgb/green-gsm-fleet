@@ -83,7 +83,7 @@ class EssMaintenanceRequest extends Model
             'in_progress' => 'warning',
             'completed'   => 'secondary',
             default       => 'primary',
-        ];
+        };
     }
 
     public function getRequestTypeLabelAttribute(): string

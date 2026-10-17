@@ -4,7 +4,7 @@
 <div class="row align-items-center mb-4">
     <div class="col">
         <h2 class="page-header-title">Fleet and Vehicle Management</h2>
-        <p class="page-header-subtitle">Manage Hirna Mobility Fleet vehicle inventory, battery storage, and active fleet statuses.</p>
+        <p class="page-header-subtitle">Manage Hirna Mobility Fleet vehicle inventory and active fleet statuses.</p>
     </div>
     <div class="col-auto d-flex gap-2 flex-wrap align-items-center">
         <!-- Search Bar -->
@@ -68,11 +68,6 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link fw-bold text-muted border-0" id="pms-tab" data-bs-toggle="tab" data-bs-target="#pms-pane" type="button" role="tab" aria-controls="pms-pane" aria-selected="false">
                 <i class="bi bi-wrench-adjustable me-1"></i> Preventive Maintenance Services (PMS)
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold text-muted border-0" id="battery-tab" data-bs-toggle="tab" data-bs-target="#battery-pane" type="button" role="tab" aria-controls="battery-pane" aria-selected="false">
-                <i class="bi bi-battery-charging me-1"></i> EV Battery Health & Telematics
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -304,41 +299,6 @@
             </div>
         </div>
 
-        <!-- EV Battery Health Tab -->
-        <div class="tab-pane fade" id="battery-pane" role="tabpanel" aria-labelledby="battery-tab" tabindex="0">
-            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-battery-charging text-success me-2"></i> Battery Telematics & State-of-Health (SoH) Diagnostics</h6>
-            <div class="row g-3 mb-4">
-                <div class="col-md-3">
-                    <div class="card border rounded-3 p-3 bg-light text-center">
-                        <small class="text-muted d-block" style="font-size: 11px;">AVG BATTERY HEALTH</small>
-                        <h3 class="fw-bold text-success my-1">{{ $avgBatteryHealth ?? 98.4 }}%</h3>
-                        <small class="text-success" style="font-size: 10px;">Zero Degradation Alerts</small>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card border rounded-3 p-3 bg-light text-center">
-                        <small class="text-muted d-block" style="font-size: 11px;">AVG CELL TEMP</small>
-                        <h3 class="fw-bold text-primary my-1">{{ $avgCellTemp ?? 29.5 }}°C</h3>
-                        <small class="text-primary" style="font-size: 10px;">Optimal Thermal Range</small>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card border rounded-3 p-3 bg-light text-center">
-                        <small class="text-muted d-block" style="font-size: 11px;">DC FAST CHARGE CHARGES</small>
-                        <h3 class="fw-bold text-warning my-1">{{ $totalDcFastCharges ?? 342 }}</h3>
-                        <small class="text-muted" style="font-size: 10px;">Hirna High-Power Stations</small>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card border rounded-3 p-3 bg-light text-center">
-                        <small class="text-muted d-block" style="font-size: 11px;">REGENERATIVE RECOVERY</small>
-                        <h3 class="fw-bold text-info my-1">{{ $regenRecovery ?? 18.2 }}%</h3>
-                        <small class="text-info" style="font-size: 10px;">Energy Reclaimed in Transit</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Drivers Tab (Team 9 Synced Read-Only View) -->
         <div class="tab-pane fade" id="drivers-pane" role="tabpanel" aria-labelledby="drivers-tab" tabindex="0">
             <div class="alert alert-info border-0 rounded-3 small mb-3" role="alert">
@@ -507,7 +467,7 @@
 window.filterVehiclesTable = function() {
     const input = (document.getElementById('vehicleSearchInput')?.value || '').toLowerCase();
     const filter = document.getElementById('vehicleTypeFilter') ? document.getElementById('vehicleTypeFilter').value.toLowerCase() : '';
-    const rows = document.querySelectorAll('#vehicles-pane tbody tr, #pms-pane tbody tr, #battery-pane tbody tr');
+    const rows = document.querySelectorAll('#vehicles-pane tbody tr, #pms-pane tbody tr');
     rows.forEach(row => {
         const text = row.innerText.toLowerCase();
         const matchesSearch = text.includes(input);

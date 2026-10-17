@@ -8,8 +8,6 @@ use App\Models\User;
 use App\Models\MaintenanceRecord;
 use Illuminate\Http\Request;
 
-use App\Models\FuelLog;
-
 class FleetController extends Controller
 {
     public function index()
@@ -18,13 +16,7 @@ class FleetController extends Controller
         $drivers = Driver::with('user')->get();
         $maintenanceRecords = MaintenanceRecord::with('vehicle')->latest()->get();
 
-        $totalDcFastCharges = FuelLog::where('fuel_type', 'like', '%DC%')->count();
-        $totalDcFastCharges = $totalDcFastCharges > 0 ? $totalDcFastCharges : 342;
-        $avgBatteryHealth = 98.4;
-        $avgCellTemp = 29.5;
-        $regenRecovery = 18.2;
-
-        return view('vehicles.index', compact('vehicles', 'drivers', 'maintenanceRecords', 'avgBatteryHealth', 'avgCellTemp', 'totalDcFastCharges', 'regenRecovery'));
+        return view('vehicles.index', compact('vehicles', 'drivers', 'maintenanceRecords'));
     }
 
     public function storeVehicle(Request $request)
